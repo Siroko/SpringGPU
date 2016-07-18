@@ -17,6 +17,17 @@ var MousePad = require('./gamepads/MousePad');
 
 var World3D = function( container ) {
 
+    this.matcaps = [
+        THREE.ImageUtils.loadTexture('assets/matcaps/brass.jpg'),
+        THREE.ImageUtils.loadTexture('assets/matcaps/emerald.jpg'),
+        THREE.ImageUtils.loadTexture('assets/matcaps/lit-sphere-matball-example.jpg'),
+        THREE.ImageUtils.loadTexture('assets/matcaps/MatCap_00.jpg'),
+        THREE.ImageUtils.loadTexture('assets/matcaps/matcap_blue_reflect.jpg'),
+        THREE.ImageUtils.loadTexture('assets/matcaps/matcap_purple.jpg'),
+        THREE.ImageUtils.loadTexture('assets/matcaps/matcap1.jpg'),
+        THREE.ImageUtils.loadTexture('assets/matcaps/skinmatcap.jpeg'),
+        THREE.ImageUtils.loadTexture('assets/matcaps/yellowmatcap.png')
+    ];
     this.container      = container;
 
     this.camera         = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 10000 );
@@ -25,7 +36,6 @@ var World3D = function( container ) {
     this.dummyCamera.add( this.camera );
 
     this.scene          = new THREE.Scene();
-
     this.renderer       = new THREE.WebGLRenderer( { antialias: true } );
 
     //// Apply VR headset positional data to camera.
@@ -95,8 +105,8 @@ World3D.prototype.setup = function() {
                 'uTime'         : { type: 'f', value: 0 },
                 'uTouch'        : { type: 'v3v', value: [ this.positionTouch1, this.positionTouch2 ] },
                 'uWorldPosition': { type: 'v3', value: this.worldPosition },
-                'normalMap'     : { type: 't', value: THREE.ImageUtils.loadTexture( 'assets/matcaps/MatCap_00.jpg' ) },
-                'textureMap'    : { type: 't', value: THREE.ImageUtils.loadTexture( 'assets/matcaps/MatCap_00.jpg' ) }
+                'normalMap'     : { type: 't', value: this.matcaps[6] },
+                'textureMap'    : { type: 't', value: this.matcaps[6] }
             }
         });
 
