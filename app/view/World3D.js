@@ -2,6 +2,8 @@
  * Created by siroko on 7/8/15.
  */
 var THREE = require('three');
+var PhysicsManager = require('./PhysicsManager');
+
 var OBJLoader = require('./../utils/OBJLoader');
 var Simulator = require('./../utils/Simulator');
 var GPUDisplacedGeometry = require('./../utils/GPUDisplacedGeometry');
@@ -12,6 +14,8 @@ var ImprovedNoise = require('./../utils/ImprovedNoise');
 var World3D = function( container ) {
 
     this.container      = container;
+    this.phManager       = new PhysicsManager();
+
 
     this.camera         = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 10000 );
     this.camera.layers.enable( 1 );
