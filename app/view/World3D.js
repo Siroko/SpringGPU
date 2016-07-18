@@ -55,8 +55,6 @@ World3D.prototype.setup = function() {
     this.positionTouch1 = new THREE.Vector3(0, 100, 0);
     this.positionTouch2 = new THREE.Vector3(0, 100, 0);
 
-    this.worldPosition = new THREE.Vector3();
-
     this.render( 0 );
 
 };
