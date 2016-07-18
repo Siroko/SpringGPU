@@ -23,6 +23,7 @@ Main.prototype.init = function() {
 Main.prototype.addEvents = function() {
 
     window.addEventListener( 'resize', this.onResize.bind( this ) );
+    window.addEventListener( 'vrdisplaypresentchange', this.onResize.bind( this ), true );
 };
 
 Main.prototype.onResize = function( e ) {

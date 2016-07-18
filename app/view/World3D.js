@@ -6,7 +6,6 @@ var OBJLoader = require('./../utils/OBJLoader');
 var Simulator = require('./../utils/Simulator');
 var GPUDisplacedGeometry = require('./../utils/GPUDisplacedGeometry');
 var CameraControl = require('./../utils/CameraControl');
-
 var ImprovedNoise = require('./../utils/ImprovedNoise');
 
 var World3D = function( container ) {
@@ -117,7 +116,7 @@ World3D.prototype.render = function( timestamp ) {
 
     window.requestAnimationFrame( this.render.bind( this ) );
 
-    if( this.mask ) {
+
         this.planeCalc.lookAt( this.camera.position );
         this.cameraControl.getIntersects( [ this.planeCalc, this.maskConvex ] );
         this.worldPosition.copy( this.mask.position );
@@ -130,7 +129,6 @@ World3D.prototype.render = function( timestamp ) {
         var speed = 0.0001;
         var t = timestamp * speed;
         this.mask.rotation.x = this.maskConvex.rotation.x = ( ImprovedNoise().noise( t, -t ), 12 ) * 0.5;
-        //this.mask.rotation.x = this.maskConvex.rotation.x -= Math.PI * 0.5;
         this.mask.rotation.z = this.maskConvex.rotation.z = ( ImprovedNoise().noise( 13, t, t ) ) * 0.5;
 
         this.mask.position.y = this.maskConvex.position.y = ImprovedNoise().noise( 13, t, t );
@@ -138,7 +136,7 @@ World3D.prototype.render = function( timestamp ) {
 
         this.planeCalc.position.copy( this.maskConvex.position );
 
-    }
+
 
     this.pointer.position.copy( this.cameraControl.intersectPoint );
 
