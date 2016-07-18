@@ -1,6 +1,3 @@
-/**
- * Created by felixmorenomartinez on 28/06/16.
- */
 // http://mrl.nyu.edu/~perlin/noise/
 
 var ImprovedNoise = function () {

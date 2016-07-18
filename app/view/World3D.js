@@ -7,6 +7,8 @@ var Simulator = require('./../utils/Simulator');
 var GPUDisplacedGeometry = require('./../utils/GPUDisplacedGeometry');
 var CameraControl = require('./../utils/CameraControl');
 
+var ImprovedNoise = require('./../utils/ImprovedNoise');
+
 var World3D = function( container ) {
 
     this.container      = container;
@@ -15,7 +17,6 @@ var World3D = function( container ) {
     this.camera.layers.enable( 1 );
 
     this.scene          = new THREE.Scene();
-    //this.scene.fog      = new THREE.Fog( 0xefd1b5, 100, 1000);
 
     this.renderer       = new THREE.WebGLRenderer( { antialias: true } );
     this.renderer.shadowMap.enabled = true;
@@ -49,7 +50,7 @@ World3D.prototype.setup = function() {
     var onProgress = function ( xhr ) {
         if ( xhr.lengthComputable ) {
             var percentComplete = xhr.loaded / xhr.total * 100;
-            console.log( Math.round(percentComplete, 2) + '% downloaded' );
+            console.log( Math.round( percentComplete, 2 ) + '% downloaded' );
         }
     };
 
@@ -58,7 +59,7 @@ World3D.prototype.setup = function() {
 
     var objLoader = new OBJLoader();
     objLoader.setPath( 'assets/obj/' );
-    objLoader.load( 'mask.obj', (function ( object ) {
+    objLoader.load( 'mask_high.obj', (function ( object ) {
 
         this.positionTouch1 = new THREE.Vector3(0, 100, 0);
         this.positionTouch2 = new THREE.Vector3(0, 100, 0);
@@ -78,14 +79,24 @@ World3D.prototype.setup = function() {
         });
 
         this.mask = this.displacedGeometry.mesh;
-        this.mask.position.set( 0, -10 , 0 );
         this.mask.scale.set( 0.5, 0.5 , 0.5 );
 
         this.scene.add( this.mask );
 
+        var objLoader2 = new OBJLoader();
+        objLoader2.setPath( 'assets/obj/' );
+        objLoader2.load( 'mask.obj', (function ( object ) {
+            this.maskConvex = object.children[ 0 ];
+            this.maskConvex.material.transparent = true;
+            this.maskConvex.material.opacity= 0;
+            this.maskConvex.scale.set( 0.5, 0.5 , 0.5 );
+            this.scene.add( this.maskConvex );
+
+            this.render( 0 );
+        } ).bind( this ), onProgress, onError );
+
     } ).bind( this ), onProgress, onError );
 
-    this.render( 0 );
 };
 
 
@@ -108,13 +119,25 @@ World3D.prototype.render = function( timestamp ) {
 
     if( this.mask ) {
         this.planeCalc.lookAt( this.camera.position );
-        this.cameraControl.getIntersects( [ this.planeCalc, this.mask ] );
+        this.cameraControl.getIntersects( [ this.planeCalc, this.maskConvex ] );
         this.worldPosition.copy( this.mask.position );
         this.displacedGeometry.updateSpringMaterial.uniforms.uTime.value = timestamp;
         this.displacedGeometry.updateSpringMaterial.uniforms.uTouch.value = [ this.cameraControl.intersectPoint, this.cameraControl.intersectPoint ];
         this.displacedGeometry.updateSpringMaterial.uniforms.uWorldPosition.value = this.worldPosition;
 
         this.displacedGeometry.update();
+
+        var speed = 0.0001;
+        var t = timestamp * speed;
+        this.mask.rotation.x = this.maskConvex.rotation.x = ( ImprovedNoise().noise( t, -t ), 12 ) * 0.5;
+        //this.mask.rotation.x = this.maskConvex.rotation.x -= Math.PI * 0.5;
+        this.mask.rotation.z = this.maskConvex.rotation.z = ( ImprovedNoise().noise( 13, t, t ) ) * 0.5;
+
+        this.mask.position.y = this.maskConvex.position.y = ImprovedNoise().noise( 13, t, t );
+        this.mask.position.z = this.maskConvex.position.z = ImprovedNoise().noise( 1, -t, t );
+
+        this.planeCalc.position.copy( this.maskConvex.position );
+
     }
 
     this.pointer.position.copy( this.cameraControl.intersectPoint );

@@ -37,18 +37,15 @@ float permute(float x) {
      return mod289(((x*34.0)+1.0)*x);
 }
 
-vec4 taylorInvSqrt(vec4 r)
-{
+vec4 taylorInvSqrt(vec4 r) {
   return 1.79284291400159 - 0.85373472095314 * r;
 }
 
-float taylorInvSqrt(float r)
-{
+float taylorInvSqrt(float r) {
   return 1.79284291400159 - 0.85373472095314 * r;
 }
 
-vec4 grad4(float j, vec4 ip)
-  {
+vec4 grad4(float j, vec4 ip) {
   const vec4 ones = vec4(1.0, 1.0, 1.0, -1.0);
   vec4 p,s;
 
@@ -58,13 +55,12 @@ vec4 grad4(float j, vec4 ip)
   p.xyz = p.xyz + (s.xyz*2.0 - 1.0) * s.www;
 
   return p;
-  }
+}
 
 // (sqrt(5) - 1)/4 = F4, used once below
 #define F4 0.309016994374947451
 
-float snoise(vec4 v)
-  {
+float snoise(vec4 v) {
   const vec4  C = vec4( 0.138196601125011,  // (5 - sqrt(5))/20  G4
                         0.276393202250021,  // 2 * G4
                         0.414589803375032,  // 3 * G4
@@ -161,14 +157,14 @@ float snoise(vec4 v)
           vec3 direction = uWorldPosition - uTouch[i];
           normalize( direction );
 
-          float d = clamp( 0.3 - distance( vertexWorldPosition, uTouch[i] ), 0.0, 1.0 );
+          float d = clamp( 1.0 - distance( vertexWorldPosition, uTouch[i] ), 0.0, 1.0 );
 
           displacement += direction * d;
           normalize( displacement );
 
       }
 
-      displacement *= 1.0;
+      displacement *= 0.2;
       normalize(displacement);
       pos += displacement;
 

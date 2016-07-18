@@ -35,12 +35,12 @@ Main.prototype.onResize = function( e ) {
 };
 
 module.exports = Main;
-},{"./view/World3D":16}],2:[function(require,module,exports){
+},{"./view/World3D":17}],2:[function(require,module,exports){
 var Main = require('./Main.js');
 require('es6-promise').polyfill();
 
 window.app = new Main();
-},{"./Main.js":1,"es6-promise":17}],3:[function(require,module,exports){
+},{"./Main.js":1,"es6-promise":18}],3:[function(require,module,exports){
 module.exports = "#extension GL_OES_standard_derivatives : enable\n\nprecision highp float;\nprecision highp sampler2D;\n\nuniform sampler2D textureMap;\nuniform sampler2D normalMap;\n\nvarying vec4 vPos;\n\nvarying mat3 vNormalMatrix;\nvarying vec4 vOPosition;\nvarying vec3 vU;\n\nfloat random(vec3 scale,float seed){return fract(sin(dot(gl_FragCoord.xyz+seed,scale))*43758.5453+seed);}\n\nvoid main(){\n\n    vec3 fdx = dFdx( vPos.xyz );\n\tvec3 fdy = dFdy( vPos.xyz );\n\tvec3 n = normalize(cross(fdx, fdy));\n\n    vec3 vNormal = vNormalMatrix * n;\n    vec3 vONormal = n;\n\n    vec3 c1 = vec3(1.0, 1.0, 1.0);\n//    vec4 color = vec4( .5 + .5 * n, 1.0 );\n\n//        float invRed = 1.5 - color.r;\n//        color.r += invRed * 0.4;\n//        color.g += invRed * 0.4;\n//\n//        color = vec4(vec3(vDist), 1.0);\n\n\n    vec3 color = vec3( .0, .0, .0 );\n    vec2 texScale = vec2(1.0);\n    float normalScale = 0.0;\n    float useSSS = 1.0;\n    float useScreen = 2.0;\n\n//    vec3 n = normalize( vONormal.xyz );\n    vec3 blend_weights = abs( n );\n    blend_weights = ( blend_weights - 0.2 ) * 7.;\n    blend_weights = max( blend_weights, 0. );\n    blend_weights /= ( blend_weights.x + blend_weights.y + blend_weights.z );\n\n    vec2 coord1 = vPos.yz * texScale;\n    vec2 coord2 = vPos.zx * texScale;\n    vec2 coord3 = vPos.xy * texScale;\n\n    vec3 bump1 = texture2D( normalMap, coord1 ).rgb;\n    vec3 bump2 = texture2D( normalMap, coord2 ).rgb;\n    vec3 bump3 = texture2D( normalMap, coord3 ).rgb;\n\n    vec3 blended_bump = bump1 * blend_weights.xxx +\n                        bump2 * blend_weights.yyy +\n                        bump3 * blend_weights.zzz;\n\n    vec3 tanX = vec3( vNormal.x, -vNormal.z, vNormal.y);\n    vec3 tanY = vec3( vNormal.z, vNormal.y, -vNormal.x);\n    vec3 tanZ = vec3(-vNormal.y, vNormal.x, vNormal.z);\n    vec3 blended_tangent = tanX * blend_weights.xxx +\n                           tanY * blend_weights.yyy +\n                           tanZ * blend_weights.zzz;\n\n    vec3 normalTex = blended_bump * 2.0 - 1.0;\n    normalTex.xy *= normalScale;\n    normalTex.y *= -1.;\n    normalTex = normalize( normalTex );\n    mat3 tsb = mat3( normalize( blended_tangent ), normalize( cross( vNormal, blended_tangent ) ), normalize( vNormal ) );\n    vec3 finalNormal = tsb * normalTex;\n\n    vec3 r = reflect( normalize( vU ), normalize( finalNormal ) );\n    float m = 2.0 * sqrt( r.x * r.x + r.y * r.y + ( r.z + 1.0 ) * ( r.z + 1.0 ) );\n    vec2 calculatedNormal = vec2( r.x / m + 0.5,  r.y / m + 0.5 );\n\n    vec3 base = texture2D( textureMap, calculatedNormal ).rgb;\n\n    float rim = 1.75 * max( 0., abs( dot( normalize( vNormal ), normalize( -vOPosition.xyz ) ) ) );\n    base += useSSS * color * ( 1. - .75 * rim );\n    base += ( 1. - useSSS ) * 10. * base * color * clamp( 1. - rim, 0., .15 );\n\n    if( useScreen == 1. ) {\n        base = vec3( 1. ) - ( vec3( 1. ) - base ) * ( vec3( 1. ) - base );\n    }\n\n    float nn = .05 * random( vec3( 1. ), length( gl_FragCoord ) );\n    base += vec3( nn );\n\n    gl_FragColor = vec4(base.rgb, 1.);\n}\n";
 
 },{}],4:[function(require,module,exports){
@@ -50,7 +50,7 @@ module.exports = "precision highp float;\nprecision highp sampler2D;\n\nuniform 
 module.exports = "precision highp float;\nprecision highp sampler2D;\n\nuniform sampler2D uPrevPositions;\nuniform sampler2D uSpringTexture;\nvarying vec2 vUv;\n\nvoid main () {\n\n    vec2 uv = vUv;\n\n    vec4 prevPositions = texture2D( uPrevPositions, uv );\n    vec4 springPosition = texture2D( uSpringTexture, uv );\n\n    vec3 pos =  prevPositions.xyz - springPosition.xyz;\n\n    gl_FragColor = vec4( pos, 1.0 );\n\n}\n";
 
 },{}],6:[function(require,module,exports){
-module.exports = "precision highp float;\nprecision highp sampler2D;\n\nuniform mat4 uModelMatrix;\nuniform sampler2D uBasePositions;\nuniform sampler2D uPrevPositions;\nuniform sampler2D uPrevPositionsGeom;\nuniform float uTime;\nuniform vec3 uTouch[2];\nuniform vec3 uWorldPosition;\n\nvarying vec2 vUv;\n\n//\n// Description : Array and textureless GLSL 2D/3D/4D simplex\n//               noise functions.\n//      Author : Ian McEwan, Ashima Arts.\n//  Maintainer : stegu\n//     Lastmod : 20110822 (ijm)\n//     License : Copyright (C) 2011 Ashima Arts. All rights reserved.\n//               Distributed under the MIT License. See LICENSE file.\n//               https://github.com/ashima/webgl-noise\n//               https://github.com/stegu/webgl-noise\n//\n\nvec4 mod289(vec4 x) {\n  return x - floor(x * (1.0 / 289.0)) * 289.0; }\n\nfloat mod289(float x) {\n  return x - floor(x * (1.0 / 289.0)) * 289.0; }\n\nvec4 permute(vec4 x) {\n     return mod289(((x*34.0)+1.0)*x);\n}\n\nfloat permute(float x) {\n     return mod289(((x*34.0)+1.0)*x);\n}\n\nvec4 taylorInvSqrt(vec4 r)\n{\n  return 1.79284291400159 - 0.85373472095314 * r;\n}\n\nfloat taylorInvSqrt(float r)\n{\n  return 1.79284291400159 - 0.85373472095314 * r;\n}\n\nvec4 grad4(float j, vec4 ip)\n  {\n  const vec4 ones = vec4(1.0, 1.0, 1.0, -1.0);\n  vec4 p,s;\n\n  p.xyz = floor( fract (vec3(j) * ip.xyz) * 7.0) * ip.z - 1.0;\n  p.w = 1.5 - dot(abs(p.xyz), ones.xyz);\n  s = vec4(lessThan(p, vec4(0.0)));\n  p.xyz = p.xyz + (s.xyz*2.0 - 1.0) * s.www;\n\n  return p;\n  }\n\n// (sqrt(5) - 1)/4 = F4, used once below\n#define F4 0.309016994374947451\n\nfloat snoise(vec4 v)\n  {\n  const vec4  C = vec4( 0.138196601125011,  // (5 - sqrt(5))/20  G4\n                        0.276393202250021,  // 2 * G4\n                        0.414589803375032,  // 3 * G4\n                       -0.447213595499958); // -1 + 4 * G4\n\n// First corner\n  vec4 i  = floor(v + dot(v, vec4(F4)) );\n  vec4 x0 = v -   i + dot(i, C.xxxx);\n\n// Other corners\n\n// Rank sorting originally contributed by Bill Licea-Kane, AMD (formerly ATI)\n  vec4 i0;\n  vec3 isX = step( x0.yzw, x0.xxx );\n  vec3 isYZ = step( x0.zww, x0.yyz );\n//  i0.x = dot( isX, vec3( 1.0 ) );\n  i0.x = isX.x + isX.y + isX.z;\n  i0.yzw = 1.0 - isX;\n//  i0.y += dot( isYZ.xy, vec2( 1.0 ) );\n  i0.y += isYZ.x + isYZ.y;\n  i0.zw += 1.0 - isYZ.xy;\n  i0.z += isYZ.z;\n  i0.w += 1.0 - isYZ.z;\n\n  // i0 now contains the unique values 0,1,2,3 in each channel\n  vec4 i3 = clamp( i0, 0.0, 1.0 );\n  vec4 i2 = clamp( i0-1.0, 0.0, 1.0 );\n  vec4 i1 = clamp( i0-2.0, 0.0, 1.0 );\n\n  //  x0 = x0 - 0.0 + 0.0 * C.xxxx\n  //  x1 = x0 - i1  + 1.0 * C.xxxx\n  //  x2 = x0 - i2  + 2.0 * C.xxxx\n  //  x3 = x0 - i3  + 3.0 * C.xxxx\n  //  x4 = x0 - 1.0 + 4.0 * C.xxxx\n  vec4 x1 = x0 - i1 + C.xxxx;\n  vec4 x2 = x0 - i2 + C.yyyy;\n  vec4 x3 = x0 - i3 + C.zzzz;\n  vec4 x4 = x0 + C.wwww;\n\n// Permutations\n  i = mod289(i);\n  float j0 = permute( permute( permute( permute(i.w) + i.z) + i.y) + i.x);\n  vec4 j1 = permute( permute( permute( permute (\n             i.w + vec4(i1.w, i2.w, i3.w, 1.0 ))\n           + i.z + vec4(i1.z, i2.z, i3.z, 1.0 ))\n           + i.y + vec4(i1.y, i2.y, i3.y, 1.0 ))\n           + i.x + vec4(i1.x, i2.x, i3.x, 1.0 ));\n\n// Gradients: 7x7x6 points over a cube, mapped onto a 4-cross polytope\n// 7*7*6 = 294, which is close to the ring size 17*17 = 289.\n  vec4 ip = vec4(1.0/294.0, 1.0/49.0, 1.0/7.0, 0.0) ;\n\n  vec4 p0 = grad4(j0,   ip);\n  vec4 p1 = grad4(j1.x, ip);\n  vec4 p2 = grad4(j1.y, ip);\n  vec4 p3 = grad4(j1.z, ip);\n  vec4 p4 = grad4(j1.w, ip);\n\n// Normalise gradients\n  vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));\n  p0 *= norm.x;\n  p1 *= norm.y;\n  p2 *= norm.z;\n  p3 *= norm.w;\n  p4 *= taylorInvSqrt(dot(p4,p4));\n\n// Mix contributions from the five corners\n  vec3 m0 = max(0.6 - vec3(dot(x0,x0), dot(x1,x1), dot(x2,x2)), 0.0);\n  vec2 m1 = max(0.6 - vec2(dot(x3,x3), dot(x4,x4)            ), 0.0);\n  m0 = m0 * m0;\n  m1 = m1 * m1;\n  return 49.0 * ( dot(m0*m0, vec3( dot( p0, x0 ), dot( p1, x1 ), dot( p2, x2 )))\n               + dot(m1*m1, vec2( dot( p3, x3 ), dot( p4, x4 ) ) ) ) ;\n\n  }\n\n  void main(){\n\n      vec3 pos = texture2D(uBasePositions, vUv).rgb;\n      vec3 prevPos = texture2D(uPrevPositions, vUv).rgb;\n      vec3 prevPosGeom = texture2D(uPrevPositionsGeom, vUv).rgb;\n\n      float noise = snoise( vec4( pos, uTime * 0.001 ) );\n      vec3 normal = pos - uWorldPosition;\n\n      vec3 vertexWorldPosition = (uModelMatrix * vec4(pos, 1.0)).xyz;\n      pos += normal * noise * 0.005;\n\n\n      vec3 displacement = vec3(0.0);\n\n      for( int i = 0; i < 2; i++ ) {\n\n          vec3 direction = uWorldPosition - uTouch[i];\n          normalize( direction );\n\n          float d = clamp( 0.3 - distance( vertexWorldPosition, uTouch[i] ), 0.0, 1.0 );\n\n          displacement += direction * d;\n          normalize( displacement );\n\n      }\n\n      displacement *= 1.0;\n      normalize(displacement);\n      pos += displacement;\n\n      float div = .04;\n      float damping = 0.9;\n\n      vec3 spring = vec3( ( prevPos.x + ( prevPosGeom.x - pos.x ) * div ) * damping,  ( prevPos.y + ( prevPosGeom.y - pos.y )  * div ) * damping,  ( prevPos.z + ( prevPosGeom.z - pos.z ) * div ) * damping );\n      gl_FragColor = vec4( spring, 1.0 );\n\n  }\n";
+module.exports = "precision highp float;\nprecision highp sampler2D;\n\nuniform mat4 uModelMatrix;\nuniform sampler2D uBasePositions;\nuniform sampler2D uPrevPositions;\nuniform sampler2D uPrevPositionsGeom;\nuniform float uTime;\nuniform vec3 uTouch[2];\nuniform vec3 uWorldPosition;\n\nvarying vec2 vUv;\n\n//\n// Description : Array and textureless GLSL 2D/3D/4D simplex\n//               noise functions.\n//      Author : Ian McEwan, Ashima Arts.\n//  Maintainer : stegu\n//     Lastmod : 20110822 (ijm)\n//     License : Copyright (C) 2011 Ashima Arts. All rights reserved.\n//               Distributed under the MIT License. See LICENSE file.\n//               https://github.com/ashima/webgl-noise\n//               https://github.com/stegu/webgl-noise\n//\n\nvec4 mod289(vec4 x) {\n  return x - floor(x * (1.0 / 289.0)) * 289.0; }\n\nfloat mod289(float x) {\n  return x - floor(x * (1.0 / 289.0)) * 289.0; }\n\nvec4 permute(vec4 x) {\n     return mod289(((x*34.0)+1.0)*x);\n}\n\nfloat permute(float x) {\n     return mod289(((x*34.0)+1.0)*x);\n}\n\nvec4 taylorInvSqrt(vec4 r) {\n  return 1.79284291400159 - 0.85373472095314 * r;\n}\n\nfloat taylorInvSqrt(float r) {\n  return 1.79284291400159 - 0.85373472095314 * r;\n}\n\nvec4 grad4(float j, vec4 ip) {\n  const vec4 ones = vec4(1.0, 1.0, 1.0, -1.0);\n  vec4 p,s;\n\n  p.xyz = floor( fract (vec3(j) * ip.xyz) * 7.0) * ip.z - 1.0;\n  p.w = 1.5 - dot(abs(p.xyz), ones.xyz);\n  s = vec4(lessThan(p, vec4(0.0)));\n  p.xyz = p.xyz + (s.xyz*2.0 - 1.0) * s.www;\n\n  return p;\n}\n\n// (sqrt(5) - 1)/4 = F4, used once below\n#define F4 0.309016994374947451\n\nfloat snoise(vec4 v) {\n  const vec4  C = vec4( 0.138196601125011,  // (5 - sqrt(5))/20  G4\n                        0.276393202250021,  // 2 * G4\n                        0.414589803375032,  // 3 * G4\n                       -0.447213595499958); // -1 + 4 * G4\n\n// First corner\n  vec4 i  = floor(v + dot(v, vec4(F4)) );\n  vec4 x0 = v -   i + dot(i, C.xxxx);\n\n// Other corners\n\n// Rank sorting originally contributed by Bill Licea-Kane, AMD (formerly ATI)\n  vec4 i0;\n  vec3 isX = step( x0.yzw, x0.xxx );\n  vec3 isYZ = step( x0.zww, x0.yyz );\n//  i0.x = dot( isX, vec3( 1.0 ) );\n  i0.x = isX.x + isX.y + isX.z;\n  i0.yzw = 1.0 - isX;\n//  i0.y += dot( isYZ.xy, vec2( 1.0 ) );\n  i0.y += isYZ.x + isYZ.y;\n  i0.zw += 1.0 - isYZ.xy;\n  i0.z += isYZ.z;\n  i0.w += 1.0 - isYZ.z;\n\n  // i0 now contains the unique values 0,1,2,3 in each channel\n  vec4 i3 = clamp( i0, 0.0, 1.0 );\n  vec4 i2 = clamp( i0-1.0, 0.0, 1.0 );\n  vec4 i1 = clamp( i0-2.0, 0.0, 1.0 );\n\n  //  x0 = x0 - 0.0 + 0.0 * C.xxxx\n  //  x1 = x0 - i1  + 1.0 * C.xxxx\n  //  x2 = x0 - i2  + 2.0 * C.xxxx\n  //  x3 = x0 - i3  + 3.0 * C.xxxx\n  //  x4 = x0 - 1.0 + 4.0 * C.xxxx\n  vec4 x1 = x0 - i1 + C.xxxx;\n  vec4 x2 = x0 - i2 + C.yyyy;\n  vec4 x3 = x0 - i3 + C.zzzz;\n  vec4 x4 = x0 + C.wwww;\n\n// Permutations\n  i = mod289(i);\n  float j0 = permute( permute( permute( permute(i.w) + i.z) + i.y) + i.x);\n  vec4 j1 = permute( permute( permute( permute (\n             i.w + vec4(i1.w, i2.w, i3.w, 1.0 ))\n           + i.z + vec4(i1.z, i2.z, i3.z, 1.0 ))\n           + i.y + vec4(i1.y, i2.y, i3.y, 1.0 ))\n           + i.x + vec4(i1.x, i2.x, i3.x, 1.0 ));\n\n// Gradients: 7x7x6 points over a cube, mapped onto a 4-cross polytope\n// 7*7*6 = 294, which is close to the ring size 17*17 = 289.\n  vec4 ip = vec4(1.0/294.0, 1.0/49.0, 1.0/7.0, 0.0) ;\n\n  vec4 p0 = grad4(j0,   ip);\n  vec4 p1 = grad4(j1.x, ip);\n  vec4 p2 = grad4(j1.y, ip);\n  vec4 p3 = grad4(j1.z, ip);\n  vec4 p4 = grad4(j1.w, ip);\n\n// Normalise gradients\n  vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));\n  p0 *= norm.x;\n  p1 *= norm.y;\n  p2 *= norm.z;\n  p3 *= norm.w;\n  p4 *= taylorInvSqrt(dot(p4,p4));\n\n// Mix contributions from the five corners\n  vec3 m0 = max(0.6 - vec3(dot(x0,x0), dot(x1,x1), dot(x2,x2)), 0.0);\n  vec2 m1 = max(0.6 - vec2(dot(x3,x3), dot(x4,x4)            ), 0.0);\n  m0 = m0 * m0;\n  m1 = m1 * m1;\n  return 49.0 * ( dot(m0*m0, vec3( dot( p0, x0 ), dot( p1, x1 ), dot( p2, x2 )))\n               + dot(m1*m1, vec2( dot( p3, x3 ), dot( p4, x4 ) ) ) ) ;\n\n  }\n\n  void main(){\n\n      vec3 pos = texture2D(uBasePositions, vUv).rgb;\n      vec3 prevPos = texture2D(uPrevPositions, vUv).rgb;\n      vec3 prevPosGeom = texture2D(uPrevPositionsGeom, vUv).rgb;\n\n      float noise = snoise( vec4( pos, uTime * 0.001 ) );\n      vec3 normal = pos - uWorldPosition;\n\n      vec3 vertexWorldPosition = (uModelMatrix * vec4(pos, 1.0)).xyz;\n      pos += normal * noise * 0.005;\n\n\n      vec3 displacement = vec3(0.0);\n\n      for( int i = 0; i < 2; i++ ) {\n\n          vec3 direction = uWorldPosition - uTouch[i];\n          normalize( direction );\n\n          float d = clamp( 1.0 - distance( vertexWorldPosition, uTouch[i] ), 0.0, 1.0 );\n\n          displacement += direction * d;\n          normalize( displacement );\n\n      }\n\n      displacement *= 0.2;\n      normalize(displacement);\n      pos += displacement;\n\n      float div = .04;\n      float damping = 0.9;\n\n      vec3 spring = vec3( ( prevPos.x + ( prevPosGeom.x - pos.x ) * div ) * damping,  ( prevPos.y + ( prevPosGeom.y - pos.y )  * div ) * damping,  ( prevPos.z + ( prevPosGeom.z - pos.z ) * div ) * damping );\n      gl_FragColor = vec4( spring, 1.0 );\n\n  }\n";
 
 },{}],7:[function(require,module,exports){
 module.exports = "precision highp float;\nprecision highp sampler2D;\n\nuniform sampler2D uPrevPositionsMap;\nuniform sampler2D uGeomPositionsMap;\nuniform float uTime;\nuniform int uLock;\nuniform float uBoundary[ 6 ];\nuniform vec3 uDirectionFlow;\nuniform vec3 uOffsetPosition;\nuniform vec3 uCollision;\nuniform float uLifeTime;\nuniform float uNoiseTimeScale;\nuniform float uNoisePositionScale;\nuniform float uNoiseScale;\n\nvarying vec2 vUv;\n\nconst int OCTAVES = 8;\n\nvec4 mod289(vec4 x) {\n    vec4 r = x - floor(x * (1.0 / 289.0)) * 289.0;\n    return r;\n}\n\nfloat mod289(float x) {\n    float r = x - floor(x * (1.0 / 289.0)) * 289.0;\n    return r;\n}\n\nvec4 permute(vec4 x) {\n    vec4 r = mod289(((x*34.0)+1.0)*x);\n    return r;\n}\n\nfloat permute(float x) {\n    float r = mod289(((x*34.0)+1.0)*x);\n    return r;\n}\n\nvec4 taylorInvSqrt(vec4 r) {\n    vec4 f = 1.79284291400159 - 0.85373472095314 * r;\n    return f;\n}\n\nfloat taylorInvSqrt(float r) {\n    float f = 1.79284291400159 - 0.85373472095314 * r;\n    return f;\n}\n\nvec4 grad4(float j, vec4 ip) {\n    const vec4 ones = vec4(1.0, 1.0, 1.0, -1.0);\n    vec4 p,s;\n\n    p.xyz = floor( fract (vec3(j) * ip.xyz) * 7.0) * ip.z - 1.0;\n    p.w = 1.5 - dot(abs(p.xyz), ones.xyz);\n    s = vec4(lessThan(p, vec4(0.0)));\n    p.xyz = p.xyz + (s.xyz*2.0 - 1.0) * s.www;\n\n    return p;\n}\n\nvec4 simplexNoiseDerivatives (vec4 v) {\n    const vec4  C = vec4( 0.138196601125011,0.276393202250021,0.414589803375032,-0.447213595499958);\n\n    vec4 i  = floor(v + dot(v, vec4(0.309016994374947451)) );\n    vec4 x0 = v -   i + dot(i, C.xxxx);\n\n    vec4 i0;\n    vec3 isX = step( x0.yzw, x0.xxx );\n    vec3 isYZ = step( x0.zww, x0.yyz );\n    i0.x = isX.x + isX.y + isX.z;\n    i0.yzw = 1.0 - isX;\n    i0.y += isYZ.x + isYZ.y;\n    i0.zw += 1.0 - isYZ.xy;\n    i0.z += isYZ.z;\n    i0.w += 1.0 - isYZ.z;\n\n    vec4 i3 = clamp( i0, 0.0, 1.0 );\n    vec4 i2 = clamp( i0-1.0, 0.0, 1.0 );\n    vec4 i1 = clamp( i0-2.0, 0.0, 1.0 );\n\n    vec4 x1 = x0 - i1 + C.xxxx;\n    vec4 x2 = x0 - i2 + C.yyyy;\n    vec4 x3 = x0 - i3 + C.zzzz;\n    vec4 x4 = x0 + C.wwww;\n\n    i = mod289(i);\n    float j0 = permute( permute( permute( permute(i.w) + i.z) + i.y) + i.x);\n    vec4 j1 = permute( permute( permute( permute (\n                        i.w + vec4(i1.w, i2.w, i3.w, 1.0 ))\n                      + i.z + vec4(i1.z, i2.z, i3.z, 1.0 ))\n                      + i.y + vec4(i1.y, i2.y, i3.y, 1.0 ))\n                      + i.x + vec4(i1.x, i2.x, i3.x, 1.0 ));\n\n\n    vec4 ip = vec4(1.0/294.0, 1.0/49.0, 1.0/7.0, 0.0) ;\n\n    vec4 p0 = grad4(j0,   ip);\n    vec4 p1 = grad4(j1.x, ip);\n    vec4 p2 = grad4(j1.y, ip);\n    vec4 p3 = grad4(j1.z, ip);\n    vec4 p4 = grad4(j1.w, ip);\n\n    vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));\n    p0 *= norm.x;\n    p1 *= norm.y;\n    p2 *= norm.z;\n    p3 *= norm.w;\n    p4 *= taylorInvSqrt(dot(p4,p4));\n\n    vec3 values0 = vec3(dot(p0, x0), dot(p1, x1), dot(p2, x2)); //value of contributions from each corner at point\n    vec2 values1 = vec2(dot(p3, x3), dot(p4, x4));\n\n    vec3 m0 = max(0.5 - vec3(dot(x0,x0), dot(x1,x1), dot(x2,x2)), 0.0); //(0.5 - x^2) where x is the distance\n    vec2 m1 = max(0.5 - vec2(dot(x3,x3), dot(x4,x4)), 0.0);\n\n    vec3 temp0 = -6.0 * m0 * m0 * values0;\n    vec2 temp1 = -6.0 * m1 * m1 * values1;\n\n    vec3 mmm0 = m0 * m0 * m0;\n    vec2 mmm1 = m1 * m1 * m1;\n\n    float dx = temp0[0] * x0.x + temp0[1] * x1.x + temp0[2] * x2.x + temp1[0] * x3.x + temp1[1] * x4.x + mmm0[0] * p0.x + mmm0[1] * p1.x + mmm0[2] * p2.x + mmm1[0] * p3.x + mmm1[1] * p4.x;\n    float dy = temp0[0] * x0.y + temp0[1] * x1.y + temp0[2] * x2.y + temp1[0] * x3.y + temp1[1] * x4.y + mmm0[0] * p0.y + mmm0[1] * p1.y + mmm0[2] * p2.y + mmm1[0] * p3.y + mmm1[1] * p4.y;\n    float dz = temp0[0] * x0.z + temp0[1] * x1.z + temp0[2] * x2.z + temp1[0] * x3.z + temp1[1] * x4.z + mmm0[0] * p0.z + mmm0[1] * p1.z + mmm0[2] * p2.z + mmm1[0] * p3.z + mmm1[1] * p4.z;\n    float dw = temp0[0] * x0.w + temp0[1] * x1.w + temp0[2] * x2.w + temp1[0] * x3.w + temp1[1] * x4.w + mmm0[0] * p0.w + mmm0[1] * p1.w + mmm0[2] * p2.w + mmm1[0] * p3.w + mmm1[1] * p4.w;\n\n    return vec4(dx, dy, dz, dw) * 49.0;\n}\n\nvec3 getCurlVelocity( vec4 position ) {\n\n    position.x += 3.0;\n    float NOISE_TIME_SCALE = uNoiseTimeScale;\n    float NOISE_SCALE = uNoiseScale;\n    float NOISE_POSITION_SCALE = uNoisePositionScale;\n\n    vec3 oldPosition = position.rgb;\n    vec3 noisePosition = oldPosition *  NOISE_POSITION_SCALE;\n\n    float noiseTime = NOISE_TIME_SCALE;\n\n    vec4 xNoisePotentialDerivatives = vec4(0.0);\n    vec4 yNoisePotentialDerivatives = vec4(0.0);\n    vec4 zNoisePotentialDerivatives = vec4(0.0);\n\n    float persistence = 0.56;\n\n    for (int i = 0; i < OCTAVES; ++i) {\n        float scale = (1.0 / 2.0) * pow(2.0, float(i));\n\n        float noiseScale = pow(persistence, float(i));\n\n        xNoisePotentialDerivatives += simplexNoiseDerivatives(vec4(noisePosition * pow(2.0, float(i)), noiseTime)) * noiseScale * scale;\n        yNoisePotentialDerivatives += simplexNoiseDerivatives(vec4((noisePosition + vec3(123.4, 129845.6, -1239.1)) * pow(2.0, float(i)), noiseTime)) * noiseScale * scale;\n        zNoisePotentialDerivatives += simplexNoiseDerivatives(vec4((noisePosition + vec3(-9519.0, 9051.0, -123.0)) * pow(2.0, float(i)), noiseTime)) * noiseScale * scale;\n    }\n\n    //compute curl\n    vec3 noiseVelocity = vec3(\n                              zNoisePotentialDerivatives[1] - yNoisePotentialDerivatives[2],\n                              xNoisePotentialDerivatives[2] - zNoisePotentialDerivatives[0],\n                              yNoisePotentialDerivatives[0] - xNoisePotentialDerivatives[1]\n                              ) * NOISE_SCALE;\n    return noiseVelocity;\n}\n\nfloat rand(vec2 co){\n    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);\n}\n\nvoid main () {\n\n    vec2 uv = vUv;\n\n    vec4 geomPositions = texture2D( uGeomPositionsMap, uv );\n    vec4 data = texture2D(uPrevPositionsMap, uv);\n\n    vec3 noiseVelocity = getCurlVelocity( data );\n\n    vec3 vel = noiseVelocity;\n    vec3 dir = uDirectionFlow;\n\n    float pLife = data.a;\n\n    if( pLife < uLifeTime ){\n     // restamos vida\n        pLife = pLife -  vel.x - ( rand( vUv ) * 0.2 + 0.1 );\n    }\n\n    vec3 newPosition = ( data.rgb + vel + dir );\n\n    if( pLife < 0.0 ){\n        pLife = uLifeTime;\n        newPosition = geomPositions.rgb + uOffsetPosition;\n    }\n\n    if( uLock != 0 && pLife == uLifeTime ){\n\n        newPosition = geomPositions.xyz + uOffsetPosition ;\n    }\n\n    if( uLock == 0 ){\n        pLife = pLife - 0.01;\n    }\n\n    gl_FragColor = vec4( newPosition, pLife );\n\n}\n";
@@ -118,7 +118,7 @@ BaseGLPass.prototype.getRenderTarget = function( w, h ) {
 };
 
 module.exports = BaseGLPass;
-},{"three":19}],12:[function(require,module,exports){
+},{"three":20}],12:[function(require,module,exports){
 /**
  * Created by felixmorenomartinez on 16/02/14.
  */
@@ -318,7 +318,7 @@ CameraControl.prototype = {
 
 module.exports = CameraControl;
 
-},{"three":19}],13:[function(require,module,exports){
+},{"three":20}],13:[function(require,module,exports){
 /**
  * Created by siroko on 7/11/16.
  */
@@ -512,7 +512,81 @@ GPUDisplacedGeometry.prototype.update = function() {
 
 
 module.exports = GPUDisplacedGeometry;
-},{"../glsl/fs-buffer-geometry.glsl":3,"../glsl/fs-update-positions-geometry.glsl":5,"../glsl/fs-update-positions-spring.glsl":6,"../glsl/vs-buffer-geometry.glsl":8,"../glsl/vs-simple-quad.glsl":10,"./BaseGLPass":11,"three":19}],14:[function(require,module,exports){
+},{"../glsl/fs-buffer-geometry.glsl":3,"../glsl/fs-update-positions-geometry.glsl":5,"../glsl/fs-update-positions-spring.glsl":6,"../glsl/vs-buffer-geometry.glsl":8,"../glsl/vs-simple-quad.glsl":10,"./BaseGLPass":11,"three":20}],14:[function(require,module,exports){
+// http://mrl.nyu.edu/~perlin/noise/
+
+var ImprovedNoise = function () {
+
+    var p = [151,160,137,91,90,15,131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,
+        23,190,6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,88,237,149,56,87,
+        174,20,125,136,171,168,68,175,74,165,71,134,139,48,27,166,77,146,158,231,83,111,229,122,60,211,
+        133,230,220,105,92,41,55,46,245,40,244,102,143,54,65,25,63,161,1,216,80,73,209,76,132,187,208,
+        89,18,169,200,196,135,130,116,188,159,86,164,100,109,198,173,186,3,64,52,217,226,250,124,123,5,
+        202,38,147,118,126,255,82,85,212,207,206,59,227,47,16,58,17,182,189,28,42,223,183,170,213,119,
+        248,152,2,44,154,163,70,221,153,101,155,167,43,172,9,129,22,39,253,19,98,108,110,79,113,224,232,
+        178,185,112,104,218,246,97,228,251,34,242,193,238,210,144,12,191,179,162,241,81,51,145,235,249,
+        14,239,107,49,192,214,31,181,199,106,157,184,84,204,176,115,121,50,45,127,4,150,254,138,236,205,
+        93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180];
+
+    for (var i=0; i < 256 ; i++) {
+
+        p[256+i] = p[i];
+
+    }
+
+    function fade(t) {
+
+        return t * t * t * (t * (t * 6 - 15) + 10);
+
+    }
+
+    function lerp(t, a, b) {
+
+        return a + t * (b - a);
+
+    }
+
+    function grad(hash, x, y, z) {
+
+        var h = hash & 15;
+        var u = h < 8 ? x : y, v = h < 4 ? y : h == 12 || h == 14 ? x : z;
+        return ((h&1) == 0 ? u : -u) + ((h&2) == 0 ? v : -v);
+
+    }
+
+    return {
+
+        noise: function (x, y, z) {
+
+            var floorX = Math.floor(x), floorY = Math.floor(y), floorZ = Math.floor(z);
+
+            var X = floorX & 255, Y = floorY & 255, Z = floorZ & 255;
+
+            x -= floorX;
+            y -= floorY;
+            z -= floorZ;
+
+            var xMinus1 = x -1, yMinus1 = y - 1, zMinus1 = z - 1;
+
+            var u = fade(x), v = fade(y), w = fade(z);
+
+            var A = p[X]+Y, AA = p[A]+Z, AB = p[A+1]+Z, B = p[X+1]+Y, BA = p[B]+Z, BB = p[B+1]+Z;
+
+            return lerp(w, lerp(v, lerp(u, grad(p[AA], x, y, z),
+                grad(p[BA], xMinus1, y, z)),
+                lerp(u, grad(p[AB], x, yMinus1, z),
+                    grad(p[BB], xMinus1, yMinus1, z))),
+                lerp(v, lerp(u, grad(p[AA+1], x, y, zMinus1),
+                    grad(p[BA+1], xMinus1, y, z-1)),
+                    lerp(u, grad(p[AB+1], x, yMinus1, zMinus1),
+                        grad(p[BB+1], xMinus1, yMinus1, zMinus1))));
+
+        }
+    }
+}
+
+module.exports = ImprovedNoise;
+},{}],15:[function(require,module,exports){
 /**
  * @author mrdoob / http://mrdoob.com/
  */
@@ -1235,7 +1309,7 @@ OBJLoader.prototype = {
 };
 
 module.exports = OBJLoader;
-},{"three":19}],15:[function(require,module,exports){
+},{"three":20}],16:[function(require,module,exports){
 /**
  * Created by siroko on 7/8/15.
  */
@@ -1391,7 +1465,7 @@ Simulator.prototype.update = function() {
 };
 
 module.exports = Simulator;
-},{"../glsl/fs-buffer-particles.glsl":4,"../glsl/fs-update-positions.glsl":7,"../glsl/vs-buffer-particles.glsl":9,"../glsl/vs-simple-quad.glsl":10,"./BaseGLPass":11,"three":19}],16:[function(require,module,exports){
+},{"../glsl/fs-buffer-particles.glsl":4,"../glsl/fs-update-positions.glsl":7,"../glsl/vs-buffer-particles.glsl":9,"../glsl/vs-simple-quad.glsl":10,"./BaseGLPass":11,"three":20}],17:[function(require,module,exports){
 /**
  * Created by siroko on 7/8/15.
  */
@@ -1401,6 +1475,8 @@ var Simulator = require('./../utils/Simulator');
 var GPUDisplacedGeometry = require('./../utils/GPUDisplacedGeometry');
 var CameraControl = require('./../utils/CameraControl');
 
+var ImprovedNoise = require('./../utils/ImprovedNoise');
+
 var World3D = function( container ) {
 
     this.container      = container;
@@ -1409,7 +1485,6 @@ var World3D = function( container ) {
     this.camera.layers.enable( 1 );
 
     this.scene          = new THREE.Scene();
-    //this.scene.fog      = new THREE.Fog( 0xefd1b5, 100, 1000);
 
     this.renderer       = new THREE.WebGLRenderer( { antialias: true } );
     this.renderer.shadowMap.enabled = true;
@@ -1443,7 +1518,7 @@ World3D.prototype.setup = function() {
     var onProgress = function ( xhr ) {
         if ( xhr.lengthComputable ) {
             var percentComplete = xhr.loaded / xhr.total * 100;
-            console.log( Math.round(percentComplete, 2) + '% downloaded' );
+            console.log( Math.round( percentComplete, 2 ) + '% downloaded' );
         }
     };
 
@@ -1452,7 +1527,7 @@ World3D.prototype.setup = function() {
 
     var objLoader = new OBJLoader();
     objLoader.setPath( 'assets/obj/' );
-    objLoader.load( 'mask.obj', (function ( object ) {
+    objLoader.load( 'mask_high.obj', (function ( object ) {
 
         this.positionTouch1 = new THREE.Vector3(0, 100, 0);
         this.positionTouch2 = new THREE.Vector3(0, 100, 0);
@@ -1472,14 +1547,24 @@ World3D.prototype.setup = function() {
         });
 
         this.mask = this.displacedGeometry.mesh;
-        this.mask.position.set( 0, -10 , 0 );
         this.mask.scale.set( 0.5, 0.5 , 0.5 );
 
         this.scene.add( this.mask );
 
+        var objLoader2 = new OBJLoader();
+        objLoader2.setPath( 'assets/obj/' );
+        objLoader2.load( 'mask.obj', (function ( object ) {
+            this.maskConvex = object.children[ 0 ];
+            this.maskConvex.material.transparent = true;
+            this.maskConvex.material.opacity= 0;
+            this.maskConvex.scale.set( 0.5, 0.5 , 0.5 );
+            this.scene.add( this.maskConvex );
+
+            this.render( 0 );
+        } ).bind( this ), onProgress, onError );
+
     } ).bind( this ), onProgress, onError );
 
-    this.render( 0 );
 };
 
 
@@ -1502,13 +1587,25 @@ World3D.prototype.render = function( timestamp ) {
 
     if( this.mask ) {
         this.planeCalc.lookAt( this.camera.position );
-        this.cameraControl.getIntersects( [ this.planeCalc, this.mask ] );
+        this.cameraControl.getIntersects( [ this.planeCalc, this.maskConvex ] );
         this.worldPosition.copy( this.mask.position );
         this.displacedGeometry.updateSpringMaterial.uniforms.uTime.value = timestamp;
         this.displacedGeometry.updateSpringMaterial.uniforms.uTouch.value = [ this.cameraControl.intersectPoint, this.cameraControl.intersectPoint ];
         this.displacedGeometry.updateSpringMaterial.uniforms.uWorldPosition.value = this.worldPosition;
 
         this.displacedGeometry.update();
+
+        var speed = 0.0001;
+        var t = timestamp * speed;
+        this.mask.rotation.x = this.maskConvex.rotation.x = ( ImprovedNoise().noise( t, -t ), 12 ) * 0.5;
+        //this.mask.rotation.x = this.maskConvex.rotation.x -= Math.PI * 0.5;
+        this.mask.rotation.z = this.maskConvex.rotation.z = ( ImprovedNoise().noise( 13, t, t ) ) * 0.5;
+
+        this.mask.position.y = this.maskConvex.position.y = ImprovedNoise().noise( 13, t, t );
+        this.mask.position.z = this.maskConvex.position.z = ImprovedNoise().noise( 1, -t, t );
+
+        this.planeCalc.position.copy( this.maskConvex.position );
+
     }
 
     this.pointer.position.copy( this.cameraControl.intersectPoint );
@@ -1532,7 +1629,7 @@ World3D.prototype.onResize = function( w, h ) {
 
 module.exports = World3D;
 
-},{"./../utils/CameraControl":12,"./../utils/GPUDisplacedGeometry":13,"./../utils/OBJLoader":14,"./../utils/Simulator":15,"three":19}],17:[function(require,module,exports){
+},{"./../utils/CameraControl":12,"./../utils/GPUDisplacedGeometry":13,"./../utils/ImprovedNoise":14,"./../utils/OBJLoader":15,"./../utils/Simulator":16,"three":20}],18:[function(require,module,exports){
 (function (process,global){
 /*!
  * @overview es6-promise - a tiny implementation of Promises/A+.
@@ -2496,7 +2593,7 @@ module.exports = World3D;
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{"_process":18}],18:[function(require,module,exports){
+},{"_process":19}],19:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -2617,7 +2714,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 // File:src/Three.js
 
 /**
