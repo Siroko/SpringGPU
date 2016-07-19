@@ -8,6 +8,9 @@ var OBJLoader = require('./../../utils/OBJLoader');
 var vs_bufferGeometry   = require('./../../glsl/vs-buffer-geometry.glsl');
 var fs_bufferGeometry   = require('./../../glsl/fs-buffer-geometry.glsl');
 
+var vs_environment      = require('./../../glsl/vs-environment.glsl');
+var fs_environment      = require('./../../glsl/fs-environment.glsl');
+
 var WorldManager = function(){
 
     THREE.EventDispatcher.call( this );
@@ -44,8 +47,22 @@ WorldManager.prototype._loadAssets = function() {
     objLoader.setPath( 'assets/obj/' );
     objLoader.load( 'enviro.obj', (function ( object ) {
 
+        var texturePattern = THREE.ImageUtils.loadTexture('assets/textures/carrots-pattern.jpg' );
+        texturePattern.wrapS = THREE.RepeatWrapping;
+        texturePattern.wrapT = THREE.RepeatWrapping;
+        texturePattern.repeat.x = 1000;
+        texturePattern.repeat.y = 1000;
+
         this.room = object.children[ 0 ];
-        this.room.material = new THREE.MeshBasicMaterial({map: THREE.ImageUtils.loadTexture('assets/textures/baked_ao.png' ) } );
+        this.room.material = new THREE.RawShaderMaterial( {
+            uniforms: {
+                map             : { type : 't', value : THREE.ImageUtils.loadTexture('assets/textures/baked_ao.png' ) },
+                uPatternMap     : { type : 't', value : texturePattern }
+            },
+
+            vertexShader                : vs_environment,
+            fragmentShader              : fs_environment
+        } );
 
         this._createGeometries();
 
@@ -56,11 +73,26 @@ WorldManager.prototype._loadAssets = function() {
 
 WorldManager.prototype._createGeometries = function() {
 
-    var geom = new THREE.IcosahedronGeometry( 0.2, 1 );
+    var sizeBase = 0.2;
+    var radius = [];
+    var scales = [];
+    var positions = [];
+
+    for ( var i = 0; i < 100; i++ ) {
+        var s = ( Math.random() * 5 ) + 1;
+        var p = new THREE.Vector3( ( Math.random() * 2 - 1) * 4.5, Math.random() * 4.5 + 4, ( Math.random() * 2 - 1 ) * 9 );
+        positions.push( p );
+        radius.push( sizeBase * s );
+        scales.push( s );
+    }
+
+    var geom = new THREE.IcosahedronGeometry( sizeBase, 1 );
     var mat = new THREE.RawShaderMaterial( {
         uniforms: {
             normalMap             : { type : 't', value : THREE.ImageUtils.loadTexture('assets/textures/matcap.png' ) },
-            textureMap            : { type : 't', value : THREE.ImageUtils.loadTexture('assets/textures/matcap.png' ) }
+            textureMap            : { type : 't', value : THREE.ImageUtils.loadTexture('assets/textures/matcap.png' ) },
+            uSpheresPositions     : { type : 'v3v', value : positions },
+            uSpheresRadius        : { type : 'fv', value : radius }
         },
 
         vertexShader                : vs_bufferGeometry,
@@ -68,12 +100,12 @@ WorldManager.prototype._createGeometries = function() {
     } );
 
     var mesh;
-    for ( var i = 0; i < 100; i++ ) {
+    for ( var i = 0; i < positions.length; i++ ) {
 
         mesh = new THREE.Mesh( geom, mat );
-        mesh.position.set( ( Math.random() * 2 - 1) * 4.5, Math.random() * 4.5 + 4, ( Math.random() * 2 - 1 ) * 9 );
+        mesh.position.copy( positions[ i ] );
 
-        var s = ( Math.random() * 5 ) + 1;
+        var s = scales[ i ];
         mesh.scale.set( s, s, s );
         this.meshes.push( mesh );
     }
