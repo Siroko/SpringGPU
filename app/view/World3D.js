@@ -75,11 +75,15 @@ World3D.prototype.addEvents = function() {
 World3D.prototype.onInitializeManager = function( n, o ) {
 
     if( !this.manager.isVRCompatible || typeof window.orientation !== 'undefined' ) {
+
         this.gamePads = new MousePad( this.scene, this.camera, this.effect );
         this.dummyCamera.position.z = 10;
         this.dummyCamera.position.y = - 0.3;
+
     } else {
+
         this.gamePads = new GamePads( this.scene, this.camera, this.effect );
+
     }
 
     this.pointer = new THREE.Mesh( new THREE.SphereBufferGeometry( 0.1, 10, 10), new THREE.MeshNormalMaterial() );
@@ -90,12 +94,11 @@ World3D.prototype.onInitializeManager = function( n, o ) {
 };
 
 World3D.prototype.onRenderLeft = function() {
-    console.log('rendering Left', this);
-
+    //console.log('rendering Left', this);
 };
 
 World3D.prototype.onRenderRight = function() {
-    console.log('rendering Right', this);
+    //console.log('rendering Right', this);
 };
 
 World3D.prototype.render = function( timestamp ) {
@@ -111,7 +114,7 @@ World3D.prototype.render = function( timestamp ) {
 
     // Render the scene through the manager.
     this.renderer.setClearColor( 0x202020 );
-    this.renderer.setRenderTarget( null ); // add this line
+    this.renderer.setRenderTarget( null ); // add this line if you are working with GPGPU sims
     this.manager.render( this.scene, this.camera, timestamp);
 
 };
