@@ -2,7 +2,7 @@
 
 ## Install dependencies
 - Checkout the project from [**Github**] (https://github.com/Siroko/SpringGPU.git)
-- Switch to WebVR  Branch: `git checkout feature/webVR`
+- Switch to WebVRBase  Branch: `git checkout feature/webVRBase`
 - Install front dependencies:
 
 	```sh
