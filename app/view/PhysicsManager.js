@@ -8,6 +8,8 @@ var THREE = require('three');
 var PhysicsManager = function() {
   this.world = new CANNON.World();
   this.world.gravity.set(0, 0, -9.82); // m/s²
+  //this.world.gravity.set(0, 0, -0.02); // m/s²
+
 
   this.threeCannon = [];
 
@@ -53,7 +55,14 @@ PhysicsManager.prototype.update = function(timestamp) {
     this.threeCannon[i].t.position.x = this.threeCannon[i].c.position.x ;
     this.threeCannon[i].t.position.y = this.threeCannon[i].c.position.z ; //XY coordinates flipped
     this.threeCannon[i].t.position.z = this.threeCannon[i].c.position.y ; //XY coordinates flipped
+
+    this.threeCannon[i].t.quaternion.x = this.threeCannon[i].c.quaternion.x ;
+    this.threeCannon[i].t.quaternion.y = this.threeCannon[i].c.quaternion.z ; //XY coordinates flipped
+    this.threeCannon[i].t.quaternion.z = this.threeCannon[i].c.quaternion.y ; //XY coordinates flipped
+    this.threeCannon[i].t.quaternion.w = this.threeCannon[i].c.quaternion.w ;
+
   }
+
 
 
   this.lastTime = timestamp;
@@ -85,11 +94,12 @@ PhysicsManager.prototype.add3DObject = function(obj,type) {
     case "sphere":
 
       var bbox = new THREE.Box3().setFromObject(obj);
-      console.log(bbox);
       var radius = bbox.max.x - bbox.min.x; //We assume that the shape is uniform
 
       var boxShape = new CANNON.Sphere(radius/2);
       var boxBody = new CANNON.Body({ mass: mass });
+
+      console.log(boxBody);
 
       boxBody.addShape(boxShape);
       boxBody.position.set(obj.position.x,obj.position.z,obj.position.y); // Cannon and three have the XY coordinates flipped
@@ -100,9 +110,17 @@ PhysicsManager.prototype.add3DObject = function(obj,type) {
 
       break;
     default:
-
   }
 }
+PhysicsManager.prototype.setClosedArea = function(obj) {
+  var bbox = new THREE.Box3().setFromObject(obj);
 
+  console.log(bbox);
+
+  //4 walls and the roof (floor is already set up)
+
+
+
+};
 
 module.exports = PhysicsManager;

@@ -133,12 +133,15 @@ World3D.prototype.onInitializeManager = function( n, o ) {
 World3D.prototype.onAssetsLoaded = function( e ) {
 
     this.scene.add( this.worldManager.room );
+    this.phManager.setClosedArea(this.worldManager.room);
+
+
 
     for (var i = 0; i < this.worldManager.meshes.length; i++) {
         var mesh = this.worldManager.meshes[i];
         this.scene.add( mesh );
 
-        
+
 
         this.phManager.add3DObject(mesh,"sphere");
 
