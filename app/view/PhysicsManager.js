@@ -11,6 +11,7 @@ var PhysicsManager = function() {
 
   this.threeCannon = [];
 
+  var radius = 0.5;
   // Create a sphere
   /*
   var radius = 0.5; // m
@@ -64,16 +65,39 @@ PhysicsManager.prototype.update = function(timestamp) {
  * @param {string} author - bounding geometry for physics calculations.
  */
 PhysicsManager.prototype.add3DObject = function(obj,type) {
+  var mass = 5;
   switch (type) {
     case "cube":
-    console.log(obj);
-      var mass = 5;
-      var boxShape = new CANNON.Box(new CANNON.Vec3(1/2,1/2,1/2));
+
+      var bbox = new THREE.Box3().setFromObject(obj);
+
+      var widthX = bbox.max.x - bbox.min.x;
+      var widthY = bbox.max.y - bbox.min.y;
+      var widthZ = bbox.max.z - bbox.min.z;
+
+      var boxShape = new CANNON.Box(new CANNON.Vec3(widthX/2,widthZ/2,widthY/2));  // Cannon and three have the XY coordinates flipped
       var boxBody = new CANNON.Body({ mass: mass });
       boxBody.addShape(boxShape);
       boxBody.position.set(obj.position.x,obj.position.z,obj.position.y); // Cannon and three have the XY coordinates flipped
       this.world.addBody(boxBody);
       this.threeCannon.push({"t":obj,"c":boxBody});
+      break;
+    case "sphere":
+
+      var bbox = new THREE.Box3().setFromObject(obj);
+      console.log(bbox);
+      var radius = bbox.max.x - bbox.min.x; //We assume that the shape is uniform
+
+      var boxShape = new CANNON.Sphere(radius/2);
+      var boxBody = new CANNON.Body({ mass: mass });
+
+      boxBody.addShape(boxShape);
+      boxBody.position.set(obj.position.x,obj.position.z,obj.position.y); // Cannon and three have the XY coordinates flipped
+      this.world.addBody(boxBody);
+      this.threeCannon.push({"t":obj,"c":boxBody});
+
+
+
       break;
     default:
 

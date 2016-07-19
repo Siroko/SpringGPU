@@ -70,12 +70,13 @@ var World3D = function( container ) {
     this.scene.add( cube );
 
     //Adding ground
+    /*
     geometry = new THREE.BoxGeometry(20,20);
     material = new THREE.MeshNormalMaterial(  );
     var ground = new THREE.Mesh( geometry, material );
     ground.rotation.x = Math.PI/2;
-
     this.scene.add( ground );
+    */
 
 
 };
@@ -136,6 +137,11 @@ World3D.prototype.onAssetsLoaded = function( e ) {
     for (var i = 0; i < this.worldManager.meshes.length; i++) {
         var mesh = this.worldManager.meshes[i];
         this.scene.add( mesh );
+
+        
+
+        this.phManager.add3DObject(mesh,"sphere");
+
     }
 
 };
