@@ -54,15 +54,24 @@ PhysicsManager.prototype.update = function(timestamp) {
   //Apply physics to three meshes
 
   for(i=0; i < this.threeCannon.length; i++){
-    this.threeCannon[i].t.position.x = this.threeCannon[i].c.position.x ;
-    this.threeCannon[i].t.position.y = this.threeCannon[i].c.position.z ; //XY coordinates flipped
-    this.threeCannon[i].t.position.z = this.threeCannon[i].c.position.y ; //XY coordinates flipped
+    if(!this.threeCannon[i].c.isActuator){
+      this.threeCannon[i].t.position.x = this.threeCannon[i].c.position.x ;
+      this.threeCannon[i].t.position.y = this.threeCannon[i].c.position.z ; //XY coordinates flipped
+      this.threeCannon[i].t.position.z = this.threeCannon[i].c.position.y ; //XY coordinates flipped
 
-    this.threeCannon[i].t.quaternion.x = this.threeCannon[i].c.quaternion.x ;
-    this.threeCannon[i].t.quaternion.y = this.threeCannon[i].c.quaternion.z ; //XY coordinates flipped
-    this.threeCannon[i].t.quaternion.z = this.threeCannon[i].c.quaternion.y ; //XY coordinates flipped
-    this.threeCannon[i].t.quaternion.w = this.threeCannon[i].c.quaternion.w ;
+      this.threeCannon[i].t.quaternion.x = this.threeCannon[i].c.quaternion.x ;
+      this.threeCannon[i].t.quaternion.y = this.threeCannon[i].c.quaternion.z ; //XY coordinates flipped
+      this.threeCannon[i].t.quaternion.z = this.threeCannon[i].c.quaternion.y ; //XY coordinates flipped
+      this.threeCannon[i].t.quaternion.w = this.threeCannon[i].c.quaternion.w ;
+    }
+    else{
+      //console.log(this.threeCannon[i].c.velocity);
 
+      this.threeCannon[i].c.position.x = this.threeCannon[i].t.position.x;
+      this.threeCannon[i].c.position.z = this.threeCannon[i].t.position.y;
+
+
+    }
   }
 
 
@@ -74,9 +83,10 @@ PhysicsManager.prototype.update = function(timestamp) {
  * Add Cannon physics to a three.js object
  * @param {Object} obj - Three.js Object
  * @param {string} author - bounding geometry for physics calculations.
+ * @param {boolean} actuator - The object is used for interacting so the mass is 0
  */
-PhysicsManager.prototype.add3DObject = function(obj,type) {
-  var mass = 5;
+PhysicsManager.prototype.add3DObject = function(obj,type,actuator) {
+  if(actuator==true){var mass = 0;}else{var mass = 5;}
   switch (type) {
     case "cube":
 
@@ -91,21 +101,19 @@ PhysicsManager.prototype.add3DObject = function(obj,type) {
       boxBody.addShape(boxShape);
       boxBody.position.set(obj.position.x,obj.position.z,obj.position.y); // Cannon and three have the XY coordinates flipped
       this.world.addBody(boxBody);
+      boxBody.isActuator = actuator;
       this.threeCannon.push({"t":obj,"c":boxBody});
       break;
     case "sphere":
 
       var bbox = new THREE.Box3().setFromObject(obj);
       var radius = bbox.max.x - bbox.min.x; //We assume that the shape is uniform
-
       var boxShape = new CANNON.Sphere(radius/2);
       var boxBody = new CANNON.Body({ mass: mass });
-
-      //console.log(boxBody);
-
       boxBody.addShape(boxShape);
       boxBody.position.set(obj.position.x,obj.position.z,obj.position.y); // Cannon and three have the XY coordinates flipped
       this.world.addBody(boxBody);
+      boxBody.isActuator = actuator;
       this.threeCannon.push({"t":obj,"c":boxBody});
 
 

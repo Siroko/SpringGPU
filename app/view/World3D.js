@@ -59,14 +59,14 @@ var World3D = function( container ) {
     var material = new THREE.MeshNormalMaterial(  );
     var cube = new THREE.Mesh( geometry, material );
     cube.position.y = 5;
-    this.phManager.add3DObject(cube,"cube");
+    this.phManager.add3DObject(cube,"cube",false);
     this.scene.add( cube );
 
     geometry = new THREE.BoxGeometry( 1, 1, 1 );
     material = new THREE.MeshNormalMaterial(  );
     cube = new THREE.Mesh( geometry, material );
     cube.position.y = 10;
-    this.phManager.add3DObject(cube,"cube");
+    this.phManager.add3DObject(cube,"cube",false);
     this.scene.add( cube );
 
     //Adding ground
@@ -126,6 +126,7 @@ World3D.prototype.onInitializeManager = function( n, o ) {
     this.pointer = new THREE.Mesh( new THREE.SphereBufferGeometry( 0.1, 10, 10), new THREE.MeshNormalMaterial() );
 
     this.scene.add( this.pointer );
+    this.phManager.add3DObject(this.pointer, "sphere", true);
 
     this.setup();
 };
@@ -143,7 +144,7 @@ World3D.prototype.onAssetsLoaded = function( e ) {
 
 
 
-        this.phManager.add3DObject(mesh,"sphere");
+        this.phManager.add3DObject(mesh,"sphere",false);
 
     }
 
