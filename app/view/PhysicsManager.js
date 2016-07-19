@@ -7,8 +7,8 @@ var THREE = require('three');
 
 var PhysicsManager = function() {
   this.world = new CANNON.World();
-  this.world.gravity.set(0, 0, -9.82); // m/s²
-  this.world.gravity.set(0, 0, -0.02); // m/s²
+  //this.world.gravity.set(0, 0, -9.82); // m/s²
+  this.world.gravity.set(0, 0, -0.05); // m/s²
 
 
   this.threeCannon = [];
@@ -40,7 +40,9 @@ var PhysicsManager = function() {
   this.maxSubSteps = 3;
   this.lastTime = 0;
 
-
+  this.spring;
+  this.springBodyA;
+  this.springBodyB;
 };
 
 PhysicsManager.prototype.update = function(timestamp) {
@@ -69,9 +71,11 @@ PhysicsManager.prototype.update = function(timestamp) {
 
       this.threeCannon[i].c.position.x = this.threeCannon[i].t.position.x;
       this.threeCannon[i].c.position.z = this.threeCannon[i].t.position.y;
-
-
     }
+  }
+
+  if(this.spring !== undefined){
+    this.spring.applyForce();
   }
 
 
@@ -114,9 +118,11 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator) {
       boxBody.position.set(obj.position.x,obj.position.z,obj.position.y); // Cannon and three have the XY coordinates flipped
       this.world.addBody(boxBody);
       boxBody.isActuator = actuator;
+      if(actuator==true){
+        this.springBodyA = boxBody;
+        this.springBodyB = this.threeCannon[0].c;
+      }
       this.threeCannon.push({"t":obj,"c":boxBody});
-
-
 
       break;
     default:
@@ -131,8 +137,6 @@ PhysicsManager.prototype.setClosedArea = function(obj) {
   console.log(bbox);
 
   //4 walls and the roof (floor is already set up)
-
-
 
   //Left wall
   var groundBody = new CANNON.Body({
@@ -189,7 +193,17 @@ PhysicsManager.prototype.setClosedArea = function(obj) {
   groundBody.quaternion.setFromAxisAngle(rot,(Math.PI))
   groundBody.position.set(0,0,widthY/2);
   this.world.addBody(groundBody);
+};
 
+PhysicsManager.prototype.springTest = function() {
+
+  this.spring = new CANNON.Spring(this.springBodyA,this.springBodyB,{
+    localAnchorA: new CANNON.Vec3(0,0,-1),
+    localAnchorB: new CANNON.Vec3(0,0,0),
+    restLength : 0,
+    stiffness : 50,
+    damping : 1,
+  });
 
 };
 

@@ -57,14 +57,15 @@ var World3D = function( container ) {
     //Adding object
     var geometry = new THREE.BoxGeometry( 1, 1, 1 );
     var material = new THREE.MeshNormalMaterial(  );
-    var cube = new THREE.Mesh( geometry, material );
-    cube.position.y = 5;
-    this.phManager.add3DObject(cube,"cube",false);
-    this.scene.add( cube );
+    this.cubetest = new THREE.Mesh( geometry, material );
+    this.cubetest.position.y = 5;
+    this.phManager.add3DObject(this.cubetest,"cube",false);
+    this.scene.add( this.cubetest );
+    
 
     geometry = new THREE.BoxGeometry( 1, 1, 1 );
     material = new THREE.MeshNormalMaterial(  );
-    cube = new THREE.Mesh( geometry, material );
+    var cube = new THREE.Mesh( geometry, material );
     cube.position.y = 10;
     this.phManager.add3DObject(cube,"cube",false);
     this.scene.add( cube );
@@ -127,6 +128,8 @@ World3D.prototype.onInitializeManager = function( n, o ) {
 
     this.scene.add( this.pointer );
     this.phManager.add3DObject(this.pointer, "sphere", true);
+    this.phManager.springTest();
+
 
     this.setup();
 };
@@ -165,6 +168,7 @@ World3D.prototype.render = function( timestamp ) {
     this.gamePads.update( timestamp,[ this.planeCalc ] );
 
     this.pointer.position.copy( this.gamePads.intersectPoint );
+
 
     // Update the physics
     this.phManager.update(timestamp);
