@@ -78,7 +78,7 @@ WorldManager.prototype._createGeometries = function() {
     var scales = [];
     var positions = [];
 
-    for ( var i = 0; i < 100; i++ ) {
+    for ( var i = 0; i < 10; i++ ) {
         var s = ( Math.random() * 5 ) + 1;
         var p = new THREE.Vector3( ( Math.random() * 2 - 1) * 4.5, Math.random() * 4.5 + 4, ( Math.random() * 2 - 1 ) * 9 );
         positions.push( p );
