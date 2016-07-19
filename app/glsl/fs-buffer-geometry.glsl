@@ -20,7 +20,7 @@ void main(){
     vec3 fdx = dFdx( vPos.xyz );
 	vec3 fdy = dFdy( vPos.xyz );
 	vec3 n = normalize(cross(fdx, fdy));
-	n = vSmoothNormal;
+//	n = vSmoothNormal;
 
     vec3 vNormal = vNormalMatrix * n;
     vec3 vONormal = n;

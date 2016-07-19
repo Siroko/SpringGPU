@@ -56,11 +56,11 @@ WorldManager.prototype._loadAssets = function() {
 
 WorldManager.prototype._createGeometries = function() {
 
-    var geom = new THREE.IcosahedronGeometry( 0.2, 3 );
+    var geom = new THREE.IcosahedronGeometry( 0.2, 1 );
     var mat = new THREE.RawShaderMaterial( {
         uniforms: {
-            normalMap             : { type : 't', value : THREE.ImageUtils.loadTexture('assets/textures/matcap.jpg' ) },
-            textureMap            : { type : 't', value : THREE.ImageUtils.loadTexture('assets/textures/matcap.jpg' ) }
+            normalMap             : { type : 't', value : THREE.ImageUtils.loadTexture('assets/textures/matcap.png' ) },
+            textureMap            : { type : 't', value : THREE.ImageUtils.loadTexture('assets/textures/matcap.png' ) }
         },
 
         vertexShader                : vs_bufferGeometry,
@@ -72,6 +72,9 @@ WorldManager.prototype._createGeometries = function() {
 
         mesh = new THREE.Mesh( geom, mat );
         mesh.position.set( ( Math.random() * 2 - 1) * 4.5, Math.random() * 4.5 + 4, ( Math.random() * 2 - 1 ) * 9 );
+
+        var s = ( Math.random() * 5 ) + 1;
+        mesh.scale.set( s, s, s );
         this.meshes.push( mesh );
     }
 
