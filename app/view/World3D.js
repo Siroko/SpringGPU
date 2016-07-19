@@ -9,6 +9,8 @@ var VREffect = require('./../utils/VREffect');
 var GamePads = require('./gamepads/GamePads');
 var MousePad = require('./gamepads/MousePad');
 
+var WorldManager = require('./scene/WorldManager');
+
 var World3D = function( container ) {
 
     this.container      = container;
@@ -34,6 +36,7 @@ var World3D = function( container ) {
         isUndistorted: false // Default: false.
     };
     this.manager = new WebVRManager( this.renderer, this.effect, params );
+    this.worldManager = new WorldManager();
     this.addEvents();
 
     // Create plane to raycast
@@ -44,6 +47,8 @@ var World3D = function( container ) {
 
     this.scene.add( this.planeCalc );
     this.scene.add( this.dummyCamera );
+
+
 
 };
 
@@ -70,6 +75,19 @@ World3D.prototype.onModeChange = function( n, o ) {
 World3D.prototype.addEvents = function() {
     this.manager.on('initialized', this.onInitializeManager.bind( this ) );
     this.manager.on('modechange', this.onModeChange.bind( this ) );
+
+    this.worldManager.addEventListener( 'assetsLoaded', this.onAssetsLoaded.bind( this ) );
+};
+
+World3D.prototype.onAssetsLoaded = function( e ) {
+
+    this.scene.add( this.worldManager.room );
+
+    for (var i = 0; i < this.worldManager.meshes.length; i++) {
+        var mesh = this.worldManager.meshes[i];
+        this.scene.add( mesh );
+    }
+
 };
 
 World3D.prototype.onInitializeManager = function( n, o ) {
@@ -77,7 +95,7 @@ World3D.prototype.onInitializeManager = function( n, o ) {
     if( !this.manager.isVRCompatible || typeof window.orientation !== 'undefined' ) {
 
         this.gamePads = new MousePad( this.scene, this.camera, this.effect );
-        this.dummyCamera.position.z = 10;
+        this.dummyCamera.position.z = 5;
         this.dummyCamera.position.y = - 0.3;
 
     } else {
