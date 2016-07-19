@@ -9,7 +9,7 @@ var VREffect = require('./../utils/VREffect');
 var GamePads = require('./gamepads/GamePads');
 var MousePad = require('./gamepads/MousePad');
 
-var WorldManager = require('./scene/WorldManager');
+var PhysicsManager = require('./PhysicsManager');
 
 var World3D = function( container ) {
 
@@ -22,6 +22,9 @@ var World3D = function( container ) {
 
     this.scene          = new THREE.Scene();
     this.renderer       = new THREE.WebGLRenderer( { antialias: true } );
+
+    //// Cannon.js physics manager
+    this.phManager      = new PhysicsManager();
 
     //// Apply VR headset positional data to camera.
     this.controls       = new VRControls( this.camera );
@@ -36,7 +39,6 @@ var World3D = function( container ) {
         isUndistorted: false // Default: false.
     };
     this.manager = new WebVRManager( this.renderer, this.effect, params );
-    this.worldManager = new WorldManager();
     this.addEvents();
 
     // Create plane to raycast
@@ -48,6 +50,24 @@ var World3D = function( container ) {
     this.scene.add( this.planeCalc );
     this.scene.add( this.dummyCamera );
 
+    //Adding Three Objects to Physic Manager
+    //Adding object
+    var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+    var material = new THREE.MeshNormalMaterial(  );
+    var cube = new THREE.Mesh( geometry, material );
+    cube.position.y = 5;
+    console.log(cube);
+    this.phManager.add3DObject(cube,"cube");
+
+    this.scene.add( cube );
+
+    //Adding ground
+    geometry = new THREE.BoxGeometry(20,20);
+    material = new THREE.MeshNormalMaterial(  );
+    var ground = new THREE.Mesh( geometry, material );
+    ground.rotation.x = Math.PI/2;
+
+    this.scene.add( ground );
 
 
 };
@@ -75,19 +95,6 @@ World3D.prototype.onModeChange = function( n, o ) {
 World3D.prototype.addEvents = function() {
     this.manager.on('initialized', this.onInitializeManager.bind( this ) );
     this.manager.on('modechange', this.onModeChange.bind( this ) );
-
-    this.worldManager.addEventListener( 'assetsLoaded', this.onAssetsLoaded.bind( this ) );
-};
-
-World3D.prototype.onAssetsLoaded = function( e ) {
-
-    this.scene.add( this.worldManager.room );
-
-    for (var i = 0; i < this.worldManager.meshes.length; i++) {
-        var mesh = this.worldManager.meshes[i];
-        this.scene.add( mesh );
-    }
-
 };
 
 World3D.prototype.onInitializeManager = function( n, o ) {
@@ -95,7 +102,7 @@ World3D.prototype.onInitializeManager = function( n, o ) {
     if( !this.manager.isVRCompatible || typeof window.orientation !== 'undefined' ) {
 
         this.gamePads = new MousePad( this.scene, this.camera, this.effect );
-        this.dummyCamera.position.z = 5;
+        this.dummyCamera.position.z = 10;
         this.dummyCamera.position.y = - 0.3;
 
     } else {
@@ -126,6 +133,9 @@ World3D.prototype.render = function( timestamp ) {
     this.gamePads.update( timestamp,[ this.planeCalc ] );
 
     this.pointer.position.copy( this.gamePads.intersectPoint );
+
+    // Update the physics
+    this.phManager.update(timestamp);
 
     // Update VR headset position and apply to camera.
     this.controls.update();
