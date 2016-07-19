@@ -9,6 +9,8 @@ var VREffect = require('./../utils/VREffect');
 var GamePads = require('./gamepads/GamePads');
 var MousePad = require('./gamepads/MousePad');
 
+var PhysicsManager = require('./PhysicsManager');
+
 var World3D = function( container ) {
 
     this.container      = container;
@@ -20,6 +22,9 @@ var World3D = function( container ) {
 
     this.scene          = new THREE.Scene();
     this.renderer       = new THREE.WebGLRenderer( { antialias: true } );
+
+    //// Cannon.js physics manager
+    this.phManager      = new PhysicsManager();
 
     //// Apply VR headset positional data to camera.
     this.controls       = new VRControls( this.camera );
@@ -105,6 +110,9 @@ World3D.prototype.render = function( timestamp ) {
     this.gamePads.update( timestamp,[ this.planeCalc ] );
 
     this.pointer.position.copy( this.gamePads.intersectPoint );
+
+    // Update the physics
+    this.phManager.update(timestamp);
 
     // Update VR headset position and apply to camera.
     this.controls.update();
