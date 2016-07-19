@@ -105,13 +105,13 @@ World3D.prototype.setup = function() {
                 'uTime'         : { type: 'f', value: 0 },
                 'uTouch'        : { type: 'v3v', value: [ this.positionTouch1, this.positionTouch2 ] },
                 'uWorldPosition': { type: 'v3', value: this.worldPosition },
-                'normalMap'     : { type: 't', value: this.matcaps[6] },
-                'textureMap'    : { type: 't', value: this.matcaps[6] }
+                'normalMap'     : { type: 't', value: this.matcaps[2] },
+                'textureMap'    : { type: 't', value: this.matcaps[2] }
             }
         });
 
         this.mask = this.displacedGeometry.mesh;
-        this.mask.scale.set( 0.5, 0.5 , 0.5 );
+        this.mask.scale.set( 0.08, 0.08 , 0.08 );
 
         this.scene.add( this.mask );
 
@@ -121,7 +121,8 @@ World3D.prototype.setup = function() {
             this.maskConvex = object.children[ 0 ];
             this.maskConvex.material.transparent = true;
             this.maskConvex.material.opacity= 0;
-            this.maskConvex.scale.set( 0.5, 0.5 , 0.5 );
+            //this.maskConvex.scale.set( 0.5, 0.5 , 0.5 );
+            this.maskConvex.scale.set( 0.08, 0.08 , 0.08 );
             this.scene.add( this.maskConvex );
 
             this.render( 0 );
@@ -148,13 +149,13 @@ World3D.prototype.onInitializeManager = function( n, o ) {
 
     if( !this.manager.isVRCompatible || typeof window.orientation !== 'undefined' ) {
         this.gamePads = new MousePad( this.scene, this.camera, this.effect );
-        this.dummyCamera.position.z = 10;
-        this.dummyCamera.position.y = - 0.3;
+        this.dummyCamera.position.z = 1;
+        this.dummyCamera.position.y = 1.6;
     } else {
         this.gamePads = new GamePads( this.scene, this.camera, this.effect );
     }
 
-    this.pointer = new THREE.Mesh( new THREE.SphereBufferGeometry( 0.1, 10, 10), new THREE.MeshNormalMaterial() );
+    this.pointer = new THREE.Mesh( new THREE.SphereBufferGeometry( 0.01, 10, 10), new THREE.MeshNormalMaterial() );
 
     this.scene.add( this.pointer );
 
@@ -176,7 +177,7 @@ World3D.prototype.render = function( timestamp ) {
 
     this.planeCalc.lookAt( this.dummyCamera.position );
 
-    this.gamePads.update( timestamp,[ this.planeCalc, this.maskConvex ] );
+    this.gamePads.update( timestamp,[ this.maskConvex ] );
 
     this.worldPosition.copy( this.mask.position );
     this.displacedGeometry.updateSpringMaterial.uniforms.uTime.value = timestamp;
@@ -190,11 +191,10 @@ World3D.prototype.render = function( timestamp ) {
     this.mask.rotation.x = this.maskConvex.rotation.x = ( ImprovedNoise().noise( t, -t ), 12 ) * 0.5;
     this.mask.rotation.z = this.maskConvex.rotation.z = ( ImprovedNoise().noise( 13, t, t ) ) * 0.5;
 
-    this.mask.position.y = this.maskConvex.position.y = ImprovedNoise().noise( 13, t, t );
+    this.mask.position.y = this.maskConvex.position.y = (ImprovedNoise().noise( 13, t, t ) ) * 0.5 + 2;
     this.mask.position.z = this.maskConvex.position.z = ImprovedNoise().noise( 1, -t, t );
     this.planeCalc.position.copy( this.maskConvex.position );
-
-
+    this.worldPosition.copy( this.mask.position );
 
     this.pointer.position.copy( this.gamePads.intersectPoint );
 
