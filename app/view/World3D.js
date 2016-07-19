@@ -50,6 +50,26 @@ var World3D = function( container ) {
     this.scene.add( this.planeCalc );
     this.scene.add( this.dummyCamera );
 
+    //Adding Three Objects to Physic Manager
+    //Adding object
+    var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+    var material = new THREE.MeshNormalMaterial(  );
+    var cube = new THREE.Mesh( geometry, material );
+    cube.position.y = 5;
+    console.log(cube);
+    this.phManager.add3DObject(cube,"cube");
+
+    this.scene.add( cube );
+
+    //Adding ground
+    geometry = new THREE.BoxGeometry(20,20);
+    material = new THREE.MeshNormalMaterial(  );
+    var ground = new THREE.Mesh( geometry, material );
+    ground.rotation.x = Math.PI/2;
+
+    this.scene.add( ground );
+
+
 };
 
 World3D.prototype.setup = function() {
