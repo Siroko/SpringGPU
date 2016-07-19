@@ -15,6 +15,8 @@ var ImprovedNoise = require('./../utils/ImprovedNoise');
 var GamePads = require('./gamepads/GamePads');
 var MousePad = require('./gamepads/MousePad');
 
+var PhysicsManager = require('./PhysicsManager');
+
 var World3D = function( container ) {
 
     this.matcaps = [
@@ -29,6 +31,7 @@ var World3D = function( container ) {
         THREE.ImageUtils.loadTexture('assets/matcaps/yellowmatcap.png')
     ];
     this.container      = container;
+    this.phManager       = new PhysicsManager();
 
     this.camera         = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 10000 );
     this.camera.layers.enable( 1 );
