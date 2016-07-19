@@ -56,7 +56,7 @@ WorldManager.prototype._loadAssets = function() {
 
 WorldManager.prototype._createGeometries = function() {
 
-    var geom = new THREE.IcosahedronGeometry( 1, 4 );
+    var geom = new THREE.IcosahedronGeometry( 0.2, 3 );
     var mat = new THREE.RawShaderMaterial( {
         uniforms: {
             normalMap             : { type : 't', value : THREE.ImageUtils.loadTexture('assets/textures/matcap.jpg' ) },
@@ -71,7 +71,7 @@ WorldManager.prototype._createGeometries = function() {
     for ( var i = 0; i < 100; i++ ) {
 
         mesh = new THREE.Mesh( geom, mat );
-        mesh.position.set( ( Math.random() * 2 - 1) * 20, Math.random() * 10, ( Math.random() * 2 - 1 ) * 10 );
+        mesh.position.set( ( Math.random() * 2 - 1) * 4.5, Math.random() * 4.5 + 4, ( Math.random() * 2 - 1 ) * 9 );
         this.meshes.push( mesh );
     }
 
