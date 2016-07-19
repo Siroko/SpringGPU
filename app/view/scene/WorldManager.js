@@ -47,7 +47,7 @@ WorldManager.prototype._loadAssets = function() {
     objLoader.setPath( 'assets/obj/' );
     objLoader.load( 'enviro.obj', (function ( object ) {
 
-        var texturePattern = THREE.ImageUtils.loadTexture('assets/textures/carrots-pattern.jpg' );
+        var texturePattern = THREE.ImageUtils.loadTexture('assets/textures/patt2.png' );
         texturePattern.wrapS = THREE.RepeatWrapping;
         texturePattern.wrapT = THREE.RepeatWrapping;
         texturePattern.repeat.x = 1000;
@@ -73,12 +73,13 @@ WorldManager.prototype._loadAssets = function() {
 
 WorldManager.prototype._createGeometries = function() {
 
+    var quantity = 10;
     var sizeBase = 0.2;
     var radius = [];
     var scales = [];
     var positions = [];
 
-    for ( var i = 0; i < 100; i++ ) {
+    for ( var i = 0; i < quantity; i++ ) {
         var s = ( Math.random() * 5 ) + 1;
         var p = new THREE.Vector3( ( Math.random() * 2 - 1) * 4.5, Math.random() * 4.5 + 4, ( Math.random() * 2 - 1 ) * 9 );
         positions.push( p );

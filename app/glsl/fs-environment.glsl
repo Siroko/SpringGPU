@@ -12,7 +12,7 @@ varying vec2 vUv;
 void main(){
 
     vec4 ao = texture2D( map, vUv );
-    vec4 patt = texture2D( uPatternMap, vUv * 10. );
+    vec4 patt = texture2D( uPatternMap, vUv * 10.0 );
 
     vec4 color = ao * patt;
 
