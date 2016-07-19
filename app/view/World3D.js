@@ -56,9 +56,14 @@ var World3D = function( container ) {
     var material = new THREE.MeshNormalMaterial(  );
     var cube = new THREE.Mesh( geometry, material );
     cube.position.y = 5;
-    console.log(cube);
     this.phManager.add3DObject(cube,"cube");
+    this.scene.add( cube );
 
+    geometry = new THREE.BoxGeometry( 1, 1, 1 );
+    material = new THREE.MeshNormalMaterial(  );
+    cube = new THREE.Mesh( geometry, material );
+    cube.position.y = 10;
+    this.phManager.add3DObject(cube,"cube");
     this.scene.add( cube );
 
     //Adding ground

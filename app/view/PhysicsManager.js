@@ -58,23 +58,22 @@ PhysicsManager.prototype.update = function(timestamp) {
   this.lastTime = timestamp;
 };
 
+/**
+ * Add Cannon physics to a three.js object
+ * @param {Object} obj - Three.js Object
+ * @param {string} author - bounding geometry for physics calculations.
+ */
 PhysicsManager.prototype.add3DObject = function(obj,type) {
   switch (type) {
     case "cube":
-
-      console.log(obj);
+    console.log(obj);
       var mass = 5;
-      var boxShape = new CANNON.Box(new CANNON.Vec3(1,1,1));
-
+      var boxShape = new CANNON.Box(new CANNON.Vec3(1/2,1/2,1/2));
       var boxBody = new CANNON.Body({ mass: mass });
       boxBody.addShape(boxShape);
       boxBody.position.set(obj.position.x,obj.position.z,obj.position.y); // Cannon and three have the XY coordinates flipped
-
       this.world.addBody(boxBody);
-
       this.threeCannon.push({"t":obj,"c":boxBody});
-
-
       break;
     default:
 
