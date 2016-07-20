@@ -25,6 +25,7 @@ MousePad.prototype.addEvents = function(){
     this.mouseMoveHandler = this.onMouseMove.bind( this )
     window.addEventListener('mousemove', this.mouseMoveHandler );
     window.addEventListener('touchend', this.onTouchEnd.bind( this ) );
+
 };
 
 MousePad.prototype.onMouseMove = function( e ){
@@ -41,6 +42,8 @@ MousePad.prototype.onTouchEnd = function( e ){
     this.screenVector.x = 0;
     this.screenVector.y = 0;
 };
+
+
 
 MousePad.prototype.update = function( t, objs ) {
 

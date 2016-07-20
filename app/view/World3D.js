@@ -26,7 +26,7 @@ var World3D = function( container ) {
     this.renderer       = new THREE.WebGLRenderer( { antialias: true } );
 
     //// Cannon.js physics manager
-    this.phManager      = new PhysicsManager();
+    this.phManager      = new PhysicsManager(this.dummyCamera);
 
     //// Apply VR headset positional data to camera.
     this.controls       = new VRControls( this.camera );
@@ -127,8 +127,8 @@ World3D.prototype.onInitializeManager = function( n, o ) {
     this.pointer = new THREE.Mesh( new THREE.SphereBufferGeometry( 0.1, 10, 10), new THREE.MeshNormalMaterial() );
 
     //this.scene.add( this.pointer );
-    this.phManager.add3DObject(this.gamePads.h1, "sphere", true);
-    this.phManager.springTest();
+    this.phManager.add3DObject(this.gamePads.h1, "cube", true);
+    //add3DObjectthis.phManager.springTest();
 
 
     this.setup();

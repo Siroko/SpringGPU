@@ -5,28 +5,26 @@
 
 var THREE = require('three');
 
-var PhysicsManager = function() {
+var PhysicsManager = function(dcamera) {
   this.world = new CANNON.World();
   //this.world.gravity.set(0, 0, -9.82); // m/s²
-  this.world.gravity.set(0, 0, -0.05); // m/s²
+  this.world.gravity.set(0, 0, 0); // m/s²
 
+  this.dcamera = dcamera;
 
   this.threeCannon = [];
 
-  var radius = 0.5;
-  // Create a sphere
-  /*
-  var radius = 0.5; // m
+  // Create a sphere for the dummyCamera
+  var radius = Math.abs(dcamera.position.y);  // m
   this.sphereBody = new CANNON.Body({
      mass: 5, // kg
-     position: new CANNON.Vec3(0, 0, 10), // m
+     position: new CANNON.Vec3(dcamera.position.x, dcamera.position.z, dcamera.position.y),
      shape: new CANNON.Sphere(radius)
   });
   this.world.addBody(this.sphereBody);
-  */
+
 
   // Create a planes
-
   var groundBody = new CANNON.Body({
       mass: 0 // mass == 0 makes the body static
   });
@@ -35,14 +33,41 @@ var PhysicsManager = function() {
   groundBody.addShape(groundShape);
   this.world.addBody(groundBody);
 
-
   this.fixedTimeStep = 1.0 / 60.0; // seconds
   this.maxSubSteps = 3;
   this.lastTime = 0;
 
+  this.damping = 0.5;
+  this.f = 50;
+
   this.spring;
   this.springBodyA;
   this.springBodyB;
+
+
+  window.addEventListener('click', this.onClick.bind( this )  );
+};
+
+PhysicsManager.prototype.onClick = function( e ){
+  //console.log(this.dcamera);
+
+  for(var i=0; i<this.threeCannon.length; i++){
+
+    var vx = this.dcamera.position.x - this.threeCannon[i].t.position.x;
+    var vy = this.dcamera.position.y - this.threeCannon[i].t.position.y;
+    var vz = this.dcamera.position.z - this.threeCannon[i].t.position.z;
+
+
+    var v = new CANNON.Vec3(vx, vz, vy);
+    v.normalize();
+    v = v.scale(this.f);
+    console.log(v);
+
+    this.threeCannon[i].c.applyImpulse(v, this.threeCannon[i].c.position);
+
+  }
+
+
 };
 
 PhysicsManager.prototype.update = function(timestamp) {
@@ -105,8 +130,17 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator) {
       boxBody.addShape(boxShape);
       boxBody.position.set(obj.position.x,obj.position.z,obj.position.y); // Cannon and three have the XY coordinates flipped
       this.world.addBody(boxBody);
+
       boxBody.isActuator = actuator;
+      if(actuator==true){
+        // When a body collides with another body, they both dispatch the "collide" event.
+        boxBody.addEventListener("collide",function(e){
+          console.log("Collided with body:",e.body);
+          console.log("Contact between bodies:",e.contact);
+        });
+      }
       this.threeCannon.push({"t":obj,"c":boxBody});
+
       break;
     case "sphere":
 
@@ -117,14 +151,14 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator) {
       boxBody.addShape(boxShape);
       boxBody.position.set(obj.position.x,obj.position.z,obj.position.y); // Cannon and three have the XY coordinates flipped
       this.world.addBody(boxBody);
+
       boxBody.isActuator = actuator;
-
       if(actuator==true){
-        this.springBodyA = boxBody;
-        this.springBodyB = this.threeCannon[0].c;
-        this.springBodyB.fixedRotation = true;
-
-
+        // When a body collides with another body, they both dispatch the "collide" event.
+        boxBody.addEventListener("collide",function(e){
+          console.log("Collided with body:",e.body);
+          console.log("Contact between bodies:",e.contact);
+        });
       }
       this.threeCannon.push({"t":obj,"c":boxBody});
 
@@ -162,8 +196,6 @@ PhysicsManager.prototype.setClosedArea = function(obj) {
   groundBody.quaternion.setFromAxisAngle(rot, -(Math.PI/2))
   groundBody.position.set(widthX/2,0,widthY/2);
   this.world.addBody(groundBody);
-
-  console.log(groundBody);
 
   //Front Wall
   var groundBody = new CANNON.Body({
@@ -205,8 +237,8 @@ PhysicsManager.prototype.springTest = function() {
     localAnchorA: new CANNON.Vec3(0,0,-0.4),
     localAnchorB: new CANNON.Vec3(0,0,0),
     restLength : 0,
-            stiffness : 50,
-            damping : 1,
+    stiffness : 50,
+    damping : 1,
   });
 
 };
