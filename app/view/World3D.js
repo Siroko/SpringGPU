@@ -145,10 +145,7 @@ World3D.prototype.onAssetsLoaded = function( e ) {
         var mesh = this.worldManager.meshes[i];
         this.scene.add( mesh );
 
-
-
         this.phManager.add3DObject(mesh,"sphere",false);
-
     }
 
 };

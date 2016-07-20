@@ -60,9 +60,11 @@ PhysicsManager.prototype.onClick = function( e ){
 
     var v = new CANNON.Vec3(vx, vz, vy);
     v.normalize();
-    v = v.scale(this.f);
-    console.log(v);
 
+
+    this.threeCannon[i].c.applyLocalImpulse(v, this.threeCannon[i].c.position);
+    v = v.scale(this.f);
+    //console.log(v);
     this.threeCannon[i].c.applyImpulse(v, this.threeCannon[i].c.position);
 
   }
@@ -126,7 +128,7 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator) {
       var widthZ = bbox.max.z - bbox.min.z;
 
       var boxShape = new CANNON.Box(new CANNON.Vec3(widthX/2,widthZ/2,widthY/2));  // Cannon and three have the XY coordinates flipped
-      var boxBody = new CANNON.Body({ mass: mass });
+      var boxBody = new CANNON.Body({ mass: mass, angularDamping:0.3});
       boxBody.addShape(boxShape);
       boxBody.position.set(obj.position.x,obj.position.z,obj.position.y); // Cannon and three have the XY coordinates flipped
       this.world.addBody(boxBody);
@@ -147,9 +149,10 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator) {
       var bbox = new THREE.Box3().setFromObject(obj);
       var radius = bbox.max.x - bbox.min.x; //We assume that the shape is uniform
       var boxShape = new CANNON.Sphere(radius/2);
-      var boxBody = new CANNON.Body({ mass: mass });
+      var boxBody = new CANNON.Body({ mass: mass, angularDamping:0.5 });
       boxBody.addShape(boxShape);
       boxBody.position.set(obj.position.x,obj.position.z,obj.position.y); // Cannon and three have the XY coordinates flipped
+
       this.world.addBody(boxBody);
 
       boxBody.isActuator = actuator;

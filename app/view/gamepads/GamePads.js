@@ -54,7 +54,13 @@ GamePads.prototype.update = function( t ){
             this.intersectPoint.copy( this.handlers[ 0 ].position );
             this.intersectPoint2.copy( this.handlers[ 1 ].position );
 
-            //if ("vibrate" in gamepad) {
+            if ("vibrate" in gamepad) {
+              for (var j = 0; j < gamepad.buttons.length; ++j) {
+                     if (gamepad.buttons[j].pressed) {
+                       console.log(i);
+                     }
+                   }
+
             //    for (var j = 0; j < gamepad.buttons.length; ++j) {
             //        if (gamepad.buttons[j].pressed) {
             //            //gamepad.vibrate(1000);
@@ -67,7 +73,7 @@ GamePads.prototype.update = function( t ){
             //            break;
             //        }
             //    }
-            //}
+            }
         }
     }
 };
