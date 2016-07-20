@@ -118,9 +118,13 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator) {
       boxBody.position.set(obj.position.x,obj.position.z,obj.position.y); // Cannon and three have the XY coordinates flipped
       this.world.addBody(boxBody);
       boxBody.isActuator = actuator;
+
       if(actuator==true){
         this.springBodyA = boxBody;
         this.springBodyB = this.threeCannon[0].c;
+        this.springBodyB.fixedRotation = true;
+
+
       }
       this.threeCannon.push({"t":obj,"c":boxBody});
 
@@ -198,11 +202,11 @@ PhysicsManager.prototype.setClosedArea = function(obj) {
 PhysicsManager.prototype.springTest = function() {
 
   this.spring = new CANNON.Spring(this.springBodyA,this.springBodyB,{
-    localAnchorA: new CANNON.Vec3(0,0,-1),
+    localAnchorA: new CANNON.Vec3(0,0,-0.4),
     localAnchorB: new CANNON.Vec3(0,0,0),
     restLength : 0,
-    stiffness : 50,
-    damping : 1,
+            stiffness : 50,
+            damping : 1,
   });
 
 };

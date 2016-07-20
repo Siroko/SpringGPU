@@ -14,6 +14,9 @@ var MousePad = function( scene, camera ) {
     this.intersectPoint = new THREE.Vector3();
     this.intersectPoint2 = new THREE.Vector3();
 
+    this.h1 = new THREE.Mesh( new THREE.BoxBufferGeometry( 0.1, 0.1, 0.1, 1, 1, 1), new THREE.MeshNormalMaterial() );
+    scene.add(this.h1);
+
     this.addEvents();
 };
 
@@ -47,7 +50,10 @@ MousePad.prototype.update = function( t, objs ) {
     if (intersects.length > 0) {
         this.intersectPoint.copy(intersects[0].point);
         this.intersectPoint2.copy(intersects[0].point);
+        this.h1.position.copy(intersects[0].point);
     }
+
+
 };
 
 module.exports = MousePad;

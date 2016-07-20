@@ -55,13 +55,13 @@ var World3D = function( container ) {
 
     //Adding Three Objects to Physic Manager
     //Adding object
-    var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+    var geometry = new THREE.BoxGeometry( 0.3, 0.3, 0.3 );
     var material = new THREE.MeshNormalMaterial(  );
     this.cubetest = new THREE.Mesh( geometry, material );
     this.cubetest.position.y = 5;
     this.phManager.add3DObject(this.cubetest,"cube",false);
     this.scene.add( this.cubetest );
-    
+
 
     geometry = new THREE.BoxGeometry( 1, 1, 1 );
     material = new THREE.MeshNormalMaterial(  );
@@ -126,8 +126,8 @@ World3D.prototype.onInitializeManager = function( n, o ) {
 
     this.pointer = new THREE.Mesh( new THREE.SphereBufferGeometry( 0.1, 10, 10), new THREE.MeshNormalMaterial() );
 
-    this.scene.add( this.pointer );
-    this.phManager.add3DObject(this.pointer, "sphere", true);
+    //this.scene.add( this.pointer );
+    this.phManager.add3DObject(this.gamePads.h1, "sphere", true);
     this.phManager.springTest();
 
 
