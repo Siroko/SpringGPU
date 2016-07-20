@@ -3,11 +3,12 @@
  */
 
 var THREE = require('three');
-var GamePads = function( scene, camera, effect ){
+var GamePads = function( scene, camera, effect , physics){
 
     this.scene = scene;
     this.camera = camera;
     this.effect = effect;
+    this.phManager = physics;
 
     this.intersectPoint = new THREE.Vector3();
     this.intersectPoint2 = new THREE.Vector3();
@@ -22,6 +23,7 @@ var GamePads = function( scene, camera, effect ){
     this.scene.add( this.h1 );
     this.scene.add( this.h2 );
 
+    this.triggerlocked = false;
 };
 
 GamePads.prototype.update = function( t ){
@@ -54,13 +56,24 @@ GamePads.prototype.update = function( t ){
             this.intersectPoint.copy( this.handlers[ 0 ].position );
             this.intersectPoint2.copy( this.handlers[ 1 ].position );
 
-            if ("vibrate" in gamepad) {
-              for (var j = 0; j < gamepad.buttons.length; ++j) {
-                     if (gamepad.buttons[j].pressed) {
-                       console.log(i);
-                     }
-                   }
 
+            //Trigger
+            if (gamepad.buttons[1].pressed) {
+              if(this.triggerlocked==false){
+                this.triggerlocked=true;
+                console.log("Trigger locked");
+                this.phManager.onClick();
+              }
+            }
+            else{
+              if(this.triggerlocked==true){
+                this.triggerlocked=false;
+                console.log("Trigger unlocked");
+              }
+
+            }
+
+            //if ("vibrate" in gamepad) {
             //    for (var j = 0; j < gamepad.buttons.length; ++j) {
             //        if (gamepad.buttons[j].pressed) {
             //            //gamepad.vibrate(1000);
@@ -73,7 +86,7 @@ GamePads.prototype.update = function( t ){
             //            break;
             //        }
             //    }
-            }
+            //}
         }
     }
 };

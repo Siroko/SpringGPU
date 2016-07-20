@@ -120,16 +120,15 @@ World3D.prototype.onInitializeManager = function( n, o ) {
 
     } else {
 
-        this.gamePads = new GamePads( this.scene, this.camera, this.effect );
+        this.gamePads = new GamePads( this.scene, this.camera, this.effect,  this.phManager );
 
     }
 
-    this.pointer = new THREE.Mesh( new THREE.SphereBufferGeometry( 0.1, 10, 10), new THREE.MeshNormalMaterial() );
-
+    //this.pointer = new THREE.Mesh( new THREE.SphereBufferGeometry( 0.1, 10, 10), new THREE.MeshNormalMaterial() );
     //this.scene.add( this.pointer );
+
     this.phManager.add3DObject(this.gamePads.h1, "cube", true);
     //add3DObjectthis.phManager.springTest();
-
 
     this.setup();
 };
@@ -164,7 +163,7 @@ World3D.prototype.render = function( timestamp ) {
     this.planeCalc.lookAt( this.dummyCamera.position );
     this.gamePads.update( timestamp,[ this.planeCalc ] );
 
-    this.pointer.position.copy( this.gamePads.intersectPoint );
+    //this.pointer.position.copy( this.gamePads.intersectPoint );
 
 
     // Update the physics

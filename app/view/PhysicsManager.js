@@ -97,7 +97,14 @@ PhysicsManager.prototype.update = function(timestamp) {
       //console.log(this.threeCannon[i].c.velocity);
 
       this.threeCannon[i].c.position.x = this.threeCannon[i].t.position.x;
+      this.threeCannon[i].c.position.y = this.threeCannon[i].t.position.z;
       this.threeCannon[i].c.position.z = this.threeCannon[i].t.position.y;
+
+
+      this.threeCannon[i].c.quaternion.x = this.threeCannon[i].t.quaternion.x;
+      this.threeCannon[i].c.quaternion.y = this.threeCannon[i].t.quaternion.z; //XY coordinates flipped
+      this.threeCannon[i].c.quaternion.z = this.threeCannon[i].t.quaternion.y; //XY coordinates flipped
+      this.threeCannon[i].c.quaternion.w = this.threeCannon[i].t.quaternion.w;
     }
   }
 
@@ -149,7 +156,7 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator) {
       var bbox = new THREE.Box3().setFromObject(obj);
       var radius = bbox.max.x - bbox.min.x; //We assume that the shape is uniform
       var boxShape = new CANNON.Sphere(radius/2);
-      var boxBody = new CANNON.Body({ mass: mass, angularDamping:0.5 });
+      var boxBody = new CANNON.Body({ mass: mass, angularDamping:0.3 });
       boxBody.addShape(boxShape);
       boxBody.position.set(obj.position.x,obj.position.z,obj.position.y); // Cannon and three have the XY coordinates flipped
 
