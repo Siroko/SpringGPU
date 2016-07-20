@@ -5,23 +5,26 @@
 
 var THREE = require('three');
 
-var PhysicsManager = function(dcamera) {
+var PhysicsManager = function(dcamera,camera) {
   this.world = new CANNON.World();
   //this.world.gravity.set(0, 0, -9.82); // m/s²
   this.world.gravity.set(0, 0, 0); // m/s²
 
   this.dcamera = dcamera;
+  this.camera = camera;
+  this.mode = -1;
+
 
   this.threeCannon = [];
 
   // Create a sphere for the dummyCamera
-  var radius = Math.abs(dcamera.position.y);  // m
-  this.sphereBody = new CANNON.Body({
-     mass: 5, // kg
+  var radius = Math.abs(0.2);  // m
+  this.camBody = new CANNON.Body({
+     mass: 0, // kg
      position: new CANNON.Vec3(dcamera.position.x, dcamera.position.z, dcamera.position.y),
      shape: new CANNON.Sphere(radius)
   });
-  this.world.addBody(this.sphereBody);
+  this.world.addBody(this.camBody);
 
 
   // Create a planes
@@ -53,9 +56,16 @@ PhysicsManager.prototype.onClick = function( e ){
 
   for(var i=0; i<this.threeCannon.length; i++){
 
-    var vx = this.dcamera.position.x - this.threeCannon[i].t.position.x;
-    var vy = this.dcamera.position.y - this.threeCannon[i].t.position.y;
-    var vz = this.dcamera.position.z - this.threeCannon[i].t.position.z;
+    if(this.mode == 3){
+      var vx = this.camera.position.x - this.threeCannon[i].t.position.x;
+      var vy = this.camera.position.y - this.threeCannon[i].t.position.y;
+      var vz = this.camera.position.z - this.threeCannon[i].t.position.z;
+    }
+    else{
+     var vx = this.dcamera.position.x - this.threeCannon[i].t.position.x;
+     var vy = this.dcamera.position.y - this.threeCannon[i].t.position.y;
+     var vz = this.dcamera.position.z - this.threeCannon[i].t.position.z;
+    }
 
 
     var v = new CANNON.Vec3(vx, vz, vy);
@@ -81,6 +91,17 @@ PhysicsManager.prototype.update = function(timestamp) {
   }
 
   //Apply physics to three meshes
+  if(this.mode == 3){
+    this.camBody.position.x = this.camera.position.x;
+    this.camBody.position.y = this.camera.position.z;
+    this.camBody.position.z = this.camera.position.y;
+  }
+  else{
+    this.camBody.position.x = this.dcamera.position.x;
+    this.camBody.position.y = this.dcamera.position.z;
+    this.camBody.position.z = this.dcamera.position.y;
+
+  }
 
   for(i=0; i < this.threeCannon.length; i++){
     if(!this.threeCannon[i].c.isActuator){
@@ -252,5 +273,9 @@ PhysicsManager.prototype.springTest = function() {
   });
 
 };
+
+PhysicsManager.prototype.setMode = function(m) {
+  this.mode = m;
+}
 
 module.exports = PhysicsManager;

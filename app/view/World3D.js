@@ -26,7 +26,7 @@ var World3D = function( container ) {
     this.renderer       = new THREE.WebGLRenderer( { antialias: true } );
 
     //// Cannon.js physics manager
-    this.phManager      = new PhysicsManager(this.dummyCamera);
+    this.phManager      = new PhysicsManager(this.dummyCamera,this.camera);
 
     //// Apply VR headset positional data to camera.
     this.controls       = new VRControls( this.camera );
@@ -95,9 +95,11 @@ World3D.prototype.setup = function() {
 };
 
 World3D.prototype.onModeChange = function( n, o ) {
+    this.phManager.setMode(n);
     switch(n){
         case 3 :
             console.log('Passing to VR mode');
+
             break;
     }
 };
