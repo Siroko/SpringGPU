@@ -38,7 +38,7 @@ var PhysicsManager = function(dcamera) {
   this.lastTime = 0;
 
   this.damping = 0.5;
-  this.f = 50;
+  this.f = 10;
 
   this.spring;
   this.springBodyA;
@@ -237,7 +237,7 @@ PhysicsManager.prototype.setClosedArea = function(obj) {
   groundBody.addShape(groundShape);
   var rot = new CANNON.Vec3(0,1,0)
   groundBody.quaternion.setFromAxisAngle(rot,(Math.PI))
-  groundBody.position.set(0,0,widthY/2);
+  groundBody.position.set(0,0,widthY);
   this.world.addBody(groundBody);
 };
 

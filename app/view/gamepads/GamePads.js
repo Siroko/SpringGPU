@@ -23,7 +23,10 @@ var GamePads = function( scene, camera, effect , physics){
     this.scene.add( this.h1 );
     this.scene.add( this.h2 );
 
-    this.triggerlocked = false;
+    this.triggerlocked = [];
+    this.triggerlocked[0] = false;
+    this.triggerlocked[1] = false;
+
 };
 
 GamePads.prototype.update = function( t ){
@@ -59,15 +62,15 @@ GamePads.prototype.update = function( t ){
 
             //Trigger
             if (gamepad.buttons[1].pressed) {
-              if(this.triggerlocked==false){
-                this.triggerlocked=true;
+              if(this.triggerlocked[i]==false){
+                this.triggerlocked[i]=true;
                 console.log("Trigger locked");
                 this.phManager.onClick();
               }
             }
             else{
-              if(this.triggerlocked==true){
-                this.triggerlocked=false;
+              if(this.triggerlocked[i]==true){
+                this.triggerlocked[i]=false;
                 console.log("Trigger unlocked");
               }
 
