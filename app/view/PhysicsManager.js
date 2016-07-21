@@ -43,9 +43,9 @@ var PhysicsManager = function(dcamera,camera) {
   this.damping = 0.5;
   this.f = 10;
 
-  this.spring;
-  this.springBodyA;
-  this.springBodyB;
+
+  this.springElements = [];
+
 
 
   window.addEventListener('click', this.onClick.bind( this )  );
@@ -144,7 +144,8 @@ PhysicsManager.prototype.update = function(timestamp) {
  * @param {string} author - bounding geometry for physics calculations.
  * @param {boolean} actuator - The object is used for interacting so the mass is 0
  */
-PhysicsManager.prototype.add3DObject = function(obj,type,actuator) {
+PhysicsManager.prototype.add3DObject = function(obj,type,actuator,options) {
+
   if(actuator==true){var mass = 0;}else{var mass = 5;}
   switch (type) {
     case "cube":
@@ -154,9 +155,14 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator) {
       var widthX = bbox.max.x - bbox.min.x;
       var widthY = bbox.max.y - bbox.min.y;
       var widthZ = bbox.max.z - bbox.min.z;
-
       var boxShape = new CANNON.Box(new CANNON.Vec3(widthX/2,widthZ/2,widthY/2));  // Cannon and three have the XY coordinates flipped
-      var boxBody = new CANNON.Body({ mass: mass, angularDamping:0.3});
+      var boxBody;
+      if(options){
+        boxBody = new CANNON.Body(options);
+      }
+      else{
+        boxBody = new CANNON.Body({ mass: mass, angularDamping:0.3 });
+      }
       boxBody.addShape(boxShape);
       boxBody.position.set(obj.position.x,obj.position.z,obj.position.y); // Cannon and three have the XY coordinates flipped
       this.world.addBody(boxBody);
@@ -177,12 +183,16 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator) {
       var bbox = new THREE.Box3().setFromObject(obj);
       var radius = bbox.max.x - bbox.min.x; //We assume that the shape is uniform
       var boxShape = new CANNON.Sphere(radius/2);
-      var boxBody = new CANNON.Body({ mass: mass, angularDamping:0.3 });
+      var boxBody;
+      if(options){
+        boxBody = new CANNON.Body(options);
+      }
+      else{
+        boxBody = new CANNON.Body({ mass: mass, angularDamping:0.3 });
+      }
       boxBody.addShape(boxShape);
       boxBody.position.set(obj.position.x,obj.position.z,obj.position.y); // Cannon and three have the XY coordinates flipped
-
       this.world.addBody(boxBody);
-
       boxBody.isActuator = actuator;
       if(actuator==true){
         // When a body collides with another body, they both dispatch the "collide" event.
@@ -262,9 +272,11 @@ PhysicsManager.prototype.setClosedArea = function(obj) {
   this.world.addBody(groundBody);
 };
 
-PhysicsManager.prototype.springTest = function() {
+PhysicsManager.prototype.addToSpring = function(bodyB) {
 
-  this.spring = new CANNON.Spring(this.springBodyA,this.springBodyB,{
+  var bodyA;
+
+  var spring = new CANNON.Spring(bodyA,bodyB,{
     localAnchorA: new CANNON.Vec3(0,0,-0.4),
     localAnchorB: new CANNON.Vec3(0,0,0),
     restLength : 0,

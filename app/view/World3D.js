@@ -58,8 +58,8 @@ var World3D = function( container ) {
     var geometry = new THREE.BoxGeometry( 0.3, 0.3, 0.3 );
     var material = new THREE.MeshNormalMaterial(  );
     this.cubetest = new THREE.Mesh( geometry, material );
-    this.cubetest.position.y = 5;
-    this.phManager.add3DObject(this.cubetest,"cube",false);
+    this.cubetest.position.y = 2;
+    this.phManager.add3DObject(this.cubetest,"cube",false,{ mass: 0 });
     this.scene.add( this.cubetest );
 
 
