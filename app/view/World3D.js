@@ -70,6 +70,8 @@ var World3D = function( container ) {
     this.phManager.add3DObject(cube,"cube",false);
     this.scene.add( cube );
 
+    //this.phManager.addToSpring();
+
     //Adding ground
     /*
     geometry = new THREE.BoxGeometry(20,20);
@@ -130,7 +132,9 @@ World3D.prototype.onInitializeManager = function( n, o ) {
     //this.scene.add( this.pointer );
 
     this.phManager.add3DObject(this.gamePads.h1, "cube", true);
-    //add3DObjectthis.phManager.springTest();
+    if(this.gamePads.h2 !== undefined){
+      this.phManager.add3DObject(this.gamePads.h2, "cube", true);
+    }
 
     this.setup();
 };

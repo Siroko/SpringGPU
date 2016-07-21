@@ -4,10 +4,14 @@
  */
 
 var THREE = require('three');
+var that;
 
 var PhysicsManager = function(dcamera,camera) {
+
+  that = this;
+
   this.world = new CANNON.World();
-  //this.world.gravity.set(0, 0, -9.82); // m/s²
+  //this.world.gravity.set(0, 0, -9.82);      // m/s²
   this.world.gravity.set(0, 0, 0); // m/s²
 
   this.dcamera = dcamera;
@@ -43,7 +47,12 @@ var PhysicsManager = function(dcamera,camera) {
   this.damping = 0.5;
   this.f = 10;
 
+  this.spring;
+  this.bodyA;
+  this.bodyB;
 
+  this.bodyText = [];
+  this.setBodyText();
   this.springElements = [];
 
 
@@ -71,12 +80,12 @@ PhysicsManager.prototype.onClick = function( e ){
     var v = new CANNON.Vec3(vx, vz, vy);
     v.normalize();
 
-
-    this.threeCannon[i].c.applyLocalImpulse(v, this.threeCannon[i].c.position);
-    v = v.scale(this.f);
-    //console.log(v);
-    this.threeCannon[i].c.applyImpulse(v, this.threeCannon[i].c.position);
-
+    if(!this.threeCannon[i].c.isSpringing){
+      this.threeCannon[i].c.applyLocalImpulse(v, this.threeCannon[i].c.position);
+      v = v.scale(this.f);
+      //console.log(v);
+      this.threeCannon[i].c.applyImpulse(v, this.threeCannon[i].c.position);
+    }
   }
 
 
@@ -129,8 +138,10 @@ PhysicsManager.prototype.update = function(timestamp) {
     }
   }
 
-  if(this.spring !== undefined){
-    this.spring.applyForce();
+  if(this.springElements.length >0){
+    for(var i=0; i<this.springElements.length; i++){
+      this.springElements[i].applyForce();
+    }
   }
 
 
@@ -159,9 +170,11 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator,options) {
       var boxBody;
       if(options){
         boxBody = new CANNON.Body(options);
+        this.bodyA = boxBody;
       }
       else{
         boxBody = new CANNON.Body({ mass: mass, angularDamping:0.3 });
+        this.bodyB = boxBody;
       }
       boxBody.addShape(boxShape);
       boxBody.position.set(obj.position.x,obj.position.z,obj.position.y); // Cannon and three have the XY coordinates flipped
@@ -172,7 +185,10 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator,options) {
         // When a body collides with another body, they both dispatch the "collide" event.
         boxBody.addEventListener("collide",function(e){
           console.log("Collided with body:",e.body);
-          console.log("Contact between bodies:",e.contact);
+          //console.log("Contact between bodies:",e.contact);
+          console.log(that.bodyText[0]);
+          that.addToSpring(that.bodyText[that.springElements.length],e.body);
+          //that.addToSpring(that.bodyText[that.springElements.length],e.body);
         });
       }
       this.threeCannon.push({"t":obj,"c":boxBody});
@@ -186,6 +202,7 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator,options) {
       var boxBody;
       if(options){
         boxBody = new CANNON.Body(options);
+
       }
       else{
         boxBody = new CANNON.Body({ mass: mass, angularDamping:0.3 });
@@ -198,7 +215,11 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator,options) {
         // When a body collides with another body, they both dispatch the "collide" event.
         boxBody.addEventListener("collide",function(e){
           console.log("Collided with body:",e.body);
-          console.log("Contact between bodies:",e.contact);
+          //console.log("Contact between bodies:",e.contact);
+
+
+          //this.addToSpring(this.bodyText[this.springElements.length],e.body));
+
         });
       }
       this.threeCannon.push({"t":obj,"c":boxBody});
@@ -213,7 +234,6 @@ PhysicsManager.prototype.setClosedArea = function(obj) {
   var widthY = bbox.max.y - bbox.min.y;
   var widthZ = bbox.max.z - bbox.min.z;
 
-  console.log(bbox);
 
   //4 walls and the roof (floor is already set up)
 
@@ -272,22 +292,42 @@ PhysicsManager.prototype.setClosedArea = function(obj) {
   this.world.addBody(groundBody);
 };
 
-PhysicsManager.prototype.addToSpring = function(bodyB) {
+PhysicsManager.prototype.addToSpring = function(a,b) {
 
-  var bodyA;
+  console.log("addto");
+  b.isSpringing = true;
 
-  var spring = new CANNON.Spring(bodyA,bodyB,{
+  var spring = new CANNON.Spring(a,b,{
     localAnchorA: new CANNON.Vec3(0,0,-0.4),
     localAnchorB: new CANNON.Vec3(0,0,0),
     restLength : 0,
     stiffness : 50,
-    damping : 1,
+    damping : 40,
   });
+
+  this.springElements.push(spring)
 
 };
 
 PhysicsManager.prototype.setMode = function(m) {
   this.mode = m;
+}
+PhysicsManager.prototype.setBodyText = function() {
+  //from 7 to 1 inclusive
+  for(var iz = 7; iz >= 1; iz--){
+    //From -4 to 4 inclusive
+    for(var ix = -4 ; ix <= 4; ix++  ){
+        var radius = 0.1;  // m
+      var body  = new CANNON.Body({
+         mass: 0, // kg
+         position: new CANNON.Vec3(ix, -10, iz),
+         shape: new CANNON.Sphere(radius)
+      });
+      //this.world.addBody(body);
+      this.bodyText.push(body);
+    }
+  }
+  this.bodyText
 }
 
 module.exports = PhysicsManager;
