@@ -11,9 +11,11 @@ var MousePad = require('./gamepads/MousePad');
 
 var PhysicsManager = require('./PhysicsManager');
 var WorldManager = require('./scene/WorldManager');
-
+var that;
 
 var World3D = function( container ) {
+
+    that=this;
 
     this.container      = container;
 
@@ -70,17 +72,21 @@ var World3D = function( container ) {
     this.phManager.add3DObject(cube,"cube",false,false);
     this.scene.add( cube );
 
-    //this.phManager.addToSpring();
+    //Letters integration
+    this.loader = new THREE.JSONLoader();
+    this.letters = {};
+    this.activeLetter;
 
-    //Adding ground
-    /*
-    geometry = new THREE.BoxGeometry(20,20);
-    material = new THREE.MeshNormalMaterial(  );
-    var ground = new THREE.Mesh( geometry, material );
-    ground.rotation.x = Math.PI/2;
-    this.scene.add( ground );
-    */
+    this.lMaterial = new THREE.RawShaderMaterial({
+      uniforms: {
+        normalMap: { type: 't', value: null },
+        textureMap: { type: 't', value: null }
+      },
+      vertexShader: require('../../letters/shaders/vs-buffer-geometry.glsl'),
+      fragmentShader: require('../../letters/shaders/fs-buffer-geometry.glsl')
+    });
 
+    this.abc = "ABCDEFGHIJKLMNOPQRSTUVWXZ";
 
 };
 
@@ -150,8 +156,47 @@ World3D.prototype.onAssetsLoaded = function( e ) {
         var mesh = this.worldManager.meshes[i];
         this.scene.add( mesh );
 
-        this.phManager.add3DObject(mesh,"sphere",false,true);
+        this.phManager.add3DObject(mesh,"sphere",false,false);
     }
+
+
+    var loader = new THREE.JSONLoader();
+
+
+    for(var i=0; i < this.abc.length; i++ ){
+      loader.load('/assets/letters/models/' + this.abc[i] + '.json', function(geometry, materials) {
+        geometry.computeFaceNormals();
+        geometry.computeVertexNormals();
+
+
+
+        var mesh = new THREE.Mesh(geometry, that.lMaterial);
+        mesh.scale.set(0.75, 0.75, 0.75);
+        mesh.position.set(0, 1, 2);
+        that.setMatcap("silver");
+
+        that.scene.add(mesh);
+        that.phManager.add3DObject(mesh,"cube",false,true);
+      });
+
+    }
+
+
+
+    /*
+    var lettersMeshes = 'THESPIGAROLDUCKNWVY'.split("").reduce(function(letter, out) {
+      console.log(arguments)
+      loader.load('/assets/letters/models/' + letter + '.json', function(geometry, materials) {
+        geometry.computeFaceNormals();
+        geometry.computeVertexNormals();
+
+        var mesh = new THREE.Mesh(geometry, that.lMaterial);
+        mesh.scale.set(1.5, 1.5, 1.5)
+        out[letter] = mesh
+        return out
+      });
+    }, {})
+    */
 
 };
 
@@ -191,7 +236,67 @@ World3D.prototype.onResize = function( w, h ) {
     this.effect.setSize( w, h );
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
+};
 
+/**
+ * @function loadLetter
+ * @param {string} letter
+ */
+World3D.prototype.loadLetter = function(letter) {
+  window.location.hash = '#' + letter;
+
+  if(this.letters[letter]) {
+    if(this.activeLetter !== void 0) {
+      this.scene.remove(this.letters[this.activeLetter]);
+    }
+
+    scene.add(this.letters[letter]);
+    this.activeLetter = letter;
+  }
+  else {
+    this.loader.load('/assets/letters/models/' + letter + '.json', function(geometry, materials) {
+      if(that.activeLetter !== void 0) {
+        that.scene.remove(that.letters[that.activeLetter]);
+      }
+
+      // needed because of the blender to .json exporter
+      // other solutions are:
+      // - using .obj
+      // - exporting to .obj and converting to .json through the .py script
+      geometry.computeFaceNormals();
+      geometry.computeVertexNormals();
+
+      var mesh = new THREE.Mesh(geometry, that.lMaterial);
+      mesh.scale.set(1.5, 1.5, 1.5)
+      that.scene.add(mesh);
+
+      that.letters[letter] = mesh;
+      that.activeLetter = letter;
+    });
+  }
+};
+
+/**
+ * @function setMatcap
+ * @param {string} matcap
+ */
+World3D.prototype.setMatcap =  function(matcap) {
+  var ltexture;
+  function set() {
+    that.lMaterial.uniforms.normalMap.value = ltexture;
+    that.lMaterial.uniforms.textureMap.value = ltexture;
+    that.lMaterial.needsUpdate = true;
+  }
+
+  if(ltexture) {
+    set();
+  }
+  else {
+    new THREE.TextureLoader().load('/assets/letters/textures/' + matcap + '.jpg', function(texture) {
+      ltexture = texture;
+      set();
+    });
+  }
 };
 
 module.exports = World3D;

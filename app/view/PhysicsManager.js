@@ -56,8 +56,8 @@ var PhysicsManager = function(dcamera,camera) {
   this.springElements = [];
 
 
-
   window.addEventListener('click', this.onClick.bind( this )  );
+  window.addEventListener("keydown",  this.onCursor, true);
 };
 
 PhysicsManager.prototype.onClick = function( e ){
@@ -87,8 +87,16 @@ PhysicsManager.prototype.onClick = function( e ){
       this.threeCannon[i].c.applyImpulse(v, this.threeCannon[i].c.position);
     }
   }
+};
 
+PhysicsManager.prototype.onCursor= function( e ){
 
+  console.log("key");
+
+  for(var i=0; i < that.springElements.length; i++){
+      that.springElements[i].bodyB.isSpringing = false;
+  }
+  that.springElements = [];
 };
 
 PhysicsManager.prototype.update = function(timestamp) {
@@ -296,7 +304,7 @@ PhysicsManager.prototype.setClosedArea = function(obj) {
 
 PhysicsManager.prototype.addToSpring = function(a,b) {
 
-  console.log("addto");
+
   b.isSpringing = true;
 
   var spring = new CANNON.Spring(a,b,{
@@ -306,9 +314,8 @@ PhysicsManager.prototype.addToSpring = function(a,b) {
     stiffness : 50,
     damping : 40,
   });
-
+  console.log(spring);
   this.springElements.push(spring)
-
 };
 
 PhysicsManager.prototype.setMode = function(m) {

@@ -18,6 +18,8 @@ var WorldManager = function(){
     this.room = null;
     this.meshes = [];
 
+
+
     this._init();
 
 };
@@ -108,13 +110,16 @@ WorldManager.prototype._createGeometries = function() {
         mesh.position.copy( positions[ i ] );
 
         var s = scales[ i ];
-        mesh.scale.set( s, s, s );
+        mesh.scale.set( s*0.5, s*0.5, s*0.5 );
         this.meshes.push( mesh );
+
+
     }
 
     this.dispatchEvent( { type : 'assetsLoaded' } );
 
 };
+
 
 WorldManager.prototype.update = function( t ) {
 

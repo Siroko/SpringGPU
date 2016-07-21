@@ -23,6 +23,9 @@ var GamePads = function( scene, camera, effect , physics){
     this.scene.add( this.h1 );
     this.scene.add( this.h2 );
 
+    this.cursorlocked = [];
+    this.cursorlocked[0] = false;
+    this.cursorlocked[1] = false;
     this.triggerlocked = [];
     this.triggerlocked[0] = false;
     this.triggerlocked[1] = false;
@@ -60,6 +63,19 @@ GamePads.prototype.update = function( t ){
             this.intersectPoint2.copy( this.handlers[ 1 ].position );
 
 
+            if (gamepad.buttons[0].pressed) {
+              if(this.cursorlocked[i]==false){
+                this.cursorlocked[i]=true;
+                console.log("cursor locked");
+                this.phManager.onCursor();
+              }
+            }
+            else{
+              if(this.cursorlocked[i]==true){
+                this.cursorlocked[i]=false;
+                console.log("cursorunlocked");
+              }
+            }
             //Trigger
             if (gamepad.buttons[1].pressed) {
               if(this.triggerlocked[i]==false){
@@ -73,8 +89,8 @@ GamePads.prototype.update = function( t ){
                 this.triggerlocked[i]=false;
                 console.log("Trigger unlocked");
               }
-
             }
+
 
             //if ("vibrate" in gamepad) {
             //    for (var j = 0; j < gamepad.buttons.length; ++j) {
