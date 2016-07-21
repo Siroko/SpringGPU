@@ -154,8 +154,10 @@ PhysicsManager.prototype.update = function(timestamp) {
  * @param {Object} obj - Three.js Object
  * @param {string} author - bounding geometry for physics calculations.
  * @param {boolean} actuator - The object is used for interacting so the mass is 0
+ * @param {Objects} options - options object with the properties of the CANNON material
+ * @param {boolean} springable - The object has an Spring interaction
  */
-PhysicsManager.prototype.add3DObject = function(obj,type,actuator,options) {
+PhysicsManager.prototype.add3DObject = function(obj,type,actuator,springable,options) {
 
   if(actuator==true){var mass = 0;}else{var mass = 5;}
   switch (type) {
@@ -179,16 +181,15 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator,options) {
       boxBody.addShape(boxShape);
       boxBody.position.set(obj.position.x,obj.position.z,obj.position.y); // Cannon and three have the XY coordinates flipped
       this.world.addBody(boxBody);
-
+      boxBody.springable = springable;
       boxBody.isActuator = actuator;
       if(actuator==true){
         // When a body collides with another body, they both dispatch the "collide" event.
         boxBody.addEventListener("collide",function(e){
-          console.log("Collided with body:",e.body);
-          //console.log("Contact between bodies:",e.contact);
-          console.log(that.bodyText[0]);
-          that.addToSpring(that.bodyText[that.springElements.length],e.body);
-          //that.addToSpring(that.bodyText[that.springElements.length],e.body);
+          //console.log("Collided with body:",e.body);
+          if(e.body.springable){
+            that.addToSpring(that.bodyText[that.springElements.length],e.body);
+          }
         });
       }
       this.threeCannon.push({"t":obj,"c":boxBody});
@@ -210,6 +211,7 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator,options) {
       boxBody.addShape(boxShape);
       boxBody.position.set(obj.position.x,obj.position.z,obj.position.y); // Cannon and three have the XY coordinates flipped
       this.world.addBody(boxBody);
+      boxBody.springable = springable;
       boxBody.isActuator = actuator;
       if(actuator==true){
         // When a body collides with another body, they both dispatch the "collide" event.

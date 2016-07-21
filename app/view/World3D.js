@@ -59,7 +59,7 @@ var World3D = function( container ) {
     var material = new THREE.MeshNormalMaterial(  );
     this.cubetest = new THREE.Mesh( geometry, material );
     this.cubetest.position.y = 2;
-    this.phManager.add3DObject(this.cubetest,"cube",false,{ mass: 0 });
+    this.phManager.add3DObject(this.cubetest,"cube",false,false);
     this.scene.add( this.cubetest );
 
 
@@ -67,7 +67,7 @@ var World3D = function( container ) {
     material = new THREE.MeshNormalMaterial(  );
     var cube = new THREE.Mesh( geometry, material );
     cube.position.y = 10;
-    this.phManager.add3DObject(cube,"cube",false);
+    this.phManager.add3DObject(cube,"cube",false,false);
     this.scene.add( cube );
 
     //this.phManager.addToSpring();
@@ -131,9 +131,9 @@ World3D.prototype.onInitializeManager = function( n, o ) {
     //this.pointer = new THREE.Mesh( new THREE.SphereBufferGeometry( 0.1, 10, 10), new THREE.MeshNormalMaterial() );
     //this.scene.add( this.pointer );
 
-    this.phManager.add3DObject(this.gamePads.h1, "cube", true);
+    this.phManager.add3DObject(this.gamePads.h1, "cube", true,false);
     if(this.gamePads.h2 !== undefined){
-      this.phManager.add3DObject(this.gamePads.h2, "cube", true);
+      this.phManager.add3DObject(this.gamePads.h2, "cube", true,false);
     }
 
     this.setup();
@@ -150,7 +150,7 @@ World3D.prototype.onAssetsLoaded = function( e ) {
         var mesh = this.worldManager.meshes[i];
         this.scene.add( mesh );
 
-        this.phManager.add3DObject(mesh,"sphere",false);
+        this.phManager.add3DObject(mesh,"sphere",false,true);
     }
 
 };
