@@ -63,6 +63,7 @@ var World3D = function( container ) {
     this.cubetest.position.y = 2;
     this.phManager.add3DObject(this.cubetest,"cube",false,false);
     this.scene.add( this.cubetest );
+    console.log( this.cubetest );
 
 
     geometry = new THREE.BoxGeometry( 1, 1, 1 );
@@ -86,7 +87,8 @@ var World3D = function( container ) {
       fragmentShader: require('../../letters/shaders/fs-buffer-geometry.glsl')
     });
 
-    this.abc = "ABCDEFGHIJKLMNOPQRSTUVWXZ";
+    //this.abc = "ABCDEFGHIJKLMNOPQRSTUVWXZ";
+    this.abc = "ACDEGHIKLNOPRSTUVW";
 
 };
 
