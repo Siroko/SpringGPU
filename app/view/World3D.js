@@ -108,6 +108,7 @@ var World3D = function( container ) {
       ["U",18],["U",29],["U",41],
       ["V",38],
       ["W",34],
+      ["Y",27]
     ]
 
 };
