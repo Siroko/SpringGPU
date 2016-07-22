@@ -75,7 +75,7 @@ WorldManager.prototype._loadAssets = function() {
 
 WorldManager.prototype._createGeometries = function() {
 
-    var quantity = 10;
+    var quantity = 200;
     var sizeBase = 0.2;
     var radius = [];
     var scales = [];
@@ -83,28 +83,34 @@ WorldManager.prototype._createGeometries = function() {
 
     for ( var i = 0; i < quantity; i++ ) {
 
-        var s = ( Math.random() * 5 ) + 1;
+        var s = ( Math.random() * 2 ) + 0.1;
         var p = new THREE.Vector3( ( Math.random() * 2 - 1) * 4.5, Math.random() * 4.5 + 4, ( Math.random() * 2 - 1 ) * 9 );
         positions.push( p );
         radius.push( sizeBase * s );
         scales.push( s );
     }
 
-    var geom = new THREE.IcosahedronGeometry( sizeBase, 1 );
-    var mat = new THREE.RawShaderMaterial( {
-        uniforms: {
-            normalMap             : { type : 't', value : THREE.ImageUtils.loadTexture('assets/textures/matcap.png' ) },
-            textureMap            : { type : 't', value : THREE.ImageUtils.loadTexture('assets/textures/matcap.png' ) },
-            uSpheresPositions     : { type : 'v3v', value : positions },
-            uSpheresRadius        : { type : 'fv', value : radius }
-        },
 
-        vertexShader                : vs_bufferGeometry,
-        fragmentShader              : fs_bufferGeometry
-    } );
+
+    var geom = new THREE.IcosahedronGeometry( sizeBase, 1 );
+
 
     var mesh;
     for ( var i = 0; i < positions.length; i++ ) {
+
+        var r = Math.round( Math.random() * 3 );
+        r += 1;
+        var mat = new THREE.RawShaderMaterial( {
+            uniforms: {
+                normalMap             : { type : 't', value : THREE.ImageUtils.loadTexture('assets/textures/matcap'+r+'.jpg' ) },
+                textureMap            : { type : 't', value : THREE.ImageUtils.loadTexture('assets/textures/matcap'+r+'.jpg' ) },
+                uSpheresPositions     : { type : 'v3v', value : positions },
+                uSpheresRadius        : { type : 'fv', value : radius }
+            },
+
+            vertexShader                : vs_bufferGeometry,
+            fragmentShader              : fs_bufferGeometry
+        } );
 
         mesh = new THREE.Mesh( geom, mat );
         mesh.position.copy( positions[ i ] );
