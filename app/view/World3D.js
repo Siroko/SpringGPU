@@ -61,17 +61,16 @@ var World3D = function( container ) {
     var material = new THREE.MeshNormalMaterial(  );
     this.cubetest = new THREE.Mesh( geometry, material );
     this.cubetest.position.y = 2;
-    this.phManager.add3DObject(this.cubetest,"cube",false,false);
-    this.scene.add( this.cubetest );
-    console.log( this.cubetest );
+    //this.phManager.add3DObject(this.cubetest,"cube",false,false);
+    //this.scene.add( this.cubetest );
 
 
     geometry = new THREE.BoxGeometry( 1, 1, 1 );
     material = new THREE.MeshNormalMaterial(  );
     var cube = new THREE.Mesh( geometry, material );
     cube.position.y = 10;
-    this.phManager.add3DObject(cube,"cube",false,false);
-    this.scene.add( cube );
+    //this.phManager.add3DObject(cube,"cube",false,false);
+    //this.scene.add( cube );
 
     //Letters integration
     this.loader = new THREE.JSONLoader();
@@ -88,7 +87,28 @@ var World3D = function( container ) {
     });
 
     //this.abc = "ABCDEFGHIJKLMNOPQRSTUVWXZ";
-    this.abc = "ACDEGHIKLNOPRSTUVW";
+    //this.abc = "ACDDEEEEEGHIKLNNNOOOOPRRSTTTUUUVW";
+    this.meshes = [];
+    this.abc = [
+      ["A",36],
+      ["C",19],
+      ["D",15],["D",37],
+      ["E",2],["E",8],["E",33],["E",38],["E",43],
+      ["G",12],
+      ["H",1],
+      ["I",6],
+      ["K",20],
+      ["L",17],
+      ["N",25],["N",32],["N",39],
+      ["O",13],["O",14],["O",24],["O",28],
+      ["P",5],
+      ["R",30],["R",42],
+      ["S",4],
+      ["T",0],["T",7],["T",40],
+      ["U",18],["U",29],["U",41],
+      ["V",38],
+      ["W",34],
+    ]
 
 };
 
@@ -163,27 +183,33 @@ World3D.prototype.onAssetsLoaded = function( e ) {
 
 
     var loader = new THREE.JSONLoader();
+    function setSpringIndexToMeshes(){
+      console.log("let's go");
+      for(var i=0; i < that.abc.length; i++ ){
+        that.meshes[i].springIndex = that.abc[i][1];
 
+      }
+    }
 
     for(var i=0; i < this.abc.length; i++ ){
-      loader.load('/assets/letters/models/' + this.abc[i] + '.json', function(geometry, materials) {
+
+
+      loader.load('/assets/letters/models/' + this.abc[i][0] + '.json', function(geometry, materials,index) {
         geometry.computeFaceNormals();
         geometry.computeVertexNormals();
-
 
 
         var mesh = new THREE.Mesh(geometry, that.lMaterial);
         mesh.scale.set(0.75, 0.75, 0.75);
         mesh.position.set(0, 1, 2);
+        mesh.springIndex = that.abc[index][1];;
         that.setMatcap("silver");
-
         that.scene.add(mesh);
         that.phManager.add3DObject(mesh,"cube",false,true);
-      });
+
+      }, function(){}, function(){}, i);
 
     }
-
-
 
     /*
     var lettersMeshes = 'THESPIGAROLDUCKNWVY'.split("").reduce(function(letter, out) {
