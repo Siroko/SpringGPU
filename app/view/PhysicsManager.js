@@ -63,6 +63,8 @@ var PhysicsManager = function(dcamera,camera) {
 PhysicsManager.prototype.onClick = function( e ){
   //console.log(this.dcamera);
 
+
+
   for(var i=0; i<this.threeCannon.length; i++){
 
     if(this.mode == 3){
@@ -95,12 +97,31 @@ PhysicsManager.prototype.onClick = function( e ){
   }
 };
 
+PhysicsManager.prototype.showMessage = function(  ){
+
+      for(var i=0; i < that.threeCannon.length;i++){
+        var body = that.threeCannon[i].c;
+
+        if(!body.isSpringing && body.springable){
+          that.addToSpring(that.bodyText[body.springIndex],body);
+        }
+
+      }
+
+};
+
 PhysicsManager.prototype.onCursor= function( e ){
 
-  for(var i=0; i < that.springElements.length; i++){
-      that.springElements[i].bodyB.isSpringing = false;
+
+  if(e.keyCode==81){
+      that.showMessage();
   }
-  that.springElements = [];
+  if(e.keyCode==32){
+    for(var i=0; i < that.springElements.length; i++){
+        that.springElements[i].bodyB.isSpringing = false;
+    }
+    that.springElements = [];
+  }
 };
 
 PhysicsManager.prototype.update = function(timestamp) {
@@ -353,13 +374,14 @@ PhysicsManager.prototype.addToSpring = function(a,b) {
 
 PhysicsManager.prototype.setMode = function(m) {
   this.mode = m;
-}
+};
+
 PhysicsManager.prototype.setBodyText = function() {
 
-  var sw = 7;
+  var sw = 10;
   var sh = 8;
 
-  var px = -3.5;
+  var px = -4.5;
   var pz = 9;
 
   //Grid 4 *11
@@ -370,8 +392,8 @@ PhysicsManager.prototype.setBodyText = function() {
   var offsetH = sh/rows;
 
 
-  for(var i=0; i < rows ; i++){
-    for(var j=0 ; j < columns; j++){
+  for(var i=0; i <= rows ; i++){
+    for(var j=0 ; j <= columns; j++){
 
       var radius = 0.1;  // m
       var body  = new CANNON.Body({

@@ -93,19 +93,19 @@ var World3D = function( container ) {
       ["A",36],
       ["C",19],
       ["D",15],["D",37],
-      ["E",2],["E",8],["E",33],["E",38],["E",43],
+      ["E",2],["E",8],["E",33],["E",39],["E",44],
       ["G",12],
       ["H",1],
       ["I",6],
       ["K",20],
       ["L",17],
-      ["N",25],["N",32],["N",39],
+      ["N",25],["N",32],["N",40],
       ["O",13],["O",14],["O",24],["O",28],
       ["P",5],
-      ["R",30],["R",42],
+      ["R",30],["R",43],
       ["S",4],
-      ["T",0],["T",7],["T",40],
-      ["U",18],["U",29],["U",41],
+      ["T",0],["T",7],["T",41],
+      ["U",18],["U",29],["U",42],
       ["V",38],
       ["W",34],
       ["Y",27]
@@ -198,7 +198,7 @@ World3D.prototype.onAssetsLoaded = function( e ) {
       loader.load('/assets/letters/models/' + this.abc[i][0] + '.json', function(geometry, materials,index) {
         geometry.computeFaceNormals();
         geometry.computeVertexNormals();
-
+        
 
         var mesh = new THREE.Mesh(geometry, that.lMaterial);
         mesh.scale.set(0.75, 0.75, 0.75);
