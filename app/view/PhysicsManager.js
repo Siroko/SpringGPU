@@ -45,7 +45,7 @@ var PhysicsManager = function(dcamera,camera) {
   this.lastTime = 0;
 
   this.damping = 0.5;
-  this.f = 10;
+  this.f = 20;
 
   this.spring;
   this.bodyA;
@@ -82,7 +82,13 @@ PhysicsManager.prototype.onClick = function( e ){
 
     if(!this.threeCannon[i].c.isSpringing){
       this.threeCannon[i].c.applyLocalImpulse(v, this.threeCannon[i].c.position);
-      v = v.scale(this.f);
+      if(this.threeCannon[i].c.springable){
+          v = v.scale(this.f);
+      }
+      else{
+          v = v.scale(this.f/10);
+      }
+
       //console.log(v);
       this.threeCannon[i].c.applyImpulse(v, this.threeCannon[i].c.position);
     }
@@ -214,12 +220,17 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator,springable,opt
       boxBody.springable = springable;
       boxBody.isActuator = actuator;
       boxBody.isSpringing = false;
+      boxBody.springIndex = obj.springIndex;
+
       if(actuator==true){
         // When a body collides with another body, they both dispatch the "collide" event.
         boxBody.addEventListener("collide",function(e){
           //console.log("Collided with body:",e.body);
           if(e.body.springable && !e.body.isSpringing){
-            that.addToSpring(that.bodyText[that.springElements.length],e.body);
+
+            if(e.body.springIndex != undefined){
+              that.addToSpring(that.bodyText[e.body.springIndex],e.body);
+            }
           }
         });
       }
@@ -244,6 +255,7 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator,springable,opt
       this.world.addBody(boxBody);
       boxBody.springable = springable;
       boxBody.isActuator = actuator;
+      boxBody.springIndex = obj.springIndex;
       if(actuator==true){
         // When a body collides with another body, they both dispatch the "collide" event.
         boxBody.addEventListener("collide",function(e){
@@ -336,13 +348,44 @@ PhysicsManager.prototype.addToSpring = function(a,b) {
     });
     that.springElements.push(spring);
 
-  }, 100);
+  }, 333);
 };
 
 PhysicsManager.prototype.setMode = function(m) {
   this.mode = m;
 }
 PhysicsManager.prototype.setBodyText = function() {
+
+  var sw = 7;
+  var sh = 8;
+
+  var px = -3.5;
+  var pz = 9;
+
+  //Grid 4 *11
+  var rows = 4;
+  var columns = 11;
+
+  var ofsetW = sw/columns;
+  var offsetH = sh/rows;
+
+
+  for(var i=0; i < rows ; i++){
+    for(var j=0 ; j < columns; j++){
+
+      var radius = 0.1;  // m
+      var body  = new CANNON.Body({
+         mass: 0, // kg
+         position: new CANNON.Vec3(px + ofsetW*j, -9, pz - offsetH*i),
+         shape: new CANNON.Sphere(radius)
+      });
+
+        console.log(this.bodyText.length,body.position);
+      this.bodyText.push(body);
+
+    }
+  }
+  /*
   //from 7 to 1 inclusive
   for(var iz = 7; iz >= 1; iz--){
     //From -4 to 4 inclusive
@@ -357,7 +400,7 @@ PhysicsManager.prototype.setBodyText = function() {
       this.bodyText.push(body);
     }
   }
-  this.bodyText
+  */
 }
 
 PhysicsManager.prototype.animateQuaternion = function(obj,t){
@@ -374,8 +417,8 @@ PhysicsManager.prototype.animateQuaternion = function(obj,t){
     THREE.Quaternion.slerp( startQuaternion, endQuaternion, obj.t.quaternion,amount );
 
     if(amount >=1){
-      console.log("end");
-    return;}
+        return;
+    }
     else{
       setTimeout(function(){ set(t); }, 1000*that.fixedTimeStep);
     }
