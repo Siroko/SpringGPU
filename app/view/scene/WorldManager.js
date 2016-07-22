@@ -17,8 +17,7 @@ var WorldManager = function(){
 
     this.room = null;
     this.meshes = [];
-
-
+    this.materials = [];
 
     this._init();
 
@@ -91,19 +90,11 @@ WorldManager.prototype._createGeometries = function() {
     }
 
 
-
-    var geom = new THREE.IcosahedronGeometry( sizeBase, 1 );
-
-
-    var mesh;
-    for ( var i = 0; i < positions.length; i++ ) {
-
-        var r = Math.round( Math.random() * 3 );
-        r += 1;
+    for (var r = 0; r < 4; r++) {
         var mat = new THREE.RawShaderMaterial( {
             uniforms: {
-                normalMap             : { type : 't', value : THREE.ImageUtils.loadTexture('assets/textures/matcap'+r+'.jpg' ) },
-                textureMap            : { type : 't', value : THREE.ImageUtils.loadTexture('assets/textures/matcap'+r+'.jpg' ) },
+                normalMap             : { type : 't', value : THREE.ImageUtils.loadTexture('assets/textures/matcap'+(r+1)+'.jpg' ) },
+                textureMap            : { type : 't', value : THREE.ImageUtils.loadTexture('assets/textures/matcap'+(r+1)+'.jpg' ) },
                 uSpheresPositions     : { type : 'v3v', value : positions },
                 uSpheresRadius        : { type : 'fv', value : radius }
             },
@@ -112,7 +103,17 @@ WorldManager.prototype._createGeometries = function() {
             fragmentShader              : fs_bufferGeometry
         } );
 
-        mesh = new THREE.Mesh( geom, mat );
+        this.materials.push( mat );
+    }
+    var geom = new THREE.IcosahedronGeometry( sizeBase, 1 );
+
+
+    var mesh;
+    for ( var i = 0; i < positions.length; i++ ) {
+
+        var r = Math.round( Math.random() * 3 );
+
+        mesh = new THREE.Mesh( geom, this.materials[ r ] );
         mesh.position.copy( positions[ i ] );
 
         var s = scales[ i ];
