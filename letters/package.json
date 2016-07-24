@@ -6,6 +6,7 @@
     "start": "budo index.js --live -- -t [ stringify --extensions [ .glsl ] ]"
   },
   "dependencies": {
+    "rebound": "0.0.13",
     "three": "^0.79.0"
   },
   "devDependencies": {
