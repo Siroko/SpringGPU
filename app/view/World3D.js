@@ -171,6 +171,7 @@ World3D.prototype.onInitializeManager = function( n, o ) {
 
 World3D.prototype.onAssetsLoaded = function( e ) {
 
+    this.scene.add(this.worldManager.floor);
     this.phManager.setClosedArea(this.worldManager.room);
 
 
