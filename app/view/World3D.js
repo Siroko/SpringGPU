@@ -116,7 +116,7 @@ var World3D = function( container ) {
 
 World3D.prototype.setup = function() {
 
-    this.renderer.setClearColor( 0x000000, 1 );
+    this.renderer.setClearColor( '#1a1f27', 1 );
     this.container.appendChild( this.renderer.domElement );
 
     this.positionTouch1 = new THREE.Vector3(0, 100, 0);
@@ -248,7 +248,6 @@ World3D.prototype.render = function( timestamp ) {
     this.controls.update();
 
     // Render the scene through the manager.
-    this.renderer.setClearColor( 0x202020 );
     this.renderer.setRenderTarget( null ); // add this line if you are working with GPGPU sims
     this.manager.render( this.scene, this.camera, timestamp);
 
