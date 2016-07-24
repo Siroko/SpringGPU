@@ -74,16 +74,17 @@ var World3D = function( container ) {
 
     //Letters integration
     this.loader = new THREE.JSONLoader();
-    this.letters = {};
-    this.activeLetter;
 
-    this.lMaterial = new THREE.RawShaderMaterial({
+    this.letters = [];
+    this.lettersMatcapsCache = {};
+    this.lettersBaseMaterial = new THREE.RawShaderMaterial({
       uniforms: {
         normalMap: { type: 't', value: null },
-        textureMap: { type: 't', value: null }
+        textureMap: { type: 't', value: null },
+        inflation: { type: 'f', value: 0 }
       },
-      vertexShader: require('../../letters/shaders/vs-buffer-geometry.glsl'),
-      fragmentShader: require('../../letters/shaders/fs-buffer-geometry.glsl')
+      vertexShader: require('../glsl/vs-letter.glsl'),
+      fragmentShader: require('../glsl/fs-letter.glsl')
     });
 
     //this.abc = "ABCDEFGHIJKLMNOPQRSTUVWXZ";
@@ -170,7 +171,6 @@ World3D.prototype.onInitializeManager = function( n, o ) {
 
 World3D.prototype.onAssetsLoaded = function( e ) {
 
-    this.scene.add( this.worldManager.room );
     this.phManager.setClosedArea(this.worldManager.room);
 
 
@@ -199,12 +199,20 @@ World3D.prototype.onAssetsLoaded = function( e ) {
         geometry.computeFaceNormals();
         geometry.computeVertexNormals();
         
+        var mat = that.lettersBaseMaterial.clone();
+        var matcap = Math.random() < 0.7 ? 'silver' : 'gold';
+        that.setMatcap(mat, matcap);
 
-        var mesh = new THREE.Mesh(geometry, that.lMaterial);
+        var mesh = new THREE.Mesh(geometry, mat);
+
         mesh.scale.set(0.75, 0.75, 0.75);
         mesh.position.set(0, 1, 2);
-        mesh.springIndex = that.abc[index][1];;
-        that.setMatcap("silver");
+
+        if(that.abc[index]) {
+          mesh.springIndex = that.abc[index][1];
+        }
+
+        that.letters.push(mesh);
         that.scene.add(mesh);
         that.phManager.add3DObject(mesh,"cube",false,true);
 
@@ -230,6 +238,8 @@ World3D.prototype.render = function( timestamp ) {
 
     //this.pointer.position.copy( this.gamePads.intersectPoint );
 
+    // update world manager
+    this.worldManager.update();
 
     // Update the physics
     this.phManager.update(timestamp);
@@ -253,27 +263,23 @@ World3D.prototype.onResize = function( w, h ) {
 };
 
 /**
-
-/**
  * @function setMatcap
+ * @param {THREE.Material} mat
  * @param {string} matcap
  */
-World3D.prototype.setMatcap =  function(matcap) {
-  var ltexture;
-  function set() {
-    that.lMaterial.uniforms.normalMap.value = ltexture;
-    that.lMaterial.uniforms.textureMap.value = ltexture;
-    that.lMaterial.needsUpdate = true;
-  }
+World3D.prototype.setMatcap =  function(mat, matcap) {
+  var setUniforms = (function() {
+    mat.uniforms.normalMap.value = mat.uniforms.textureMap.value = this.lettersMatcapsCache[matcap];
+    mat.needsUpdate = true;
+  }).bind(this);
 
-  if(ltexture) {
-    set();
+  if(this.lettersMatcapsCache[matcap]) {
+    setUniforms();
   }
   else {
-    new THREE.TextureLoader().load('/assets/letters/textures/' + matcap + '.jpg', function(texture) {
-      ltexture = texture;
-      set();
-    });
+    var url = '/assets/textures/' + matcap + '.jpg';
+    this.lettersMatcapsCache[matcap] = new THREE.TextureLoader().load(url);
+    setUniforms();
   }
 };
 
