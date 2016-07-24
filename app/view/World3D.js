@@ -212,21 +212,6 @@ World3D.prototype.onAssetsLoaded = function( e ) {
 
     }
 
-    /*
-    var lettersMeshes = 'THESPIGAROLDUCKNWVY'.split("").reduce(function(letter, out) {
-      console.log(arguments)
-      loader.load('/assets/letters/models/' + letter + '.json', function(geometry, materials) {
-        geometry.computeFaceNormals();
-        geometry.computeVertexNormals();
-
-        var mesh = new THREE.Mesh(geometry, that.lMaterial);
-        mesh.scale.set(1.5, 1.5, 1.5)
-        out[letter] = mesh
-        return out
-      });
-    }, {})
-    */
-
 };
 
 World3D.prototype.onRenderLeft = function() {
@@ -268,42 +253,6 @@ World3D.prototype.onResize = function( w, h ) {
 };
 
 /**
- * @function loadLetter
- * @param {string} letter
- */
-World3D.prototype.loadLetter = function(letter) {
-  window.location.hash = '#' + letter;
-
-  if(this.letters[letter]) {
-    if(this.activeLetter !== void 0) {
-      this.scene.remove(this.letters[this.activeLetter]);
-    }
-
-    scene.add(this.letters[letter]);
-    this.activeLetter = letter;
-  }
-  else {
-    this.loader.load('/assets/letters/models/' + letter + '.json', function(geometry, materials) {
-      if(that.activeLetter !== void 0) {
-        that.scene.remove(that.letters[that.activeLetter]);
-      }
-
-      // needed because of the blender to .json exporter
-      // other solutions are:
-      // - using .obj
-      // - exporting to .obj and converting to .json through the .py script
-      geometry.computeFaceNormals();
-      geometry.computeVertexNormals();
-
-      var mesh = new THREE.Mesh(geometry, that.lMaterial);
-      mesh.scale.set(1.5, 1.5, 1.5)
-      that.scene.add(mesh);
-
-      that.letters[letter] = mesh;
-      that.activeLetter = letter;
-    });
-  }
-};
 
 /**
  * @function setMatcap
