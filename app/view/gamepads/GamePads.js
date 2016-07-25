@@ -67,7 +67,7 @@ GamePads.prototype.update = function( t ){
               if(this.cursorlocked[i]==false){
                 this.cursorlocked[i]=true;
                 console.log("cursor locked");
-                this.phManager.onCursor();
+                this.phManager.onCursor(-1);
               }
             }
             else{

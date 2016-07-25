@@ -175,7 +175,9 @@ World3D.prototype.onInitializeManager = function( n, o ) {
 World3D.prototype.onAssetsLoaded = function( e ) {
 
     this.scene.add(this.worldManager.floor);
-    this.phManager.setClosedArea(this.worldManager.room);
+
+
+    this.phManager.setClosedArea(15,15,15);
 
 
 
@@ -184,6 +186,7 @@ World3D.prototype.onAssetsLoaded = function( e ) {
         this.scene.add( mesh );
 
         this.phManager.add3DObject(mesh,"sphere",false,false);
+
     }
 
 
@@ -208,7 +211,7 @@ World3D.prototype.onAssetsLoaded = function( e ) {
           var mat = that.lettersBaseMaterial.clone();
           var matcap = Math.random() < 0.7 ? 'silver' : 'gold';
           that.setMatcap(mat, matcap);
-        
+
           var mesh = new THREE.Mesh(geometry, mat);
 
           mesh.scale.set(0.75, 0.75, 0.75);
@@ -218,6 +221,7 @@ World3D.prototype.onAssetsLoaded = function( e ) {
 
           that.scene.add(mesh);
           that.phManager.add3DObject(mesh,"cube",false,true);
+          //that.phManager.add3DObject(mesh,"convex",false,true);
 
           // add inflate spring to mesh
           var inflateSpring = that.springSystem.createSpring(40, 3);
