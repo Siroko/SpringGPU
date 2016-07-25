@@ -101,10 +101,23 @@ WorldManager.prototype._createGeometries = function() {
     var scales = [];
     var positions = [];
 
+    var boxsize= 20;
+
     for ( var i = 0; i < quantity; i++ ) {
 
         var s = ( Math.random() * 2 ) + 0.1;
-        var p = new THREE.Vector3( ( Math.random() * 2 - 1) * 4.5, Math.random() * 4.5 + 4, ( Math.random() * 2 - 1 ) * 9 );
+
+
+        var rdx = Math.floor(Math.random() * boxsize*2) - boxsize;
+        var rdy = Math.floor(Math.random() * boxsize/2);
+        var rdz = Math.floor(Math.random() * boxsize*2) - boxsize;
+
+        //var p = new THREE.Vector3( ( Math.random() * 2 - 1) * 4.5, Math.random() * 4.5 + 4, ( Math.random() * 2 - 1 ) * 9 );
+
+        var p = new THREE.Vector3( rdx,rdy, rdz );
+
+
+
         positions.push( p );
         radius.push( sizeBase * s );
         scales.push( s );

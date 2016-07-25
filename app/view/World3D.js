@@ -58,11 +58,9 @@ var World3D = function( container ) {
 
     //Adding Three Objects to Physic Manager
     //Adding object
-    var geometry = new THREE.BoxGeometry( 0.3, 0.3, 0.3 );
-    var material = new THREE.MeshNormalMaterial(  );
+    var geometry = new THREE.BoxGeometry( 20, 20, 20 );
+    var material = new THREE.MeshNormalMaterial({side:THREE.DoubleSide} );
     this.cubetest = new THREE.Mesh( geometry, material );
-    this.cubetest.position.y = 2;
-    //this.phManager.add3DObject(this.cubetest,"cube",false,false);
     //this.scene.add( this.cubetest );
 
 
@@ -154,7 +152,12 @@ World3D.prototype.addLetter = function(letter) {
 
     var mesh = new THREE.Mesh(geo, mat);
     mesh.scale.set(0.75, 0.75, 0.75);
-    mesh.position.set(0, 1, 2);
+
+    var boxsize= 20;
+    var rdx = Math.floor(Math.random() * boxsize*2) - boxsize;
+    var rdy = Math.floor(Math.random() * boxsize/2);
+    var rdz = Math.floor(Math.random() * boxsize*2) - boxsize;
+    mesh.position.set(rdx, rdy, rdz);
     mesh.springIndex = letter.index;
 
     this.scene.add(mesh);
@@ -231,7 +234,7 @@ World3D.prototype.onAssetsLoaded = function( e ) {
     this.scene.add(this.worldManager.floor);
 
 
-    this.phManager.setClosedArea(15,15,15);
+    this.phManager.setClosedArea(20,20,20);
 
 
 
@@ -244,7 +247,9 @@ World3D.prototype.onAssetsLoaded = function( e ) {
     }
 
     for(var i=0; i < this.abc.length; i++ ){
+
       this.addLetter(this.abc[i]);
+
     }
 
 };
