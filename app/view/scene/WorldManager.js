@@ -16,6 +16,7 @@ var WorldManager = function(){
     THREE.EventDispatcher.call( this );
 
     this.room = null;
+    this.floor = null;
     this.meshes = [];
     this.materials = [];
 
@@ -74,6 +75,26 @@ WorldManager.prototype._loadAssets = function() {
 
 WorldManager.prototype._createGeometries = function() {
 
+    this.floor = new THREE.Object3D();
+    this.floor.rotation.x = -Math.PI / 2;
+
+    // create floor
+    var infiniteFloorGeo = new THREE.PlaneBufferGeometry(100, 100);
+    var infiniteFloorMat = new THREE.MeshBasicMaterial({ color: '#1a1f27' });
+    var infiniteFloorMesh = new THREE.Mesh(infiniteFloorGeo, infiniteFloorMat);
+    this.floor.add(infiniteFloorMesh);
+
+    var centerFloorGeo = new THREE.PlaneBufferGeometry(3, 3);
+    var centerFloorMat = new THREE.MeshBasicMaterial({
+      map: new THREE.TextureLoader().load('assets/textures/floor.png'),
+      transparent: true
+    });
+
+    var centerFloorMesh = new THREE.Mesh(centerFloorGeo, centerFloorMat);
+    centerFloorMesh.position.z = 0.01;
+    centerFloorMesh.position.y -= 5;
+    this.floor.add(centerFloorMesh);
+
     var quantity = 200;
     var sizeBase = 0.2;
     var radius = [];
@@ -89,31 +110,29 @@ WorldManager.prototype._createGeometries = function() {
         scales.push( s );
     }
 
+    var shapesMaterial = new THREE.RawShaderMaterial({
+      uniforms: {
+        time: { type: 'f', value: 0 },
+        timeOffset: { type: 'f', value: 0 }
+      },
+      vertexShader: require('../../glsl/vs-shape.glsl'),
+      fragmentShader: require('../../glsl/fs-shape.glsl')
+    });
 
-    for (var r = 0; r < 4; r++) {
-        var mat = new THREE.RawShaderMaterial( {
-            uniforms: {
-                normalMap             : { type : 't', value : THREE.ImageUtils.loadTexture('assets/textures/matcap'+(r+1)+'.jpg' ) },
-                textureMap            : { type : 't', value : THREE.ImageUtils.loadTexture('assets/textures/matcap'+(r+1)+'.jpg' ) },
-                uSpheresPositions     : { type : 'v3v', value : positions },
-                uSpheresRadius        : { type : 'fv', value : radius }
-            },
 
-            vertexShader                : vs_bufferGeometry,
-            fragmentShader              : fs_bufferGeometry
-        } );
-
-        this.materials.push( mat );
-    }
-    var geom = new THREE.IcosahedronGeometry( sizeBase, 1 );
-
+    var geom = new THREE.IcosahedronGeometry( sizeBase, 2 );
 
     var mesh;
     for ( var i = 0; i < positions.length; i++ ) {
 
         var r = Math.round( Math.random() * 3 );
 
-        mesh = new THREE.Mesh( geom, this.materials[ r ] );
+        var newMat = shapesMaterial.clone();
+        newMat.uniforms.time.value = 0;
+        newMat.uniforms.timeOffset.value = Math.random();
+        this.materials.push(newMat);
+
+        mesh = new THREE.Mesh( geom, newMat);
         mesh.position.copy( positions[ i ] );
 
         var s = scales[ i ];
@@ -129,7 +148,9 @@ WorldManager.prototype._createGeometries = function() {
 
 
 WorldManager.prototype.update = function( t ) {
-
+  for(var i = 0; i < this.materials.length; ++i) {
+    this.materials[i].uniforms.time.value += 0.01;
+  }
 };
 
 module.exports = WorldManager;

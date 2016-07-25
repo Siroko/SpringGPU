@@ -74,16 +74,17 @@ var World3D = function( container ) {
 
     //Letters integration
     this.loader = new THREE.JSONLoader();
-    this.letters = {};
-    this.activeLetter;
 
-    this.lMaterial = new THREE.RawShaderMaterial({
+    this.letters = [];
+    this.lettersMatcapsCache = {};
+    this.lettersBaseMaterial = new THREE.RawShaderMaterial({
       uniforms: {
         normalMap: { type: 't', value: null },
-        textureMap: { type: 't', value: null }
+        textureMap: { type: 't', value: null },
+        inflation: { type: 'f', value: 0 }
       },
-      vertexShader: require('../../letters/shaders/vs-buffer-geometry.glsl'),
-      fragmentShader: require('../../letters/shaders/fs-buffer-geometry.glsl')
+      vertexShader: require('../glsl/vs-letter.glsl'),
+      fragmentShader: require('../glsl/fs-letter.glsl')
     });
 
     //this.abc = "ABCDEFGHIJKLMNOPQRSTUVWXZ";
@@ -115,7 +116,7 @@ var World3D = function( container ) {
 
 World3D.prototype.setup = function() {
 
-    this.renderer.setClearColor( 0x000000, 1 );
+    this.renderer.setClearColor( '#1a1f27', 1 );
     this.container.appendChild( this.renderer.domElement );
 
     this.positionTouch1 = new THREE.Vector3(0, 100, 0);
@@ -170,7 +171,7 @@ World3D.prototype.onInitializeManager = function( n, o ) {
 
 World3D.prototype.onAssetsLoaded = function( e ) {
 
-    this.scene.add( this.worldManager.room );
+    this.scene.add(this.worldManager.floor);
     this.phManager.setClosedArea(this.worldManager.room);
 
 
@@ -195,16 +196,23 @@ World3D.prototype.onAssetsLoaded = function( e ) {
     for(var i=0; i < this.abc.length; i++ ){
 
       (function(index) {
+
         loader.load('/assets/letters/models/' + that.abc[index][0] + '.json', function(geometry, materials) {
+
           geometry.computeFaceNormals();
           geometry.computeVertexNormals();
 
+          var mat = that.lettersBaseMaterial.clone();
+          var matcap = Math.random() < 0.7 ? 'silver' : 'gold';
+          that.setMatcap(mat, matcap);
+        
+          var mesh = new THREE.Mesh(geometry, mat);
 
-          var mesh = new THREE.Mesh(geometry, that.lMaterial);
           mesh.scale.set(0.75, 0.75, 0.75);
           mesh.position.set(0, 1, 2);
+
           mesh.springIndex = that.abc[index][1];;
-          that.setMatcap("silver");
+
           that.scene.add(mesh);
           that.phManager.add3DObject(mesh,"cube",false,true);
 
@@ -212,24 +220,7 @@ World3D.prototype.onAssetsLoaded = function( e ) {
 
       })(i);
 
-
-
     }
-
-    /*
-    var lettersMeshes = 'THESPIGAROLDUCKNWVY'.split("").reduce(function(letter, out) {
-      console.log(arguments)
-      loader.load('/assets/letters/models/' + letter + '.json', function(geometry, materials) {
-        geometry.computeFaceNormals();
-        geometry.computeVertexNormals();
-
-        var mesh = new THREE.Mesh(geometry, that.lMaterial);
-        mesh.scale.set(1.5, 1.5, 1.5)
-        out[letter] = mesh
-        return out
-      });
-    }, {})
-    */
 
 };
 
@@ -249,6 +240,8 @@ World3D.prototype.render = function( timestamp ) {
 
     //this.pointer.position.copy( this.gamePads.intersectPoint );
 
+    // update world manager
+    this.worldManager.update();
 
     // Update the physics
     this.phManager.update(timestamp);
@@ -257,7 +250,6 @@ World3D.prototype.render = function( timestamp ) {
     this.controls.update();
 
     // Render the scene through the manager.
-    this.renderer.setClearColor( 0x202020 );
     this.renderer.setRenderTarget( null ); // add this line if you are working with GPGPU sims
     this.manager.render( this.scene, this.camera, timestamp);
 
@@ -272,63 +264,23 @@ World3D.prototype.onResize = function( w, h ) {
 };
 
 /**
- * @function loadLetter
- * @param {string} letter
- */
-World3D.prototype.loadLetter = function(letter) {
-  window.location.hash = '#' + letter;
-
-  if(this.letters[letter]) {
-    if(this.activeLetter !== void 0) {
-      this.scene.remove(this.letters[this.activeLetter]);
-    }
-
-    scene.add(this.letters[letter]);
-    this.activeLetter = letter;
-  }
-  else {
-    this.loader.load('/assets/letters/models/' + letter + '.json', function(geometry, materials) {
-      if(that.activeLetter !== void 0) {
-        that.scene.remove(that.letters[that.activeLetter]);
-      }
-
-      // needed because of the blender to .json exporter
-      // other solutions are:
-      // - using .obj
-      // - exporting to .obj and converting to .json through the .py script
-      geometry.computeFaceNormals();
-      geometry.computeVertexNormals();
-
-      var mesh = new THREE.Mesh(geometry, that.lMaterial);
-      mesh.scale.set(1.5, 1.5, 1.5)
-      that.scene.add(mesh);
-
-      that.letters[letter] = mesh;
-      that.activeLetter = letter;
-    });
-  }
-};
-
-/**
  * @function setMatcap
+ * @param {THREE.Material} mat
  * @param {string} matcap
  */
-World3D.prototype.setMatcap =  function(matcap) {
-  var ltexture;
-  function set() {
-    that.lMaterial.uniforms.normalMap.value = ltexture;
-    that.lMaterial.uniforms.textureMap.value = ltexture;
-    that.lMaterial.needsUpdate = true;
-  }
+World3D.prototype.setMatcap =  function(mat, matcap) {
+  var setUniforms = (function() {
+    mat.uniforms.normalMap.value = mat.uniforms.textureMap.value = this.lettersMatcapsCache[matcap];
+    mat.needsUpdate = true;
+  }).bind(this);
 
-  if(ltexture) {
-    set();
+  if(this.lettersMatcapsCache[matcap]) {
+    setUniforms();
   }
   else {
-    new THREE.TextureLoader().load('/assets/letters/textures/' + matcap + '.jpg', function(texture) {
-      ltexture = texture;
-      set();
-    });
+    var url = '/assets/textures/' + matcap + '.jpg';
+    this.lettersMatcapsCache[matcap] = new THREE.TextureLoader().load(url);
+    setUniforms();
   }
 };
 
