@@ -45,7 +45,7 @@ var PhysicsManager = function(dcamera,camera) {
   this.lastTime = 0;
 
   this.damping = 0.5;
-  this.f = 20;
+  this.f = 10;
 
   this.spring;
   this.bodyA;
@@ -83,12 +83,13 @@ PhysicsManager.prototype.onClick = function( e ){
     v.normalize();
 
     if(!this.threeCannon[i].c.isSpringing){
-      this.threeCannon[i].c.applyLocalImpulse(v, this.threeCannon[i].c.position);
+      this.threeCannon[i].c.applyLocalImpulse(v.scale(this.f/10), this.threeCannon[i].c.position);
+
       if(this.threeCannon[i].c.springable){
-          v = v.scale(this.f);
+          v = v.scale(this.f/2);
       }
       else{
-          v = v.scale(this.f/10);
+          v = v.scale(this.f/500);
       }
 
       //console.log(v);
@@ -113,7 +114,7 @@ PhysicsManager.prototype.showMessage = function(  ){
 PhysicsManager.prototype.onCursor= function( e ){
 
 
-  if(e.keyCode==81){
+  if(e.keyCode==81 || e == -1){
       that.showMessage();
   }
   if(e.keyCode==32){
@@ -219,9 +220,8 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator,springable,opt
   if(actuator==true){var mass = 0;}else{var mass = 5;}
   switch (type) {
     case "cube":
-
+      //console.log(obj);
       var bbox = new THREE.Box3().setFromObject(obj);
-
       var widthX = bbox.max.x - bbox.min.x;
       var widthY = bbox.max.y - bbox.min.y;
       var widthZ = bbox.max.z - bbox.min.z;
@@ -288,6 +288,63 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator,springable,opt
       this.threeCannon.push({"t":obj,"c":boxBody});
 
       break;
+
+      case "convex":
+
+        var bbox = new THREE.Box3().setFromObject(obj);
+
+        var widthX = bbox.max.x - bbox.min.x;
+        var widthY = bbox.max.y - bbox.min.y;
+        var widthZ = bbox.max.z - bbox.min.z;
+
+
+
+        var verts=[];
+        for(var i=0; i<obj.geometry.vertices.length; i++ ){
+          verts.push(new CANNON.Vec3(obj.geometry.vertices[i].x,obj.geometry.vertices[i].z,obj.geometry.vertices[i].y));
+        }
+        var faces=[];
+        for(var i=0; i<obj.geometry.faces.length; i++ ){
+          faces.push([obj.geometry.faces[i].a,obj.geometry.faces[i].b,obj.geometry.faces[i].c]);
+        }
+        var boxShape = new CANNON.ConvexPolyhedron(verts,faces);
+
+
+        var boxBody;
+        if(options){
+          boxBody = new CANNON.Body(options);
+          this.bodyA = boxBody;
+        }
+        else{
+          boxBody = new CANNON.Body({ mass: mass, angularDamping:0.3 });
+          this.bodyB = boxBody;
+        }
+        boxBody.addShape(boxShape);
+        boxBody.position.set(obj.position.x,obj.position.z,obj.position.y); // Cannon and three have the XY coordinates flipped
+        this.world.addBody(boxBody);
+        boxBody.springable = springable;
+        boxBody.isActuator = actuator;
+        boxBody.isSpringing = false;
+        boxBody.springIndex = obj.springIndex;
+
+        if(actuator==true){
+          // When a body collides with another body, they both dispatch the "collide" event.
+          boxBody.addEventListener("collide",function(e){
+            //console.log("Collided with body:",e.body);
+            if(e.body.springable && !e.body.isSpringing){
+
+              if(e.body.springIndex != undefined){
+                that.addToSpring(that.bodyText[e.body.springIndex],e.body);
+                that.onLetterHit(that.getThreeMeshFromCannonBody(e.body));
+              }
+            }
+          });
+        }
+        this.threeCannon.push({"t":obj,"c":boxBody});
+
+        break;
+
+
     default:
   }
 }
@@ -327,11 +384,11 @@ PhysicsManager.prototype.getThreeMeshFromCannonBody = function(body) {
   return;
 };
 
-PhysicsManager.prototype.setClosedArea = function(obj) {
-  var bbox = new THREE.Box3().setFromObject(obj);
-  var widthX = bbox.max.x - bbox.min.x;
-  var widthY = bbox.max.y - bbox.min.y;
-  var widthZ = bbox.max.z - bbox.min.z;
+PhysicsManager.prototype.setClosedArea = function(x,y,z) {
+  //var bbox = new THREE.Box3().setFromObject(obj);
+  var widthX = x;//bbox.max.x - bbox.min.x;
+  var widthY = y;//bbox.max.y - bbox.min.y;
+  var widthZ = z;//bbox.max.z - bbox.min.z;
 
 
   //4 walls and the roof (floor is already set up)
@@ -439,7 +496,7 @@ PhysicsManager.prototype.setBodyText = function() {
          shape: new CANNON.Sphere(radius)
       });
 
-        console.log(this.bodyText.length,body.position);
+      //console.log(this.bodyText.length,body.position);
       this.bodyText.push(body);
 
     }
