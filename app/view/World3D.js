@@ -2,6 +2,7 @@
  * Created by siroko on 7/8/15.
  */
 var THREE = require('three');
+var Rebound = require('rebound');
 
 var VRControls = require('./../utils/VRControls');
 var VREffect = require('./../utils/VREffect');
@@ -112,6 +113,8 @@ var World3D = function( container ) {
       ["Y",27]
     ]
 
+    this.springSystem = new Rebound.SpringSystem();
+
 };
 
 World3D.prototype.setup = function() {
@@ -215,6 +218,16 @@ World3D.prototype.onAssetsLoaded = function( e ) {
 
           that.scene.add(mesh);
           that.phManager.add3DObject(mesh,"cube",false,true);
+
+          // add inflate spring to mesh
+          var inflateSpring = that.springSystem.createSpring(40, 3);
+          inflateSpring.addListener({
+            onSpringUpdate: function(spring) {
+              mat.uniforms.inflation.value = spring.getCurrentValue();
+            }
+          });
+
+          mesh.inflateSpring = inflateSpring;
 
         });
 

@@ -251,6 +251,7 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator,springable,opt
 
             if(e.body.springIndex != undefined){
               that.addToSpring(that.bodyText[e.body.springIndex],e.body);
+              that.onLetterHit(that.getThreeMeshFromCannonBody(e.body));
             }
           }
         });
@@ -290,6 +291,42 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator,springable,opt
     default:
   }
 }
+
+/**
+ * @method onLetterHit
+ * @param {THREE.Mesh} letterMesh
+ */
+PhysicsManager.prototype.onLetterHit = function(letterMesh) {
+  if(!letterMesh.inflateSpring) {
+    return;
+  }
+
+  if(letterMesh.deflateTimeoutId) {
+    window.clearTimeout(letterMesh.deflateTimeoutId);
+  }
+
+  letterMesh.inflateSpring.setEndValue(0.09);
+
+  letterMesh.deflateTimeoutId = window.setTimeout(function() {
+    letterMesh.inflateSpring.setEndValue(0);
+  }, 300);
+};
+
+/**
+ * @method getThreeMeshFromCannonBody
+ * @param {CANNON.Body} body
+ * @returns {THREE.Mesh}
+ */
+PhysicsManager.prototype.getThreeMeshFromCannonBody = function(body) {
+  for(var i = 0; i < this.threeCannon.length; i++) {
+    if(body.id === this.threeCannon[i].c.id) {
+      return this.threeCannon[i].t;
+    }
+  }
+
+  return;
+};
+
 PhysicsManager.prototype.setClosedArea = function(obj) {
   var bbox = new THREE.Box3().setFromObject(obj);
   var widthX = bbox.max.x - bbox.min.x;
