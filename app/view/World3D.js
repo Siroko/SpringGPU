@@ -88,33 +88,87 @@ var World3D = function( container ) {
       fragmentShader: require('../glsl/fs-letter.glsl')
     });
 
-    //this.abc = "ABCDEFGHIJKLMNOPQRSTUVWXZ";
-    //this.abc = "ACDDEEEEEGHIKLNNNOOOOPRRSTTTUUUVW";
     this.meshes = [];
-    this.abc = [
-      ["A",36],
-      ["C",19],
-      ["D",15],["D",37],
-      ["E",2],["E",8],["E",33],["E",39],["E",44],
-      ["G",12],
-      ["H",1],
-      ["I",6],
-      ["K",20],
-      ["L",17],
-      ["N",25],["N",32],["N",40],
-      ["O",13],["O",14],["O",24],["O",28],
-      ["P",5],
-      ["R",30],["R",43],
-      ["S",4],
-      ["T",0],["T",7],["T",41],
-      ["U",18],["U",29],["U",42],
-      ["V",38],
-      ["W",34],
-      ["Y",27]
-    ]
+
+    this.jsonLoader = new THREE.JSONLoader();
+
+    this.abc = this.getAbc(
+      'THE  SPITE  GOOD LUCK   ON YOUR NEW  ADVENTURE',
+      'GGG  GGGGG  SSSS SSSS   SS SSSS SSS  SSSSSSSSS' // S for silver, G for Gold
+    );
 
     this.springSystem = new Rebound.SpringSystem();
 
+};
+
+/**
+ * @interface ILetter {
+ *  char letter;
+ *  int index;
+ *  string color;
+ * }
+ */
+
+/**
+ * @function getAbc
+ * @param {string} text
+ * @param {colors} colors G for Gold, S for silver
+ * @returns {Array<ILetter>}
+ */
+World3D.prototype.getAbc = function(text, colors) {
+    var letters = text.split('');
+
+    var abc = [];
+
+    for(var i = 0; i < letters.length; ++i) {
+      var letter = letters[i];
+
+      if(letter === ' ') {
+        continue;
+      }
+
+      abc.push({
+        letter: letter,
+        index: i,
+        color: colors[i]
+      });
+    }
+
+    return abc;
+};
+
+/**
+ * @function addLetter
+ * @param {ILetter} letter
+ */
+World3D.prototype.addLetter = function(letter) {
+  var url = '/assets/letters/models/' + letter.letter + '.json';
+
+  this.jsonLoader.load(url, (function(geo, mats) {
+    geo.computeFaceNormals();
+    geo.computeVertexNormals();
+
+    var mat = this.lettersBaseMaterial.clone();
+    var matcap = letter.color === 'G' ? 'gold' : 'silver';
+    this.setMatcap(mat, matcap);
+
+    var mesh = new THREE.Mesh(geometry, mat);
+    mesh.scale.set(0.75, 0.75, 0.75);
+    mesh.position.set(0, 1, 2);
+    mesh.springIndex = letter.index;
+
+    this.scene.add(mesh);
+    this.phManager.add3DObject(mesh, 'cube', false, true);
+
+    var inflateSpring = that.springSystem.createSpring(40, 3);
+    inflateSpring.addListener({
+      onSpringUpdate: function(spring) {
+        mat.uniforms.inflation.value = spring.getCurrentValue();
+      }
+    });
+    mesh.inflateSpring = inflateSpring;
+
+  }).bind(this));
 };
 
 World3D.prototype.setup = function() {
@@ -186,53 +240,8 @@ World3D.prototype.onAssetsLoaded = function( e ) {
         this.phManager.add3DObject(mesh,"sphere",false,false);
     }
 
-
-    var loader = new THREE.JSONLoader();
-    function setSpringIndexToMeshes(){
-      console.log("let's go");
-      for(var i=0; i < that.abc.length; i++ ){
-        that.meshes[i].springIndex = that.abc[i][1];
-
-      }
-    }
-
     for(var i=0; i < this.abc.length; i++ ){
-
-      (function(index) {
-
-        loader.load('/assets/letters/models/' + that.abc[index][0] + '.json', function(geometry, materials) {
-
-          geometry.computeFaceNormals();
-          geometry.computeVertexNormals();
-
-          var mat = that.lettersBaseMaterial.clone();
-          var matcap = Math.random() < 0.7 ? 'silver' : 'gold';
-          that.setMatcap(mat, matcap);
-        
-          var mesh = new THREE.Mesh(geometry, mat);
-
-          mesh.scale.set(0.75, 0.75, 0.75);
-          mesh.position.set(0, 1, 2);
-
-          mesh.springIndex = that.abc[index][1];;
-
-          that.scene.add(mesh);
-          that.phManager.add3DObject(mesh,"cube",false,true);
-
-          // add inflate spring to mesh
-          var inflateSpring = that.springSystem.createSpring(40, 3);
-          inflateSpring.addListener({
-            onSpringUpdate: function(spring) {
-              mat.uniforms.inflation.value = spring.getCurrentValue();
-            }
-          });
-
-          mesh.inflateSpring = inflateSpring;
-
-        });
-
-      })(i);
-
+      this.addLetter(this.abc[i]);
     }
 
 };
