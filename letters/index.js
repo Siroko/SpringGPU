@@ -23,6 +23,8 @@ var springSytem;
 var inflateSpring;
 var deflateTimeoutId;
 
+var range;
+
 /**
  * @function setup
  */
@@ -90,6 +92,14 @@ var deflateTimeoutId;
   button.addEventListener('click', inflate);
   document.body.appendChild(button);
 
+  range = document.createElement('input');
+  range.type = 'range';
+  range.min = -0.5
+  range.max = 0.5;
+  range.step = 0.01;
+  range.addEventListener('input', updateInflation);
+  document.body.appendChild(range);
+
   window.requestAnimationFrame(draw);
 })();
 
@@ -156,12 +166,9 @@ function setMatcap(matcap) {
     material.uniforms.normalMap.value = matcaps[matcap];
     material.uniforms.textureMap.value = matcaps[matcap];
     material.needsUpdate = true;
-
-    console.log(matcaps[matcap]);
   }
 
   if(matcaps[matcap]) {
-        console.log(matcaps[matcap]);
     set();
   }
   else {
@@ -177,13 +184,24 @@ function setMatcap(matcap) {
  * @param {float} duration
  */
 function inflate() {
+  range.value = 0;
+
   inflateSpring.setEndValue(0.07);
 
   if(deflateTimeoutId) {
-    clearTimeout(deflateTimeoutId);
+    window.clearTimeout(deflateTimeoutId);
   }
 
   deflateTimeoutId = window.setTimeout(function() {
     inflateSpring.setEndValue(0);
   }, 200);
 }
+
+/**
+ * @function updateInflation
+ */
+function updateInflation(e) {
+  var value = parseFloat(e.currentTarget.value) || 0;
+  inflateSpring.setEndValue(value);
+}
+
