@@ -95,7 +95,7 @@ WorldManager.prototype._createGeometries = function() {
     centerFloorMesh.position.y -= 5;
     this.floor.add(centerFloorMesh);
 
-    var quantity = 200;
+    var quantity = 100;
     var sizeBase = 0.2;
     var radius = [];
     var scales = [];
