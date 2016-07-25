@@ -154,14 +154,16 @@ World3D.prototype.addLetter = function(letter) {
     mesh.scale.set(0.75, 0.75, 0.75);
 
     var boxsize= 20;
-    var rdx = Math.floor(Math.random() * boxsize*2) - boxsize;
-    var rdy = Math.floor(Math.random() * boxsize/2);
-    var rdz = Math.floor(Math.random() * boxsize*2) - boxsize;
+    var rdx = Math.floor(Math.random()*boxsize - boxsize/2 );
+    var rdy = Math.floor(Math.random()*boxsize/2  );
+    var rdz = Math.floor(Math.random()*boxsize - boxsize/2);
     mesh.position.set(rdx, rdy, rdz);
     mesh.springIndex = letter.index;
 
     this.scene.add(mesh);
     this.phManager.add3DObject(mesh, 'cube', false, true);
+    //this.phManager.add3DObject(mesh, 'convex', false, true);
+
 
     var inflateSpring = that.springSystem.createSpring(40, 3);
     inflateSpring.addListener({

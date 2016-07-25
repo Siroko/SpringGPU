@@ -22,7 +22,7 @@ var PhysicsManager = function(dcamera,camera) {
   this.threeCannon = [];
 
   // Create a sphere for the dummyCamera
-  var radius = Math.abs(0.2);  // m
+  var radius = Math.abs(0.3);  // m
   this.camBody = new CANNON.Body({
      mass: 0, // kg
      position: new CANNON.Vec3(dcamera.position.x, dcamera.position.z, dcamera.position.y),
@@ -307,7 +307,7 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator,springable,opt
         for(var i=0; i<obj.geometry.faces.length; i++ ){
           faces.push([obj.geometry.faces[i].a,obj.geometry.faces[i].b,obj.geometry.faces[i].c]);
         }
-        var boxShape = new CANNON.ConvexPolyhedron(verts,faces);
+        var boxShape = new CANNON.Trimesh(verts,faces);
 
 
         var boxBody;
