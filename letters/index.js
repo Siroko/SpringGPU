@@ -58,6 +58,7 @@ var deflateTimeoutId;
   letter = letter === '' ? LETTERS[0] : letter;
   loadLetter(letter);
 
+
   setMatcap(MATCAPS.split(' ')[0]);
 
   springSytem = new Rebound.SpringSystem();
@@ -68,7 +69,7 @@ var deflateTimeoutId;
       material.uniforms.inflation.value = spring.getCurrentValue();
     }
   });
-  
+
   // ui
   LETTERS.split('').forEach(function(letter) {
     var button = document.createElement('button');
@@ -76,7 +77,7 @@ var deflateTimeoutId;
     button.addEventListener('click', loadLetter.bind(null, letter));
     document.body.appendChild(button);
   });
-  
+
   MATCAPS.split(' ').forEach(function(matcap) {
     var button = document.createElement('button');
     button.innerHTML = matcap;
@@ -155,9 +156,12 @@ function setMatcap(matcap) {
     material.uniforms.normalMap.value = matcaps[matcap];
     material.uniforms.textureMap.value = matcaps[matcap];
     material.needsUpdate = true;
+
+    console.log(matcaps[matcap]);
   }
 
   if(matcaps[matcap]) {
+        console.log(matcaps[matcap]);
     set();
   }
   else {
@@ -183,4 +187,3 @@ function inflate() {
     inflateSpring.setEndValue(0);
   }, 200);
 }
-

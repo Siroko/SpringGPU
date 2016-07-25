@@ -195,29 +195,30 @@ World3D.prototype.onAssetsLoaded = function( e ) {
 
     for(var i=0; i < this.abc.length; i++ ){
 
+      (function(index) {
 
-      loader.load('/assets/letters/models/' + this.abc[i][0] + '.json', function(geometry, materials,index) {
-        geometry.computeFaceNormals();
-        geometry.computeVertexNormals();
+        loader.load('/assets/letters/models/' + that.abc[index][0] + '.json', function(geometry, materials) {
+
+          geometry.computeFaceNormals();
+          geometry.computeVertexNormals();
+
+          var mat = that.lettersBaseMaterial.clone();
+          var matcap = Math.random() < 0.7 ? 'silver' : 'gold';
+          that.setMatcap(mat, matcap);
         
-        var mat = that.lettersBaseMaterial.clone();
-        var matcap = Math.random() < 0.7 ? 'silver' : 'gold';
-        that.setMatcap(mat, matcap);
+          var mesh = new THREE.Mesh(geometry, mat);
 
-        var mesh = new THREE.Mesh(geometry, mat);
+          mesh.scale.set(0.75, 0.75, 0.75);
+          mesh.position.set(0, 1, 2);
 
-        mesh.scale.set(0.75, 0.75, 0.75);
-        mesh.position.set(0, 1, 2);
+          mesh.springIndex = that.abc[index][1];;
 
-        if(that.abc[index]) {
-          mesh.springIndex = that.abc[index][1];
-        }
+          that.scene.add(mesh);
+          that.phManager.add3DObject(mesh,"cube",false,true);
 
-        that.letters.push(mesh);
-        that.scene.add(mesh);
-        that.phManager.add3DObject(mesh,"cube",false,true);
+        });
 
-      }, function(){}, function(){}, i);
+      })(i);
 
     }
 
