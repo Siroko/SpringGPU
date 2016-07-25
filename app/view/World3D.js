@@ -53,7 +53,7 @@ var World3D = function( container ) {
         opacity: 0
     }) );
 
-    this.scene.add( this.planeCalc );
+    //this.scene.add( this.planeCalc );
     this.scene.add( this.dummyCamera );
 
     //Adding Three Objects to Physic Manager

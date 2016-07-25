@@ -73,8 +73,7 @@ WorldManager.prototype._loadAssets = function() {
 
 };
 
-WorldManager.prototype._createGeometries = function() {
-
+WorldManager.prototype._createFloor = function() {
     this.floor = new THREE.Object3D();
     this.floor.rotation.x = -Math.PI / 2;
 
@@ -86,14 +85,18 @@ WorldManager.prototype._createGeometries = function() {
 
     var centerFloorGeo = new THREE.PlaneBufferGeometry(6, 6);
     var centerFloorMat = new THREE.MeshBasicMaterial({
+      side: THREE.DoubleSide,
       map: new THREE.TextureLoader().load('assets/textures/floor.png'),
       transparent: true
     });
 
     var centerFloorMesh = new THREE.Mesh(centerFloorGeo, centerFloorMat);
     centerFloorMesh.position.z = 0.01;
-    centerFloorMesh.position.y -= 5;
     this.floor.add(centerFloorMesh);
+};
+
+
+WorldManager.prototype._createShapes = function() {
 
     var quantity = 100;
     var sizeBase = 0.2;
@@ -154,6 +157,12 @@ WorldManager.prototype._createGeometries = function() {
 
 
     }
+};
+
+WorldManager.prototype._createGeometries = function() {
+
+    this._createFloor();
+    this._createShapes();
 
     this.dispatchEvent( { type : 'assetsLoaded' } );
 
