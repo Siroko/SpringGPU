@@ -12,6 +12,7 @@ uniform mat4 projectionMatrix;
 uniform mat3 normalMatrix;
 uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
+uniform float inflation;
 
 varying vec4 vPos;
 varying vec2 vUv;
@@ -21,17 +22,16 @@ varying vec4 vOPosition;
 varying vec3 vU;
 varying vec3 vSmoothNormal;
 
-  void main(){
+void main(){
 
-      vec3 pos = position;
+  vec3 pos = position;
 
-      vPos = vec4(pos, 1.0);
-      vOPosition = modelViewMatrix * vPos;
-      vU = normalize( vec3( modelViewMatrix * vPos ) );
-      vNormalMatrix = normalMatrix;
+  vPos = vec4(pos, 1.0);
+  vOPosition = modelViewMatrix * vPos;
+  vU = normalize( vec3( modelViewMatrix * vPos ) );
+  vNormalMatrix = normalMatrix;
 
-      vSmoothNormal = normal;
-      gl_Position = projectionMatrix * modelViewMatrix * vPos;
+  vSmoothNormal = normal;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(pos + normal * inflation, 1.0);
 
-
-  }
+}

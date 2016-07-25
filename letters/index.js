@@ -1,4 +1,5 @@
 var THREE = require('three');
+var Rebound = require('rebound');
 
 var LETTERS = 'THESPIGAROLDUCKNWVY';
 var MATCAPS = 'silver gold';
@@ -17,6 +18,10 @@ var matcaps = {};
 var material;
 
 var rotation = 0;
+
+var springSytem;
+var inflateSpring;
+var deflateTimeoutId;
 
 /**
  * @function setup
@@ -42,7 +47,8 @@ var rotation = 0;
   material = new THREE.RawShaderMaterial({
     uniforms: {
       normalMap: { type: 't', value: null },
-      textureMap: { type: 't', value: null }
+      textureMap: { type: 't', value: null },
+      inflation: { type: 'f', value: 0 }
     },
     vertexShader: require('./shaders/vs-buffer-geometry.glsl'),
     fragmentShader: require('./shaders/fs-buffer-geometry.glsl')
@@ -52,7 +58,17 @@ var rotation = 0;
   letter = letter === '' ? LETTERS[0] : letter;
   loadLetter(letter);
 
-  setMatcap('Silver');
+
+  setMatcap(MATCAPS.split(' ')[0]);
+
+  springSytem = new Rebound.SpringSystem();
+
+  inflateSpring = springSytem.createSpring(40, 3);
+  inflateSpring.addListener({
+    onSpringUpdate: function(spring) {
+      material.uniforms.inflation.value = spring.getCurrentValue();
+    }
+  });
 
   // ui
   LETTERS.split('').forEach(function(letter) {
@@ -68,6 +84,11 @@ var rotation = 0;
     button.addEventListener('click', setMatcap.bind(null, matcap));
     document.body.appendChild(button);
   });
+
+  var button = document.createElement('button');
+  button.innerHTML = 'inflate';
+  button.addEventListener('click', inflate);
+  document.body.appendChild(button);
 
   window.requestAnimationFrame(draw);
 })();
@@ -149,4 +170,20 @@ function setMatcap(matcap) {
       set();
     });
   }
+}
+
+/**
+ * @function inflate
+ * @param {float} duration
+ */
+function inflate() {
+  inflateSpring.setEndValue(0.07);
+
+  if(deflateTimeoutId) {
+    clearTimeout(deflateTimeoutId);
+  }
+
+  deflateTimeoutId = window.setTimeout(function() {
+    inflateSpring.setEndValue(0);
+  }, 200);
 }
