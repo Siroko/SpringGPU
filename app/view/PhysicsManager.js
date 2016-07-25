@@ -83,7 +83,7 @@ PhysicsManager.prototype.onClick = function( e ){
     v.normalize();
 
     if(!this.threeCannon[i].c.isSpringing){
-      this.threeCannon[i].c.applyLocalImpulse(v.scale(this.f/10), this.threeCannon[i].c.position);
+      this.threeCannon[i].c.applyLocalImpulse(v.scale(this.f/30), this.threeCannon[i].c.position);
 
       if(this.threeCannon[i].c.springable){
           v = v.scale(this.f/2);
@@ -397,7 +397,7 @@ PhysicsManager.prototype.setClosedArea = function(x,y,z) {
   var groundBody = new CANNON.Body({
       mass: 0 // mass == 0 makes the body static
   });
-  var groundShape = new CANNON.Plane(widthZ/2,widthY/2);
+  var groundShape = new CANNON.Plane(widthZ,widthY);
   groundBody.addShape(groundShape);
   var rot = new CANNON.Vec3(0,1,0)
   groundBody.quaternion.setFromAxisAngle(rot,(Math.PI/2))
@@ -407,7 +407,7 @@ PhysicsManager.prototype.setClosedArea = function(x,y,z) {
   var groundBody = new CANNON.Body({
       mass: 0 // mass == 0 makes the body static
   });
-  var groundShape = new CANNON.Plane(widthZ/2,widthY/2);
+  var groundShape = new CANNON.Plane(widthZ,widthY);
   groundBody.addShape(groundShape);
   var rot = new CANNON.Vec3(0,1,0)
   groundBody.quaternion.setFromAxisAngle(rot, -(Math.PI/2))
@@ -418,7 +418,7 @@ PhysicsManager.prototype.setClosedArea = function(x,y,z) {
   var groundBody = new CANNON.Body({
       mass: 0 // mass == 0 makes the body static
   });
-  var groundShape = new CANNON.Plane(widthX/2,widthY/2);
+  var groundShape = new CANNON.Plane(widthX,widthY);
   groundBody.addShape(groundShape);
   var rot = new CANNON.Vec3(1,0,0)
   groundBody.quaternion.setFromAxisAngle(rot,-(Math.PI/2))
@@ -428,7 +428,7 @@ PhysicsManager.prototype.setClosedArea = function(x,y,z) {
   var groundBody = new CANNON.Body({
       mass: 0 // mass == 0 makes the body static
   });
-  var groundShape = new CANNON.Plane(widthX/2,widthY/2);
+  var groundShape = new CANNON.Plane(widthX,widthY);
   groundBody.addShape(groundShape);
   var rot = new CANNON.Vec3(1,0,0)
   groundBody.quaternion.setFromAxisAngle(rot,(Math.PI/2))
@@ -440,7 +440,7 @@ PhysicsManager.prototype.setClosedArea = function(x,y,z) {
   var groundBody = new CANNON.Body({
       mass: 0 // mass == 0 makes the body static
   });
-  var groundShape = new CANNON.Plane(widthX/2,widthZ/2);
+  var groundShape = new CANNON.Plane(widthX,widthZ);
   groundBody.addShape(groundShape);
   var rot = new CANNON.Vec3(0,1,0)
   groundBody.quaternion.setFromAxisAngle(rot,(Math.PI))
