@@ -248,7 +248,7 @@ World3D.prototype.onStart = function() {
 
   var makeLetterAppear = (function(mesh) {
 
-    var spring = this.springSystem.createSpring(40, 10);
+    var spring = this.springSystem.createSpring(40, 20);
     spring.setCurrentValue(0).setAtRest();
 
     spring.addListener({
@@ -263,7 +263,7 @@ World3D.prototype.onStart = function() {
 
     setTimeout(function() {
       spring.setEndValue(1);
-    }, Math.random() * 2000);
+    }, (Math.random() * 2000) + 1000);
 
   }).bind(this);
 
