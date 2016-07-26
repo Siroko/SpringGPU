@@ -38,7 +38,8 @@ Explosion.prototype.init = function() {
     },
     vertexShader: require('./shaders/vs-explosion.glsl'),
     fragmentShader: require('./shaders/fs-explosion.glsl'),
-    transparent: true
+    transparent: true,
+    linewidth: 2
   });
 
   for(var i = 0; i < sphereGeometry.vertices.length; ++i) {
