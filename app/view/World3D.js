@@ -170,11 +170,14 @@ World3D.prototype.addLetter = function(letter) {
 
 
     var inflateSpring = that.springSystem.createSpring(40, 3);
+    inflateSpring.setEndValue(1).setAtRest();
+
     inflateSpring.addListener({
       onSpringUpdate: function(spring) {
         mat.uniforms.inflation.value = spring.getCurrentValue();
       }
     });
+
     mesh.inflateSpring = inflateSpring;
 
   }).bind(this));
@@ -207,7 +210,41 @@ World3D.prototype.addEvents = function() {
     this.manager.on('modechange', this.onModeChange.bind( this ) );
 
     this.worldManager.addEventListener( 'assetsLoaded', this.onAssetsLoaded.bind( this ) );
-    this.phManager.addEventListener( 'starts', function(){console.log("start event")} );
+    this.phManager.addEventListener( 'starts', this.onStart.bind(this) );
+};
+
+World3D.prototype.onStart = function() {
+  var springSystem = this.springSystem;
+
+  var makeAppear = (function(mesh) {
+
+    var targetScale = mesh.scale.x;
+    mesh.scale.set(0, 0, 0);
+    mesh.visible = true;
+
+    var spring = this.springSystem.createSpring(40, (Math.random() * 3) + 1);
+    spring.setCurrentValue(0).setAtRest();
+
+    spring.addListener({
+      onSpringUpdate: function(spring) {
+        var value = spring.getCurrentValue();
+        mesh.scale.set(value, value, value);
+      },
+      onSpringAtRest: function(spring) {
+        spring.removeAllListeners();
+      }
+    });
+
+    setTimeout(function() {
+      spring.setEndValue(targetScale);
+    }, Math.random() * 1000);
+
+  }).bind(this);
+
+  for(var i = 0; i < this.worldManager.meshes.length; ++i) {
+    var mesh = this.worldManager.meshes[i];
+    makeAppear(mesh)
+  }
 };
 
 World3D.prototype.onInitializeManager = function( n, o ) {
