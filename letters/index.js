@@ -1,5 +1,7 @@
 var THREE = require('three');
 var Rebound = require('rebound');
+var TWEEN = require('tween.js');
+var Explosion = require('./Explosion');
 
 var LETTERS = 'THESPIGAROLDUCKNWVY';
 var MATCAPS = 'silver gold';
@@ -22,13 +24,17 @@ var rotation = 0;
 var springSytem;
 var inflateSpring;
 var deflateTimeoutId;
+var inflateRange;
 
-var range;
+var explosion;
+var explosionRange;
 
 /**
  * @function setup
  */
 (function setup() {
+  document.body.style.backgroundColor = '#1a1f27';
+
   var $viewport = document.createElement('div');
   $viewport.style.width = VIEWPORT_WIDTH + 'px';
   $viewport.style.height = VIEWPORT_HEIGHT + 'px';
@@ -52,8 +58,8 @@ var range;
       textureMap: { type: 't', value: null },
       inflation: { type: 'f', value: 0 }
     },
-    vertexShader: require('./shaders/vs-buffer-geometry.glsl'),
-    fragmentShader: require('./shaders/fs-buffer-geometry.glsl')
+    vertexShader: require('./shaders/vs-letter.glsl'),
+    fragmentShader: require('./shaders/fs-letter.glsl')
   });
 
   var letter = window.location.hash.replace('#', '');
@@ -87,18 +93,32 @@ var range;
     document.body.appendChild(button);
   });
 
-  var button = document.createElement('button');
-  button.innerHTML = 'inflate';
-  button.addEventListener('click', inflate);
-  document.body.appendChild(button);
+  var inflateButton = document.createElement('button');
+  inflateButton.innerHTML = 'inflate';
+  inflateButton.addEventListener('click', inflate);
+  document.body.appendChild(inflateButton);
 
-  range = document.createElement('input');
-  range.type = 'range';
-  range.min = -0.5
-  range.max = 0.5;
-  range.step = 0.01;
-  range.addEventListener('input', updateInflation);
-  document.body.appendChild(range);
+  inflateRange = document.createElement('input');
+  inflateRange.type = 'range';
+  inflateRange.min = -0.5;
+  inflateRange.max = 0.5;
+  inflateRange.step = 0.01;
+  inflateRange.addEventListener('input', updateInflation);
+  document.body.appendChild(inflateRange);
+
+  explosion = new Explosion(null, {
+    radius: 1
+  });
+
+  scene.add(explosion.el);
+
+  explosionRange = document.createElement('input');
+  explosionRange.type = 'range';
+  explosionRange.min = 0;
+  explosionRange.max = 1;
+  explosionRange.step = 0.01;
+  explosionRange.addEventListener('input', updateExplosion);
+  document.body.appendChild(explosionRange);
 
   window.requestAnimationFrame(draw);
 })();
@@ -109,9 +129,17 @@ var range;
 function draw() {
   window.requestAnimationFrame(draw);
 
+  TWEEN.update();
+
   if(activeLetter !== void 0) {
-    letters[activeLetter].rotation.y = Math.sin(rotation);
-    letters[activeLetter].rotation.x = Math.cos(rotation / 2) / 2;
+    var rotationY = Math.sin(rotation);
+    var rotationX = Math.cos(rotation / 2) / 2;
+
+    letters[activeLetter].rotation.y = rotationY;
+    letters[activeLetter].rotation.x = rotationX;
+
+    explosion.el.rotation.y = rotationY;
+    explosion.el.rotation.x = rotationX;
   }
 
   rotation += 0.02;
@@ -184,7 +212,15 @@ function setMatcap(matcap) {
  * @param {float} duration
  */
 function inflate() {
-  range.value = 0;
+  var tween = new TWEEN.Tween({ progress: 0 })
+    .to({ progress: 1 }, 1500)
+    .easing(TWEEN.Easing.Exponential.Out)
+    .onUpdate(function() {
+      explosion.setProgress(this.progress);
+    })
+    .start();
+
+  inflateRange.value = 0;
 
   inflateSpring.setEndValue(0.07);
 
@@ -205,3 +241,10 @@ function updateInflation(e) {
   inflateSpring.setEndValue(value);
 }
 
+/**
+ * @function updateExplosion
+ */
+function updateExplosion(e) {
+  var value = parseFloat(e.currentTarget.value) || 0;
+  explosion.setProgress(value);
+}
