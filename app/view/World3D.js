@@ -56,20 +56,14 @@ var World3D = function( container ) {
     //this.scene.add( this.planeCalc );
     this.scene.add( this.dummyCamera );
 
-    //Adding Three Objects to Physic Manager
-    //Adding object
-    var geometry = new THREE.BoxGeometry( 20, 20, 20 );
-    var material = new THREE.MeshNormalMaterial({side:THREE.DoubleSide} );
-    this.cubetest = new THREE.Mesh( geometry, material );
-    //this.scene.add( this.cubetest );
-
-
-    geometry = new THREE.BoxGeometry( 1, 1, 1 );
-    material = new THREE.MeshNormalMaterial(  );
+    var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+    var material = new THREE.MeshNormalMaterial(  );
     var cube = new THREE.Mesh( geometry, material );
-    cube.position.y = 10;
-    //this.phManager.add3DObject(cube,"cube",false,false);
-    //this.scene.add( cube );
+    cube.position.y = 0.5;
+    cube.position.z = 0.0;
+    this.phManager.addStarterObject(cube,"cube");
+
+    this.scene.add( cube );
 
     //Letters integration
     this.loader = new THREE.JSONLoader();
@@ -94,6 +88,8 @@ var World3D = function( container ) {
       'THE  SPITE  GOOD LUCK   ON YOUR NEW  ADVENTURE',
       'GGG  GGGGG  SSSS SSSS   SS SSSS SSS  SSSSSSSSS' // S for silver, G for Gold
     );
+
+
 
     this.springSystem = new Rebound.SpringSystem();
 
@@ -151,17 +147,27 @@ World3D.prototype.addLetter = function(letter) {
     this.setMatcap(mat, matcap);
 
     var mesh = new THREE.Mesh(geo, mat);
-    mesh.scale.set(0.75, 0.75, 0.75);
+    //mesh.scale.set(0.75, 0.75, 0.75);
+    mesh.geometry.scale(0.75, 0.75, 0.75);
+    mesh.geometry.computeBoundingBox();
+    //console.log(mesh);
 
     var boxsize= 20;
-    var rdx = Math.floor(Math.random() * boxsize*2) - boxsize;
-    var rdy = Math.floor(Math.random() * boxsize/2);
-    var rdz = Math.floor(Math.random() * boxsize*2) - boxsize;
+    var rdx = Math.floor(Math.random()*boxsize - boxsize/2 );
+    var rdy = Math.floor(Math.random()*boxsize/2  );
+    var rdz = Math.floor(Math.random()*boxsize - boxsize/2);
     mesh.position.set(rdx, rdy, rdz);
     mesh.springIndex = letter.index;
 
+    mesh.material.transparent = true;
+    mesh.material.opacity = 0;
+
+    mesh.geometry.computeBoundingBox();
     this.scene.add(mesh);
+
     this.phManager.add3DObject(mesh, 'cube', false, true);
+    //this.phManager.add3DObject(mesh, 'convex', false, true);
+
 
     var inflateSpring = that.springSystem.createSpring(40, 3);
     inflateSpring.addListener({
@@ -201,14 +207,14 @@ World3D.prototype.addEvents = function() {
     this.manager.on('modechange', this.onModeChange.bind( this ) );
 
     this.worldManager.addEventListener( 'assetsLoaded', this.onAssetsLoaded.bind( this ) );
-
+    this.phManager.addEventListener( 'starts', function(){console.log("start event")} );
 };
 
 World3D.prototype.onInitializeManager = function( n, o ) {
 
     if( !this.manager.isVRCompatible || typeof window.orientation !== 'undefined' ) {
 
-        this.gamePads = new MousePad( this.scene, this.camera, this.effect );
+        this.gamePads = new MousePad( this.scene, this.camera, this.effect, this.phManager );
         this.dummyCamera.position.z = 5;
         this.dummyCamera.position.y = - 0.3;
 
@@ -221,7 +227,7 @@ World3D.prototype.onInitializeManager = function( n, o ) {
     //this.pointer = new THREE.Mesh( new THREE.SphereBufferGeometry( 0.1, 10, 10), new THREE.MeshNormalMaterial() );
     //this.scene.add( this.pointer );
 
-    this.phManager.add3DObject(this.gamePads.h1, "cube", true,false);
+
     if(this.gamePads.h2 !== undefined){
       this.phManager.add3DObject(this.gamePads.h2, "cube", true,false);
     }
@@ -274,7 +280,9 @@ World3D.prototype.render = function( timestamp ) {
     this.worldManager.update();
 
     // Update the physics
-    this.phManager.update(timestamp);
+
+      this.phManager.update(timestamp);
+
 
     // Update VR headset position and apply to camera.
     this.controls.update();

@@ -83,7 +83,7 @@ WorldManager.prototype._createFloor = function() {
     var infiniteFloorMesh = new THREE.Mesh(infiniteFloorGeo, infiniteFloorMat);
     this.floor.add(infiniteFloorMesh);
 
-    var centerFloorGeo = new THREE.PlaneBufferGeometry(3, 3);
+    var centerFloorGeo = new THREE.PlaneBufferGeometry(6, 6);
     var centerFloorMat = new THREE.MeshBasicMaterial({
       side: THREE.DoubleSide,
       map: new THREE.TextureLoader().load('assets/textures/floor.png'),
@@ -95,7 +95,9 @@ WorldManager.prototype._createFloor = function() {
     this.floor.add(centerFloorMesh);
 };
 
+
 WorldManager.prototype._createShapes = function() {
+
     var quantity = 100;
     var sizeBase = 0.2;
     var radius = [];
@@ -109,9 +111,9 @@ WorldManager.prototype._createShapes = function() {
         var s = ( Math.random() * 2 ) + 0.1;
 
 
-        var rdx = Math.floor(Math.random() * boxsize*2) - boxsize;
+        var rdx = Math.floor(Math.random() * boxsize) - boxsize/2;
         var rdy = Math.floor(Math.random() * boxsize/2);
-        var rdz = Math.floor(Math.random() * boxsize*2) - boxsize;
+        var rdz = Math.floor(Math.random() * boxsize) - boxsize/2;
 
         //var p = new THREE.Vector3( ( Math.random() * 2 - 1) * 4.5, Math.random() * 4.5 + 4, ( Math.random() * 2 - 1 ) * 9 );
 

@@ -9,6 +9,7 @@ var that;
 var PhysicsManager = function(dcamera,camera) {
 
   that = this;
+  THREE.EventDispatcher.call( this );
 
   this.world = new CANNON.World();
   //this.world.gravity.set(0, 0, -9.82);      // m/s²
@@ -22,7 +23,7 @@ var PhysicsManager = function(dcamera,camera) {
   this.threeCannon = [];
 
   // Create a sphere for the dummyCamera
-  var radius = Math.abs(0.2);  // m
+  var radius = Math.abs(0.3);  // m
   this.camBody = new CANNON.Body({
      mass: 0, // kg
      position: new CANNON.Vec3(dcamera.position.x, dcamera.position.z, dcamera.position.y),
@@ -48,52 +49,56 @@ var PhysicsManager = function(dcamera,camera) {
   this.f = 10;
 
   this.spring;
-  this.bodyA;
-  this.bodyB;
+
 
   this.bodyText = [];
   this.setBodyText();
   this.springElements = [];
+
+  this.startPh = false;
+  this.startSpring;
 
 
   window.addEventListener('click', this.onClick.bind( this )  );
   window.addEventListener("keydown",  this.onCursor, true);
 };
 
+// Inherits from eventdispatcher in order to be able to dispatch events from this class
+PhysicsManager.prototype = Object.create( THREE.EventDispatcher.prototype );
+
 PhysicsManager.prototype.onClick = function( e ){
   //console.log(this.dcamera);
+  if(that.startPh){
+    for(var i=0; i<this.threeCannon.length; i++){
 
-
-
-  for(var i=0; i<this.threeCannon.length; i++){
-
-    if(this.mode == 3){
-      var vx = this.camera.position.x - this.threeCannon[i].t.position.x;
-      var vy = this.camera.position.y - this.threeCannon[i].t.position.y;
-      var vz = this.camera.position.z - this.threeCannon[i].t.position.z;
-    }
-    else{
-     var vx = this.dcamera.position.x - this.threeCannon[i].t.position.x;
-     var vy = this.dcamera.position.y - this.threeCannon[i].t.position.y;
-     var vz = this.dcamera.position.z - this.threeCannon[i].t.position.z;
-    }
-
-
-    var v = new CANNON.Vec3(vx, vz, vy);
-    v.normalize();
-
-    if(!this.threeCannon[i].c.isSpringing){
-      this.threeCannon[i].c.applyLocalImpulse(v.scale(this.f/30), this.threeCannon[i].c.position);
-
-      if(this.threeCannon[i].c.springable){
-          v = v.scale(this.f/2);
+      if(this.mode == 3){
+        var vx = this.camera.position.x - this.threeCannon[i].t.position.x;
+        var vy = this.camera.position.y - this.threeCannon[i].t.position.y;
+        var vz = this.camera.position.z - this.threeCannon[i].t.position.z;
       }
       else{
-          v = v.scale(this.f/500);
+       var vx = this.dcamera.position.x - this.threeCannon[i].t.position.x;
+       var vy = this.dcamera.position.y - this.threeCannon[i].t.position.y;
+       var vz = this.dcamera.position.z - this.threeCannon[i].t.position.z;
       }
 
-      //console.log(v);
-      this.threeCannon[i].c.applyImpulse(v, this.threeCannon[i].c.position);
+
+      var v = new CANNON.Vec3(vx, vz, vy);
+      v.normalize();
+
+      if(!this.threeCannon[i].c.isSpringing){
+        this.threeCannon[i].c.applyLocalImpulse(v.scale(this.f/30), this.threeCannon[i].c.position);
+
+        if(this.threeCannon[i].c.springable){
+            v = v.scale(this.f/2);
+        }
+        else{
+            v = v.scale(this.f/500);
+        }
+
+        //console.log(v);
+        this.threeCannon[i].c.applyImpulse(v, this.threeCannon[i].c.position);
+      }
     }
   }
 };
@@ -103,26 +108,27 @@ PhysicsManager.prototype.showMessage = function(  ){
       for(var i=0; i < that.threeCannon.length;i++){
         var body = that.threeCannon[i].c;
 
-        if(!body.isSpringing && body.springable){
+        if(!body.isSpringing && body.springable && !body.isStarter ){
           that.addToSpring(that.bodyText[body.springIndex],body);
         }
-
       }
 
 };
 
 PhysicsManager.prototype.onCursor= function( e ){
 
-
-  if(e.keyCode==81 || e == -1){
-      that.showMessage();
-  }
-  if(e.keyCode==32){
-    for(var i=0; i < that.springElements.length; i++){
-        that.springElements[i].bodyB.isSpringing = false;
+  if(that.startPh){
+    if(e.keyCode==81 ){
+        that.showMessage();
     }
-    that.springElements = [];
+    if(e.keyCode==32 || e == -1){
+      for(var i=0; i < that.springElements.length; i++){
+          that.springElements[i].bodyB.isSpringing = false;
+      }
+      that.springElements = [];
+    }
   }
+
 };
 
 PhysicsManager.prototype.update = function(timestamp) {
@@ -146,65 +152,108 @@ PhysicsManager.prototype.update = function(timestamp) {
 
   }
 
+
+
+
   for(i=0; i < this.threeCannon.length; i++){
     if(!this.threeCannon[i].c.isActuator){
 
-      this.threeCannon[i].t.position.x = this.threeCannon[i].c.position.x ;
-      this.threeCannon[i].t.position.y = this.threeCannon[i].c.position.z ; //XY coordinates flipped
-      this.threeCannon[i].t.position.z = this.threeCannon[i].c.position.y ; //XY coordinates flipped
-
-
-
-      if(!this.threeCannon[i].c.isSpringing){
-
-        this.threeCannon[i].t.quaternion.x = this.threeCannon[i].c.quaternion.x ;
-        this.threeCannon[i].t.quaternion.y = this.threeCannon[i].c.quaternion.z ; //XY coordinates flipped
-        this.threeCannon[i].t.quaternion.z = this.threeCannon[i].c.quaternion.y ; //XY coordinates flipped
-        this.threeCannon[i].t.quaternion.w = this.threeCannon[i].c.quaternion.w ;
-
-      }
-      else{
-
-
-        if(this.threeCannon[i].c.waitsAnimation){
-          this.threeCannon[i].c.waitsAnimation=false;
-
-          this.animateQuaternion(this.threeCannon[i],2);
+        if(this.startPh){
+          this.threeCannon[i].t.position.x = this.threeCannon[i].c.position.x ;
+          this.threeCannon[i].t.position.y = this.threeCannon[i].c.position.z ; //XY coordinates flipped
+          this.threeCannon[i].t.position.z = this.threeCannon[i].c.position.y ; //XY coordinates flipped
+        }
+        else if(this.threeCannon[i].c.isStarter){
+          this.threeCannon[i].t.position.x = this.threeCannon[i].c.position.x ;
+          this.threeCannon[i].t.position.y = this.threeCannon[i].c.position.z ; //XY coordinates flipped
+          this.threeCannon[i].t.position.z = this.threeCannon[i].c.position.y ; //XY coordinates flipped
         }
 
-        this.threeCannon[i].c.quaternion.x = this.threeCannon[i].t.quaternion.x;
-        this.threeCannon[i].c.quaternion.y = this.threeCannon[i].t.quaternion.z; //XY coordinates flipped
-        this.threeCannon[i].c.quaternion.z = this.threeCannon[i].t.quaternion.y; //XY coordinates flipped
-        this.threeCannon[i].c.quaternion.w = this.threeCannon[i].t.quaternion.w;
 
-      }
+        if(!this.threeCannon[i].c.isSpringing){
+          this.threeCannon[i].t.quaternion.x = this.threeCannon[i].c.quaternion.x ;
+          this.threeCannon[i].t.quaternion.y = this.threeCannon[i].c.quaternion.z ; //XY coordinates flipped
+          this.threeCannon[i].t.quaternion.z = this.threeCannon[i].c.quaternion.y ; //XY coordinates flipped
+          this.threeCannon[i].t.quaternion.w = this.threeCannon[i].c.quaternion.w ;
+
+        }
+        else{
+          if(this.threeCannon[i].c.waitsAnimation){
+            this.threeCannon[i].c.waitsAnimation=false;
+            this.animateQuaternion(this.threeCannon[i],2);
+          }
+          this.threeCannon[i].c.quaternion.x = this.threeCannon[i].t.quaternion.x;
+          this.threeCannon[i].c.quaternion.y = this.threeCannon[i].t.quaternion.z; //XY coordinates flipped
+          this.threeCannon[i].c.quaternion.z = this.threeCannon[i].t.quaternion.y; //XY coordinates flipped
+          this.threeCannon[i].c.quaternion.w = this.threeCannon[i].t.quaternion.w;
+        }
+
     }
     else{
-      //console.log(this.threeCannon[i].c.velocity);
-
       this.threeCannon[i].c.position.x = this.threeCannon[i].t.position.x;
       this.threeCannon[i].c.position.y = this.threeCannon[i].t.position.z;
       this.threeCannon[i].c.position.z = this.threeCannon[i].t.position.y;
-
 
       this.threeCannon[i].c.quaternion.x = this.threeCannon[i].t.quaternion.x;
       this.threeCannon[i].c.quaternion.y = this.threeCannon[i].t.quaternion.z; //XY coordinates flipped
       this.threeCannon[i].c.quaternion.z = this.threeCannon[i].t.quaternion.y; //XY coordinates flipped
       this.threeCannon[i].c.quaternion.w = this.threeCannon[i].t.quaternion.w;
-
-
     }
   }
 
-  if(this.springElements.length >0){
+  if(this.springElements.length >0 && this.startPh){
     for(var i=0; i<this.springElements.length; i++){
       this.springElements[i].applyForce();
     }
   }
+  //if(!this.startPh){
+    this.startSpring.applyForce();
+  //}
+
 
 
 
   this.lastTime = timestamp;
+};
+
+
+PhysicsManager.prototype.addStarterObject = function(obj,type) {
+  var mass = 5;
+  switch (type) {
+    case "cube":
+      var bbox = new THREE.Box3().setFromObject(obj);
+      var widthX = bbox.max.x - bbox.min.x;
+      var widthY = bbox.max.y - bbox.min.y;
+      var widthZ = bbox.max.z - bbox.min.z;
+      var boxShape = new CANNON.Box(new CANNON.Vec3(widthX/2,widthZ/2,widthY/2));  // Cannon and three have the XY coordinates flipped
+      var boxBody;
+
+      boxBody = new CANNON.Body({ mass: mass, angularDamping:0.3 });
+      boxBody.springable = true;
+      boxBody.isStarter = true;
+      boxBody.addShape(boxShape);
+      boxBody.position.set(obj.position.x,obj.position.z,obj.position.y); // Cannon and three have the XY coordinates flipped
+      this.world.addBody(boxBody);
+
+      var radius = 0.1;  // m
+      var body  = new CANNON.Body({
+         mass: 0, // kg
+         position: new CANNON.Vec3(0,0,0.5),
+         shape: new CANNON.Sphere(radius)
+      });
+
+
+      this.startSpring = new CANNON.Spring(body,boxBody,{
+        localAnchorA: new CANNON.Vec3(0,0,-0.4),
+        localAnchorB: new CANNON.Vec3(0,0,0),
+        restLength : 0,
+        stiffness : 50,
+        damping : 40,
+      });
+
+      this.threeCannon.push({"t":obj,"c":boxBody});
+    break;
+  }
 };
 
 /**
@@ -229,11 +278,9 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator,springable,opt
       var boxBody;
       if(options){
         boxBody = new CANNON.Body(options);
-        this.bodyA = boxBody;
       }
       else{
         boxBody = new CANNON.Body({ mass: mass, angularDamping:0.3 });
-        this.bodyB = boxBody;
       }
       boxBody.addShape(boxShape);
       boxBody.position.set(obj.position.x,obj.position.z,obj.position.y); // Cannon and three have the XY coordinates flipped
@@ -246,9 +293,14 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator,springable,opt
       if(actuator==true){
         // When a body collides with another body, they both dispatch the "collide" event.
         boxBody.addEventListener("collide",function(e){
-          //console.log("Collided with body:",e.body);
-          if(e.body.springable && !e.body.isSpringing){
 
+          if(!that.startPh && e.body.isStarter && that.lastTime > 1000){
+              console.log("Interaction enabled");
+              that.dispatchEvent( { type : 'starts' } );
+              that.startPh = true;
+          }
+
+          if(e.body.springable && !e.body.isSpringing){
             if(e.body.springIndex != undefined){
               that.addToSpring(that.bodyText[e.body.springIndex],e.body);
               that.onLetterHit(that.getThreeMeshFromCannonBody(e.body));
@@ -307,17 +359,17 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator,springable,opt
         for(var i=0; i<obj.geometry.faces.length; i++ ){
           faces.push([obj.geometry.faces[i].a,obj.geometry.faces[i].b,obj.geometry.faces[i].c]);
         }
-        var boxShape = new CANNON.ConvexPolyhedron(verts,faces);
+        var boxShape = new CANNON.Trimesh(verts,faces);
 
 
         var boxBody;
         if(options){
           boxBody = new CANNON.Body(options);
-          this.bodyA = boxBody;
+
         }
         else{
           boxBody = new CANNON.Body({ mass: mass, angularDamping:0.3 });
-          this.bodyB = boxBody;
+
         }
         boxBody.addShape(boxShape);
         boxBody.position.set(obj.position.x,obj.position.z,obj.position.y); // Cannon and three have the XY coordinates flipped

@@ -3,7 +3,10 @@
  */
 
 var THREE = require('three');
+var OBJLoader = require('./../../utils/OBJLoader');
+var that;
 var GamePads = function( scene, camera, effect , physics){
+    that = this;
 
     this.scene = scene;
     this.camera = camera;
@@ -15,13 +18,48 @@ var GamePads = function( scene, camera, effect , physics){
     this.sTSMat = new THREE.Matrix4();
 
     this.h1 = new THREE.Mesh( new THREE.BoxBufferGeometry( 0.1, 0.1, 0.1, 1, 1, 1), new THREE.MeshNormalMaterial() );
-    this.h1.matrixAutoUpdate = false;
     this.h2 = new THREE.Mesh( new THREE.BoxBufferGeometry( 0.1, 0.1, 0.1, 1, 1, 1), new THREE.MeshNormalMaterial() );
+
+    // instantiate a loader
+    var loader = new OBJLoader();
+    // load a resource
+    loader.load(
+    	// resource URL
+    	'assets/obj/hand-free.obj',
+    	// Function when resource is loaded
+    	function ( object ) {
+
+        object.children[0].material = new THREE.MeshNormalMaterial();
+        object.children[0].material.side = THREE.DoubleSide;
+        object.children[0].material.needsUpdate = true;
+        object.children[0].geometry.scale( 0.01, 0.01, 0.01 );
+        object.children[0].geometry.rotateY(Math.PI);
+        object.children[0].geometry.computeBoundingBox();
+
+        that.h1 = object.children[0];
+
+        var h2c = new THREE.Mesh(object.children[0].geometry.clone(),object.children[0].material.clone());
+        h2c.geometry.scale( -1, 1, 1 );
+        that.h2 = h2c ;
+
+        that.h1.matrixAutoUpdate = false;
+        that.h2.matrixAutoUpdate = false;
+        that.handlers = [ that.h1, that.h2 ];
+
+        that.scene.add(that.h1);
+        that.scene.add(that.h2);
+        that.phManager.add3DObject(that.h1, "cube", true,false);
+        that.phManager.add3DObject(that.h2, "cube", true,false);
+
+    	}
+    );
+    /*
+    this.h1.matrixAutoUpdate = false;
     this.h2.matrixAutoUpdate = false;
     this.handlers = [ this.h1, this.h2 ];
-
     this.scene.add( this.h1 );
     this.scene.add( this.h2 );
+    */
 
     this.cursorlocked = [];
     this.cursorlocked[0] = false;
