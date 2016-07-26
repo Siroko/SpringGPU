@@ -17,8 +17,8 @@ var GamePads = function( scene, camera, effect , physics){
     this.intersectPoint2 = new THREE.Vector3();
     this.sTSMat = new THREE.Matrix4();
 
-  //  this.h1 = new THREE.Mesh( new THREE.BoxBufferGeometry( 0.1, 0.1, 0.1, 1, 1, 1), new THREE.MeshNormalMaterial() );
-    //this.h2 = new THREE.Mesh( new THREE.BoxBufferGeometry( 0.1, 0.1, 0.1, 1, 1, 1), new THREE.MeshNormalMaterial() );
+    this.h1 = new THREE.Mesh( new THREE.BoxBufferGeometry( 0.1, 0.1, 0.1, 1, 1, 1), new THREE.MeshNormalMaterial() );
+    this.h2 = new THREE.Mesh( new THREE.BoxBufferGeometry( 0.1, 0.1, 0.1, 1, 1, 1), new THREE.MeshNormalMaterial() );
 
     // instantiate a loader
     var loader = new OBJLoader();
@@ -32,13 +32,14 @@ var GamePads = function( scene, camera, effect , physics){
         object.children[0].material = new THREE.MeshNormalMaterial();
         object.children[0].material.side = THREE.DoubleSide;
         object.children[0].material.needsUpdate = true;
-        object.children[0].scale.set( 0.02, 0.02, 0.02 );
-        object.children[0].rotation.y += Math.PI;
+        object.children[0].geometry.scale( 0.01, 0.01, 0.01 );
+        object.children[0].geometry.rotateY(Math.PI);
+        object.children[0].geometry.computeBoundingBox();
 
         that.h1 = object.children[0];
 
         var h2c = new THREE.Mesh(object.children[0].geometry.clone(),object.children[0].material.clone());
-        h2c.scale.set( -0.02, 0.02, 0.02 );
+        h2c.geometry.scale( -1, 1, 1 );
         that.h2 = h2c ;
 
         that.h1.matrixAutoUpdate = false;

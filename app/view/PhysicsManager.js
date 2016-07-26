@@ -108,7 +108,7 @@ PhysicsManager.prototype.showMessage = function(  ){
       for(var i=0; i < that.threeCannon.length;i++){
         var body = that.threeCannon[i].c;
 
-        if(!body.isSpringing && body.springable){
+        if(!body.isSpringing && body.springable && !body.isStarter ){
           that.addToSpring(that.bodyText[body.springIndex],body);
         }
       }

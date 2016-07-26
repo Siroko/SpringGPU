@@ -159,7 +159,9 @@ World3D.prototype.addLetter = function(letter) {
     mesh.material.transparent = true;
     mesh.material.opacity = 0;
 
+    mesh.geometry.computeBoundingBox();
     this.scene.add(mesh);
+
     this.phManager.add3DObject(mesh, 'cube', false, true);
     //this.phManager.add3DObject(mesh, 'convex', false, true);
 
@@ -202,7 +204,7 @@ World3D.prototype.addEvents = function() {
     this.manager.on('modechange', this.onModeChange.bind( this ) );
 
     this.worldManager.addEventListener( 'assetsLoaded', this.onAssetsLoaded.bind( this ) );
-
+    this.phManager.addEventListener( 'starts', function(){console.log("start event")} );
 };
 
 World3D.prototype.onInitializeManager = function( n, o ) {
@@ -222,7 +224,7 @@ World3D.prototype.onInitializeManager = function( n, o ) {
     //this.pointer = new THREE.Mesh( new THREE.SphereBufferGeometry( 0.1, 10, 10), new THREE.MeshNormalMaterial() );
     //this.scene.add( this.pointer );
 
-  
+
     if(this.gamePads.h2 !== undefined){
       this.phManager.add3DObject(this.gamePads.h2, "cube", true,false);
     }

@@ -33,11 +33,14 @@ var MousePad = function( scene, camera, effect,physics ) {
         object.children[0].material = new THREE.MeshNormalMaterial();
         object.children[0].material.side = THREE.DoubleSide;
         object.children[0].material.needsUpdate = true;
-        object.children[0].scale.set( 0.02, 0.02, 0.02 );
-
+        object.children[0].geometry.scale( 0.02, 0.02, 0.02 );
         object.children[0].rotation.y += Math.PI;
+        object.children[0].geometry.computeBoundingBox();
 
         that.h1 = object.children[0];
+
+        console.log(that.h1);
+
         that.scene.add(that.h1);
         that.phManager.add3DObject(that.h1, "cube", true,false);
         that.addEvents();
