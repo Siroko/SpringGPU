@@ -209,7 +209,7 @@ World3D.prototype.onInitializeManager = function( n, o ) {
 
     if( !this.manager.isVRCompatible || typeof window.orientation !== 'undefined' ) {
 
-        this.gamePads = new MousePad( this.scene, this.camera, this.effect );
+        this.gamePads = new MousePad( this.scene, this.camera, this.effect, this.phManager );
         this.dummyCamera.position.z = 5;
         this.dummyCamera.position.y = - 0.3;
 
@@ -222,7 +222,7 @@ World3D.prototype.onInitializeManager = function( n, o ) {
     //this.pointer = new THREE.Mesh( new THREE.SphereBufferGeometry( 0.1, 10, 10), new THREE.MeshNormalMaterial() );
     //this.scene.add( this.pointer );
 
-    this.phManager.add3DObject(this.gamePads.h1, "cube", true,false);
+  
     if(this.gamePads.h2 !== undefined){
       this.phManager.add3DObject(this.gamePads.h2, "cube", true,false);
     }

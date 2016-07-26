@@ -9,6 +9,7 @@ var that;
 var PhysicsManager = function(dcamera,camera) {
 
   that = this;
+  THREE.EventDispatcher.call( this );
 
   this.world = new CANNON.World();
   //this.world.gravity.set(0, 0, -9.82);      // m/s²
@@ -61,6 +62,9 @@ var PhysicsManager = function(dcamera,camera) {
   window.addEventListener('click', this.onClick.bind( this )  );
   window.addEventListener("keydown",  this.onCursor, true);
 };
+
+// Inherits from eventdispatcher in order to be able to dispatch events from this class
+PhysicsManager.prototype = Object.create( THREE.EventDispatcher.prototype );
 
 PhysicsManager.prototype.onClick = function( e ){
   //console.log(this.dcamera);
@@ -292,6 +296,7 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator,springable,opt
 
           if(!that.startPh && e.body.isStarter && that.lastTime > 1000){
               console.log("Interaction enabled");
+              that.dispatchEvent( { type : 'starts' } );
               that.startPh = true;
           }
 
