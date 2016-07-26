@@ -147,7 +147,10 @@ World3D.prototype.addLetter = function(letter) {
     this.setMatcap(mat, matcap);
 
     var mesh = new THREE.Mesh(geo, mat);
-    mesh.scale.set(0.75, 0.75, 0.75);
+    //mesh.scale.set(0.75, 0.75, 0.75);
+    mesh.geometry.scale(0.75, 0.75, 0.75);
+    mesh.geometry.computeBoundingBox();
+    //console.log(mesh);
 
     var boxsize= 20;
     var rdx = Math.floor(Math.random()*boxsize - boxsize/2 );
