@@ -5,6 +5,7 @@ precision highp sampler2D;
 
 uniform sampler2D textureMap;
 uniform sampler2D normalMap;
+uniform float opacity;
 
 varying vec4 vPos;
 
@@ -90,5 +91,5 @@ void main(){
     float nn = .05 * random( vec3( 1. ), length( gl_FragCoord ) );
     base += vec3( nn );
 
-    gl_FragColor = vec4(base.rgb, 1.);
+    gl_FragColor = vec4(base.rgb, opacity);
 }

@@ -69,15 +69,18 @@ var World3D = function( container ) {
     this.loader = new THREE.JSONLoader();
 
     this.letters = [];
+    this.lettersMesh = [];
     this.lettersMatcapsCache = {};
     this.lettersBaseMaterial = new THREE.RawShaderMaterial({
       uniforms: {
         normalMap: { type: 't', value: null },
         textureMap: { type: 't', value: null },
-        inflation: { type: 'f', value: 0 }
+        inflation: { type: 'f', value: 0 },
+        opacity: { type: 'f', value: 0 }
       },
       vertexShader: require('../glsl/vs-letter.glsl'),
-      fragmentShader: require('../glsl/fs-letter.glsl')
+      fragmentShader: require('../glsl/fs-letter.glsl'),
+      transparent: true
     });
 
     this.meshes = [];
@@ -180,6 +183,8 @@ World3D.prototype.addLetter = function(letter) {
 
     mesh.inflateSpring = inflateSpring;
 
+    this.lettersMesh.push(mesh);
+
   }).bind(this));
 };
 
@@ -216,7 +221,7 @@ World3D.prototype.addEvents = function() {
 World3D.prototype.onStart = function() {
   var springSystem = this.springSystem;
 
-  var makeAppear = (function(mesh) {
+  var makeShapeAppear = (function(mesh) {
 
     var targetScale = mesh.scale.x;
     mesh.scale.set(0, 0, 0);
@@ -237,14 +242,41 @@ World3D.prototype.onStart = function() {
 
     setTimeout(function() {
       spring.setEndValue(targetScale);
-    }, Math.random() * 1000);
+    }, Math.random() * 2000);
+
+  }).bind(this);
+
+  var makeLetterAppear = (function(mesh) {
+
+    var spring = this.springSystem.createSpring(40, 10);
+    spring.setCurrentValue(0).setAtRest();
+
+    spring.addListener({
+      onSpringUpdate: function(spring) {
+        var value = spring.getCurrentValue();
+        mesh.material.uniforms.opacity.value = value;
+      },
+      onSpringAtRest: function(spring) {
+        spring.removeAllListeners();
+      }
+    });
+
+    setTimeout(function() {
+      spring.setEndValue(1);
+    }, Math.random() * 2000);
 
   }).bind(this);
 
   for(var i = 0; i < this.worldManager.meshes.length; ++i) {
     var mesh = this.worldManager.meshes[i];
-    makeAppear(mesh)
+    makeShapeAppear(mesh)
   }
+
+  for(var i = 0; i < this.lettersMesh.length; ++i) {
+    var letterMesh = this.lettersMesh[i];
+    makeLetterAppear(letterMesh);
+  }
+
 };
 
 World3D.prototype.onInitializeManager = function( n, o ) {
