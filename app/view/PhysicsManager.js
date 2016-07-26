@@ -158,16 +158,11 @@ PhysicsManager.prototype.update = function(timestamp) {
   for(i=0; i < this.threeCannon.length; i++){
     if(!this.threeCannon[i].c.isActuator){
 
-        if(this.startPh){
+
           this.threeCannon[i].t.position.x = this.threeCannon[i].c.position.x ;
           this.threeCannon[i].t.position.y = this.threeCannon[i].c.position.z ; //XY coordinates flipped
           this.threeCannon[i].t.position.z = this.threeCannon[i].c.position.y ; //XY coordinates flipped
-        }
-        else if(this.threeCannon[i].c.isStarter){
-          this.threeCannon[i].t.position.x = this.threeCannon[i].c.position.x ;
-          this.threeCannon[i].t.position.y = this.threeCannon[i].c.position.z ; //XY coordinates flipped
-          this.threeCannon[i].t.position.z = this.threeCannon[i].c.position.y ; //XY coordinates flipped
-        }
+
 
 
         if(!this.threeCannon[i].c.isSpringing){
@@ -200,6 +195,7 @@ PhysicsManager.prototype.update = function(timestamp) {
       this.threeCannon[i].c.quaternion.w = this.threeCannon[i].t.quaternion.w;
     }
   }
+
 
   if(this.springElements.length >0 && this.startPh){
     for(var i=0; i<this.springElements.length; i++){
@@ -300,7 +296,7 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator,springable,opt
               that.startPh = true;
           }
 
-          if(e.body.springable && !e.body.isSpringing){
+          if(e.body.springable && !e.body.isSpringing && that.startPh){
             if(e.body.springIndex != undefined){
               that.addToSpring(that.bodyText[e.body.springIndex],e.body);
               that.onLetterHit(that.getThreeMeshFromCannonBody(e.body));
