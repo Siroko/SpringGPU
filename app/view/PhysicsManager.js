@@ -67,38 +67,42 @@ var PhysicsManager = function(dcamera,camera) {
 PhysicsManager.prototype = Object.create( THREE.EventDispatcher.prototype );
 
 PhysicsManager.prototype.onClick = function( e ){
-  //console.log(this.dcamera);
-  if(that.startPh){
-    for(var i=0; i<this.threeCannon.length; i++){
+  this.attractBodiesToPlayer();
+};
 
-      if(this.mode == 3){
-        var vx = this.camera.position.x - this.threeCannon[i].t.position.x;
-        var vy = this.camera.position.y - this.threeCannon[i].t.position.y;
-        var vz = this.camera.position.z - this.threeCannon[i].t.position.z;
+/**
+ * @method attractToPlayer
+ */
+PhysicsManager.prototype.attractBodiesToPlayer = function() {
+  for(var i=0; i<this.threeCannon.length; i++){
+
+    if(this.mode == 3){
+      var vx = this.camera.position.x - this.threeCannon[i].t.position.x;
+      var vy = this.camera.position.y - this.threeCannon[i].t.position.y;
+      var vz = this.camera.position.z - this.threeCannon[i].t.position.z;
+    }
+    else{
+      var vx = this.dcamera.position.x - this.threeCannon[i].t.position.x;
+      var vy = this.dcamera.position.y - this.threeCannon[i].t.position.y;
+      var vz = this.dcamera.position.z - this.threeCannon[i].t.position.z;
+    }
+
+
+    var v = new CANNON.Vec3(vx, vz, vy);
+    v.normalize();
+
+    if(!this.threeCannon[i].c.isSpringing){
+      this.threeCannon[i].c.applyLocalImpulse(v.scale(this.f/30), this.threeCannon[i].c.position);
+
+      if(this.threeCannon[i].c.springable){
+        v = v.scale(this.f/2);
       }
       else{
-       var vx = this.dcamera.position.x - this.threeCannon[i].t.position.x;
-       var vy = this.dcamera.position.y - this.threeCannon[i].t.position.y;
-       var vz = this.dcamera.position.z - this.threeCannon[i].t.position.z;
+        v = v.scale(this.f/500);
       }
 
-
-      var v = new CANNON.Vec3(vx, vz, vy);
-      v.normalize();
-
-      if(!this.threeCannon[i].c.isSpringing){
-        this.threeCannon[i].c.applyLocalImpulse(v.scale(this.f/30), this.threeCannon[i].c.position);
-
-        if(this.threeCannon[i].c.springable){
-            v = v.scale(this.f/2);
-        }
-        else{
-            v = v.scale(this.f/500);
-        }
-
-        //console.log(v);
-        this.threeCannon[i].c.applyImpulse(v, this.threeCannon[i].c.position);
-      }
+      //console.log(v);
+      this.threeCannon[i].c.applyImpulse(v, this.threeCannon[i].c.position);
     }
   }
 };

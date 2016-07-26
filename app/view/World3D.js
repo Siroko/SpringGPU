@@ -277,6 +277,8 @@ World3D.prototype.onStart = function() {
     makeLetterAppear(letterMesh);
   }
 
+  this.phManager.attractBodiesToPlayer();
+
 };
 
 World3D.prototype.onInitializeManager = function( n, o ) {
