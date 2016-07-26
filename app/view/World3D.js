@@ -56,14 +56,29 @@ var World3D = function( container ) {
     //this.scene.add( this.planeCalc );
     this.scene.add( this.dummyCamera );
 
+
+    THREE.ImageUtils.crossOrigin = '';
+    var tex = THREE.ImageUtils.loadTexture("assets/textures/breel.jpeg");
+    tex.generateMipmaps = false;
+    tex.minFilter = THREE.LinearFilter;
+    tex.magFilter = THREE.LinearFilter;
+
     var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-    var material = new THREE.MeshNormalMaterial(  );
+    var material = new THREE.MeshBasicMaterial(  );
+    material.map =  tex;
+    material.map = tex;
+    material.needsUpdate = true;
+
     var cube = new THREE.Mesh( geometry, material );
     cube.position.y = 0.5;
     cube.position.z = 0.0;
-    this.phManager.addStarterObject(cube,"cube");
 
-    this.scene.add( cube );
+    that.phManager.addStarterObject(cube,"cube");
+    that.scene.add( cube );
+
+
+
+
 
     //Letters integration
     this.loader = new THREE.JSONLoader();
