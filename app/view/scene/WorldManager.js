@@ -149,6 +149,7 @@ WorldManager.prototype._createShapes = function() {
         this.materials.push(newMat);
 
         mesh = new THREE.Mesh( geom, newMat);
+        mesh.visible = false;
         mesh.position.copy( positions[ i ] );
 
         var s = scales[ i ];
