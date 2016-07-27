@@ -11,6 +11,8 @@ var GamePads = require('./gamepads/GamePads');
 var MousePad = require('./gamepads/MousePad');
 
 var PhysicsManager = require('./PhysicsManager');
+var SoundManager = require('./sound/SoundManager');
+var AssetsSound = require('./sound/AssetsSound');
 var WorldManager = require('./scene/WorldManager');
 var that;
 
@@ -93,6 +95,8 @@ var World3D = function( container ) {
     );
 
 
+    this.soundManager = new SoundManager();
+    this.soundManager.addSounds(AssetsSound.Sounds);
 
     this.springSystem = new Rebound.SpringSystem();
 
