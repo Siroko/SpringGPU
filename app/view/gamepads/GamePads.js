@@ -20,6 +20,8 @@ var GamePads = function( scene, camera, effect , physics){
     this.h1 = new THREE.Mesh( new THREE.BoxBufferGeometry( 0.1, 0.1, 0.1, 1, 1, 1), new THREE.MeshNormalMaterial() );
     this.h2 = new THREE.Mesh( new THREE.BoxBufferGeometry( 0.1, 0.1, 0.1, 1, 1, 1), new THREE.MeshNormalMaterial() );
 
+
+
     // instantiate a loader
     var loader = new OBJLoader();
     // load a resource
@@ -34,6 +36,7 @@ var GamePads = function( scene, camera, effect , physics){
         object.children[0].material.needsUpdate = true;
         object.children[0].geometry.scale( 0.01, 0.01, 0.01 );
         object.children[0].geometry.rotateY(Math.PI);
+
         object.children[0].geometry.computeBoundingBox();
 
         that.h1 = object.children[0];
@@ -93,9 +96,18 @@ GamePads.prototype.update = function( t ){
             vrGamepads.push(gamepad);
             //this.intersectPoint.quaternion.fromArray( gamepad.pose.orientation );
             this.handlers[ i ].position.fromArray( gamepad.pose.position );
+
+
+
             this.handlers[ i ].quaternion.fromArray( gamepad.pose.orientation );
             this.handlers[ i ].updateMatrix();
             this.handlers[ i ].applyMatrix( this.sTSMat );
+
+
+            this.handlers[ i].updateMatrixWorld();
+            this.tmpVector.set( -0.1, 0.3, -0.35);
+            this.tmpVector.applyMatrix4( this.h1Handler.matrixWorld );
+
 
             this.intersectPoint.copy( this.handlers[ 0 ].position );
             this.intersectPoint2.copy( this.handlers[ 1 ].position );

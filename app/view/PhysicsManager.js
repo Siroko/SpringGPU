@@ -266,9 +266,10 @@ PhysicsManager.prototype.deleteStarterObject = function() {
 
   function fadeOut(){
       if(  mesh.material.opacity <= 0){return;}
-      mesh.material.opacity -= 0.075;
+      mesh.material.opacity -= 0.016;
 
-      setTimeout(function(){ fadeOut(); }, 1000/10);
+
+      window.requestAnimationFrame(fadeOut);
   }
   fadeOut();
   this.startSpring = undefined;
