@@ -207,7 +207,9 @@ PhysicsManager.prototype.update = function(timestamp) {
     }
   }
   //if(!this.startPh){
+  if(this.startSpring !== undefined){
     this.startSpring.applyForce();
+  }
   //}
 
 
@@ -238,7 +240,7 @@ PhysicsManager.prototype.addStarterObject = function(obj,type) {
       var radius = 0.1;  // m
       var body  = new CANNON.Body({
          mass: 0, // kg
-         position: new CANNON.Vec3(0,0,0.5),
+         position: new CANNON.Vec3(0,0,1.5),
          shape: new CANNON.Sphere(radius)
       });
 
@@ -256,6 +258,21 @@ PhysicsManager.prototype.addStarterObject = function(obj,type) {
   }
 };
 
+PhysicsManager.prototype.deleteStarterObject = function() {
+
+
+  var mesh = that.getThreeMeshFromCannonBody(this.startSpring.bodyB);
+  mesh.material.transparent = true;
+
+  function fadeOut(){
+      if(  mesh.material.opacity <= 0){return;}
+      mesh.material.opacity -= 0.075;
+
+      setTimeout(function(){ fadeOut(); }, 1000/10);
+  }
+  fadeOut();
+  this.startSpring = undefined;
+};
 /**
  * Add Cannon physics to a three.js object
  * @param {Object} obj - Three.js Object
@@ -298,6 +315,7 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator,springable,opt
               console.log("Interaction enabled");
               that.dispatchEvent( { type : 'starts' } );
               that.startPh = true;
+              that.deleteStarterObject();
           }
 
           if(e.body.springable && !e.body.isSpringing && that.startPh){
