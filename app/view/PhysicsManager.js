@@ -419,6 +419,10 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator,springable,opt
   }
 }
 
+var Explosion = require('./Explosion');
+
+var availableExplosions = [];
+
 /**
  * @method onLetterHit
  * @param {THREE.Mesh} letterMesh
@@ -431,6 +435,24 @@ PhysicsManager.prototype.onLetterHit = function(letterMesh) {
   if(letterMesh.deflateTimeoutId) {
     window.clearTimeout(letterMesh.deflateTimeoutId);
   }
+
+  var explosion = availableExplosions.length
+    ? availableExplosions.pop()
+    : new Explosion();
+
+  explosion.setParent(letterMesh);
+
+  new TWEEN.Tween({ progress: 0 })
+    .to({ progress: 1 }, 1500)
+    .easing(TWEEN.Easing.Exponential.Out)
+    .onUpdate(function() {
+      explosion.setProgress(this.progress);
+    })
+    .onComplete(function() {
+      availableExplosions.push(explosion);
+      explosion.setParent(null);
+    })
+    .start();
 
   letterMesh.inflateSpring.setEndValue(0.09);
 
