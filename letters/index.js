@@ -106,7 +106,7 @@ var explosionRange;
   inflateRange.addEventListener('input', updateInflation);
   document.body.appendChild(inflateRange);
 
-  explosion = new Explosion(null, {
+  explosion = new Explosion({
     radius: 1
   });
 

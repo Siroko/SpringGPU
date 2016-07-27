@@ -6,33 +6,31 @@ var THREE = require('three');
  * }
  *
  * @class Explosion
- * @param {HTMLElement} parent
+ * @constructor
  * @param {IExplosionOptions} options
  */
-function Explosion(parent, options) {
-  this.options = options || {};
+function Explosion(options) {
+  this._options = options || {};
 
-  if(this.options.radius === void 0) {
-    this.options.radius = 1;
+  if(this._options.radius === void 0) {
+    this._options.radius = 1;
   }
 
-  this.parent = parent;
+  this._parent = null;
   this.el = new THREE.Object3D();
 
-  if(this.parent) {
-    this.parent.add(el);
-  }
+  this._lineMaterial = null;
 
-  this.init();
+  this._init();
 };
 
 /**
  * @method init
  */
-Explosion.prototype.init = function() {
-  var sphereGeometry = new THREE.SphereGeometry(this.options.radius, 12, 12);
+Explosion.prototype._init = function() {
+  var sphereGeometry = new THREE.SphereGeometry(this._options.radius, 12, 12);
 
-  this.lineMaterial = new THREE.RawShaderMaterial({
+  this._lineMaterial = new THREE.RawShaderMaterial({
     uniforms: {
       progress: { type: 'f', value: 0 }
     },
@@ -78,9 +76,22 @@ Explosion.prototype.init = function() {
     geometry.addAttribute('influence', new THREE.BufferAttribute(influences, 1));
     geometry.addAttribute('tint', new THREE.BufferAttribute(tints, 3));
 
-    var line = new THREE.Line(geometry, this.lineMaterial);
+    var line = new THREE.Line(geometry, this._lineMaterial);
     this.el.add(line);
   }
+};
+
+/**
+ * @method setParent
+ * @param {THREE.Object3D} parent
+ */
+Explosion.prototype.setParent = function(parent) {
+  if(this._parent) {
+    this._parent.remove(this.el);
+  }
+
+  this._parent = parent;
+  this._parent.add(this.el);
 };
 
 /**
@@ -88,15 +99,15 @@ Explosion.prototype.init = function() {
  * @param {float} valu from 0 to 1
  */
 Explosion.prototype.setProgress = function(value) {
-  this.lineMaterial.uniforms.progress.value = value;
+  this._lineMaterial.uniforms.progress.value = value;
 };
 
 /**
  * @method dispose
  */
 Explosion.prototype.dispose = function() {
-  if(this.parent) {
-    this.parent.remove(this.el);
+  if(this._parent) {
+    this._parent.remove(this.el);
   }
 };
 
