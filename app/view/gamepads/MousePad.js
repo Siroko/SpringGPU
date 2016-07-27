@@ -20,6 +20,7 @@ var MousePad = function( scene, camera, effect,physics ) {
 
     this.h1 = new THREE.Mesh( new THREE.BoxBufferGeometry( 0.1, 0.1, 0.1, 1, 1, 1), new THREE.MeshNormalMaterial() );
 
+
     // instantiate a loader
     var loader = new OBJLoader();
     // load a resource

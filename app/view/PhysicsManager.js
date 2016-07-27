@@ -266,7 +266,7 @@ PhysicsManager.prototype.addStarterObject = function(obj,type) {
 };
 
 PhysicsManager.prototype.deleteStarterObject = function() {
-
+  var cbody = that.startSpring.bodyB;
   var mesh = that.getThreeMeshFromCannonBody(this.startSpring.bodyB);
   mesh.material.transparent = true;
 
@@ -275,9 +275,14 @@ PhysicsManager.prototype.deleteStarterObject = function() {
     .onUpdate(function() {
       mesh.material.opacity = this.opacity;
     })
+    .onComplete(function() {
+      mesh.visible = false;
+      cbody.sleep();
+    })
     .start();
 
   this.startSpring = undefined;
+
 };
 /**
  * Add Cannon physics to a three.js object
@@ -475,7 +480,7 @@ PhysicsManager.prototype.onLetterHit = function(letterMesh) {
     this.balloonSoundIndex = 0;
   }
 
-  console.log(this.balloonSoundIndex);
+  //console.log(this.balloonSoundIndex);
 
   var sound;
 
