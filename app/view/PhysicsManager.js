@@ -26,11 +26,12 @@ var PhysicsManager = function(dcamera,camera) {
 
   this.threeCannon = [];
 
+  console.log(dcamera.position);
   // Create a sphere for the dummyCamera
-  var radius = Math.abs(0.3);  // m
+  var radius = 0.25;  // m
   this.camBody = new CANNON.Body({
      mass: 0, // kg
-     position: new CANNON.Vec3(dcamera.position.x, dcamera.position.z, dcamera.position.y),
+
      shape: new CANNON.Sphere(radius)
   });
   this.world.addBody(this.camBody);

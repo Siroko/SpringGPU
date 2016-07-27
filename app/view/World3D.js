@@ -294,7 +294,7 @@ World3D.prototype.onInitializeManager = function( n, o ) {
 
         this.gamePads = new MousePad( this.scene, this.camera, this.effect, this.phManager );
         this.dummyCamera.position.z = 5;
-        this.dummyCamera.position.y = - 0.3;
+        this.dummyCamera.position.y = 0.5;
 
     } else {
 
