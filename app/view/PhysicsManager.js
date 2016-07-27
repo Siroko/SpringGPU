@@ -4,6 +4,7 @@
  */
 
 var THREE = require('three');
+var TWEEN = require('tween.js');
 var that;
 
 var PhysicsManager = function(dcamera,camera) {
@@ -179,7 +180,7 @@ PhysicsManager.prototype.update = function(timestamp) {
         else{
           if(this.threeCannon[i].c.waitsAnimation){
             this.threeCannon[i].c.waitsAnimation=false;
-            this.animateQuaternion(this.threeCannon[i],2);
+            this.animateQuaternion(this.threeCannon[i], 2000);
           }
           this.threeCannon[i].c.quaternion.x = this.threeCannon[i].t.quaternion.x;
           this.threeCannon[i].c.quaternion.y = this.threeCannon[i].t.quaternion.z; //XY coordinates flipped
@@ -260,17 +261,16 @@ PhysicsManager.prototype.addStarterObject = function(obj,type) {
 
 PhysicsManager.prototype.deleteStarterObject = function() {
 
-
   var mesh = that.getThreeMeshFromCannonBody(this.startSpring.bodyB);
   mesh.material.transparent = true;
 
-  function fadeOut(){
-      if(  mesh.material.opacity <= 0){return;}
-      mesh.material.opacity -= 0.075;
+  new TWEEN.Tween({ opacity: mesh.material.opacity })
+    .to({ opacity: 0 }, 1000)
+    .onUpdate(function() {
+      mesh.material.opacity = this.opacity;
+    })
+    .start();
 
-      setTimeout(function(){ fadeOut(); }, 1000/10);
-  }
-  fadeOut();
   this.startSpring = undefined;
 };
 /**
@@ -589,27 +589,25 @@ PhysicsManager.prototype.setBodyText = function() {
   */
 }
 
-PhysicsManager.prototype.animateQuaternion = function(obj,t){
-  var amount=0;
-  //console.log("start");
+/**
+ * Animate quaternion to his 'resting' position.
+ *
+ * @method animateQuaternion
+ * @param {any} obj
+ * @param {float} duration
+ */
+PhysicsManager.prototype.animateQuaternion = function(obj, duration) {
 
-  var startQuaternion = new THREE.Quaternion().copy( obj.t.quaternion ).normalize();
-  var endQuaternion = new THREE.Quaternion().set( 0, 0, 0, 1 ).normalize();
+  var startQuaternion = new THREE.Quaternion().copy(obj.t.quaternion).normalize();
+  var endQuaternion = new THREE.Quaternion().set(0, 0, 0, 1).normalize();
 
+  new TWEEN.Tween({ progress: 0 })
+    .to({ progress: 1 }, duration)
+    .onUpdate(function() {
+      THREE.Quaternion.slerp(startQuaternion, endQuaternion, obj.t.quaternion, this.progress);
+    })
+    .start();
 
-  function set(t){
-    amount += that.fixedTimeStep/t;
-
-    THREE.Quaternion.slerp( startQuaternion, endQuaternion, obj.t.quaternion,amount );
-
-    if(amount >=1){
-        return;
-    }
-    else{
-      setTimeout(function(){ set(t); }, 1000*that.fixedTimeStep);
-    }
-  }
-  set(t);
 };
 
 module.exports = PhysicsManager;

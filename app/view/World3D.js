@@ -2,6 +2,7 @@
  * Created by siroko on 7/8/15.
  */
 var THREE = require('three');
+var TWEEN = require('tween.js');
 var Rebound = require('rebound');
 
 var VRControls = require('./../utils/VRControls');
@@ -240,49 +241,40 @@ World3D.prototype.addEvents = function() {
 World3D.prototype.onStart = function() {
   var springSystem = this.springSystem;
 
+  /**
+   * @function makeShapeAppear
+   * @param {THREE.Mesh} mesh
+   */
   var makeShapeAppear = (function(mesh) {
 
     var targetScale = mesh.scale.x;
     mesh.scale.set(0, 0, 0);
     mesh.visible = true;
 
-    var spring = this.springSystem.createSpring(40, (Math.random() * 3) + 1);
-    spring.setCurrentValue(0).setAtRest();
-
-    spring.addListener({
-      onSpringUpdate: function(spring) {
-        var value = spring.getCurrentValue();
-        mesh.scale.set(value, value, value);
-      },
-      onSpringAtRest: function(spring) {
-        spring.removeAllListeners();
-      }
-    });
-
-    setTimeout(function() {
-      spring.setEndValue(targetScale);
-    }, Math.random() * 2000);
+    new TWEEN.Tween({ scale: 0 })
+      .to({ scale: targetScale }, 1000)
+      .easing(TWEEN.Easing.Elastic.Out)
+      .delay(Math.random() * 2000)
+      .onUpdate(function() {
+        mesh.scale.set(this.scale, this.scale, this.scale);
+      })
+      .start();
 
   }).bind(this);
 
+  /**
+   * @function makeLetterAppear
+   * @param {THREE.Mesh} mesh
+   */
   var makeLetterAppear = (function(mesh) {
 
-    var spring = this.springSystem.createSpring(40, 20);
-    spring.setCurrentValue(0).setAtRest();
-
-    spring.addListener({
-      onSpringUpdate: function(spring) {
-        var value = spring.getCurrentValue();
-        mesh.material.uniforms.opacity.value = value;
-      },
-      onSpringAtRest: function(spring) {
-        spring.removeAllListeners();
-      }
-    });
-
-    setTimeout(function() {
-      spring.setEndValue(1);
-    }, (Math.random() * 2000) + 1000);
+    new TWEEN.Tween({ opacity: 0 })
+      .to({ opacity: 1 }, 1000)
+      .delay((Math.random() * 2000) + 1000)
+      .onUpdate(function() {
+        mesh.material.uniforms.opacity.value = this.opacity;
+      })
+      .start();
 
   }).bind(this);
 
@@ -361,6 +353,9 @@ World3D.prototype.onRenderRight = function() {
 World3D.prototype.render = function( timestamp ) {
 
     window.requestAnimationFrame( this.render.bind( this ) );
+
+    TWEEN.update();
+
     this.planeCalc.lookAt( this.dummyCamera.position );
     this.gamePads.update( timestamp,[ this.planeCalc ] );
 
