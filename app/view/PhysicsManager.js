@@ -410,7 +410,7 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator,springable,opt
             if(e.body.springable && !e.body.isSpringing){
 
               if(e.body.springIndex != undefined){
-                that.addToSpring(that.bodyText[e.body.springIndex],e.body);
+                that.addToSpring(that.bodyText[e.body.springIndex], e.body);
                 that.onLetterHit(that.getThreeMeshFromCannonBody(e.body));
               }
             }
@@ -575,22 +575,42 @@ PhysicsManager.prototype.setClosedArea = function(x,y,z) {
   this.world.addBody(groundBody);
 };
 
-PhysicsManager.prototype.addToSpring = function(a,b) {
-  b.isSpringing = true;
-  b.waitsAnimation = true;
+/**
+ * @method addToSpring
+ * @param {CANNON.Body} a
+ * @param {CANNON.Body} b
+ */
+PhysicsManager.prototype.addToSpring = function(bodyA, bodyB) {
+  // get the distance between the letter and the target
+  var dx = bodyA.position.x - bodyB.position.x;
+  var dy = bodyA.position.y - bodyB.position.y;
+  var dz = bodyA.position.z - bodyB.position.z;
 
-  setTimeout(function(){
+  var dist = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2) + Math.pow(dz, 2));
 
-    var spring = new CANNON.Spring(a,b,{
-      localAnchorA: new CANNON.Vec3(0,0,-0.4),
-      localAnchorB: new CANNON.Vec3(0,0,0),
-      restLength : 0,
-      stiffness : 50,
-      damping : 40,
-    });
-    that.springElements.push(spring);
+  bodyB.isSpringing = true;
+  bodyB.waitsAnimation = true;
 
-  }, 333);
+  var spring = new CANNON.Spring(bodyA, bodyB,{
+    localAnchorA: new CANNON.Vec3(0, 0, -0.4),
+    localAnchorB: new CANNON.Vec3(0, 0, 0),
+    restLength : dist,
+    stiffness : 50,
+    damping : 40
+  });
+
+
+  that.springElements.push(spring);
+
+  // shring the spring resting lenght to 0
+  new TWEEN.Tween({ length: spring.restLength })
+    .to({ length: 0 }, 2000)
+    .easing(TWEEN.Easing.Exponential.InOut)
+    .onUpdate(function() {
+      spring.restLength = this.length;
+    })
+    .start();
+
 };
 
 PhysicsManager.prototype.setMode = function(m) {
