@@ -103,12 +103,6 @@ GamePads.prototype.update = function( t ){
             this.handlers[ i ].updateMatrix();
             this.handlers[ i ].applyMatrix( this.sTSMat );
 
-
-            this.handlers[ i].updateMatrixWorld();
-            this.tmpVector.set( -0.1, 0.3, -0.35);
-            this.tmpVector.applyMatrix4( this.h1Handler.matrixWorld );
-
-
             this.intersectPoint.copy( this.handlers[ 0 ].position );
             this.intersectPoint2.copy( this.handlers[ 1 ].position );
 
