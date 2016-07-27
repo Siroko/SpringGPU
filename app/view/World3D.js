@@ -59,9 +59,9 @@ var World3D = function( container ) {
     //this.scene.add( this.planeCalc );
     this.scene.add( this.dummyCamera );
 
+    this.textureLoader = new THREE.TextureLoader();
 
-    THREE.ImageUtils.crossOrigin = '';
-    var tex = THREE.ImageUtils.loadTexture("assets/textures/breel.jpeg");
+    var tex = this.textureLoader.load("assets/textures/breel.jpeg");
     tex.generateMipmaps = false;
     tex.minFilter = THREE.LinearFilter;
     tex.magFilter = THREE.LinearFilter;
@@ -373,7 +373,7 @@ World3D.prototype.render = function( timestamp ) {
     this.controls.update();
 
     // Render the scene through the manager.
-    this.renderer.setRenderTarget( null ); // add this line if you are working with GPGPU sims
+    //this.renderer.setRenderTarget( null ); // add this line if you are working with GPGPU sims
     this.manager.render( this.scene, this.camera, timestamp);
 
 };
@@ -402,7 +402,7 @@ World3D.prototype.setMatcap =  function(mat, matcap) {
   }
   else {
     var url = '/assets/textures/' + matcap + '.jpg';
-    this.lettersMatcapsCache[matcap] = new THREE.TextureLoader().load(url);
+    this.lettersMatcapsCache[matcap] = this.textureLoader.load(url);
     setUniforms();
   }
 };

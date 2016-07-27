@@ -46,10 +46,12 @@ WorldManager.prototype._loadAssets = function() {
     };
 
     var objLoader = new OBJLoader();
+    var textureLoader = new THREE.TextureLoader();
+
     objLoader.setPath( 'assets/obj/' );
     objLoader.load( 'enviro.obj', (function ( object ) {
 
-        var texturePattern = THREE.ImageUtils.loadTexture('assets/textures/patt2.png' );
+        var texturePattern = textureLoader.load('assets/textures/patt2.png' );
         texturePattern.wrapS = THREE.RepeatWrapping;
         texturePattern.wrapT = THREE.RepeatWrapping;
         texturePattern.repeat.x = 1000;
@@ -58,7 +60,7 @@ WorldManager.prototype._loadAssets = function() {
         this.room = object.children[ 0 ];
         this.room.material = new THREE.RawShaderMaterial( {
             uniforms: {
-                map             : { type : 't', value : THREE.ImageUtils.loadTexture('assets/textures/baked_ao.png' ) },
+                map             : { type : 't', value : textureLoader.load('assets/textures/baked_ao.png' ) },
                 uPatternMap     : { type : 't', value : texturePattern }
             },
 
