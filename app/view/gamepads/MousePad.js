@@ -20,7 +20,6 @@ var MousePad = function( scene, camera, effect,physics ) {
 
     this.h1 = new THREE.Mesh( new THREE.BoxBufferGeometry( 0.1, 0.1, 0.1, 1, 1, 1), new THREE.MeshNormalMaterial() );
 
-
     // instantiate a loader
     var loader = new OBJLoader();
     // load a resource
@@ -82,9 +81,12 @@ MousePad.prototype.update = function( t, objs ) {
 
     var intersects = this.raycaster.intersectObjects( objs );
     if (intersects.length > 0) {
+
         this.intersectPoint.copy(intersects[0].point);
         this.intersectPoint2.copy(intersects[0].point);
         this.h1.position.copy(intersects[0].point);
+
+
     }
 
 
