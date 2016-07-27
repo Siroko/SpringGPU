@@ -448,12 +448,16 @@ PhysicsManager.prototype.onLetterHit = function(letterMesh) {
     window.clearTimeout(letterMesh.deflateTimeoutId);
   }
 
+
   // explosion
   var explosion = availableExplosions.length
     ? availableExplosions.pop()
     : new Explosion();
 
-  explosion.setParent(letterMesh);
+  var scene = letterMesh.parent;
+
+  explosion.setParent(scene);
+  explosion.el.position.copy(letterMesh.position);
 
   new TWEEN.Tween({ progress: 0 })
     .to({ progress: 1 }, 400)
