@@ -7,6 +7,9 @@ var THREE = require('three');
 var TWEEN = require('tween.js');
 var that;
 
+var SoundManager = require('./sound/SoundManager');
+var AssetsSound = require('./sound/AssetsSound');
+
 var PhysicsManager = function(dcamera,camera) {
 
   that = this;
@@ -59,6 +62,9 @@ var PhysicsManager = function(dcamera,camera) {
   this.startPh = false;
   this.startSpring;
 
+  this.soundManager = new SoundManager();
+  this.soundManager.addSounds(AssetsSound.Sounds);
+  this.balloonSoundIndex = 0;
 
   window.addEventListener('click', this.onClick.bind( this )  );
   window.addEventListener("keydown",  this.onCursor, true);
@@ -436,6 +442,7 @@ PhysicsManager.prototype.onLetterHit = function(letterMesh) {
     window.clearTimeout(letterMesh.deflateTimeoutId);
   }
 
+  // explosion
   var explosion = availableExplosions.length
     ? availableExplosions.pop()
     : new Explosion();
@@ -443,8 +450,8 @@ PhysicsManager.prototype.onLetterHit = function(letterMesh) {
   explosion.setParent(letterMesh);
 
   new TWEEN.Tween({ progress: 0 })
-    .to({ progress: 1 }, 1500)
-    .easing(TWEEN.Easing.Exponential.Out)
+    .to({ progress: 1 }, 400)
+    //.easing(TWEEN.Easing.Exponential.Out)
     .onUpdate(function() {
       explosion.setProgress(this.progress);
     })
@@ -454,11 +461,39 @@ PhysicsManager.prototype.onLetterHit = function(letterMesh) {
     })
     .start();
 
+  // inflate
   letterMesh.inflateSpring.setEndValue(0.09);
 
   letterMesh.deflateTimeoutId = window.setTimeout(function() {
     letterMesh.inflateSpring.setEndValue(0);
   }, 300);
+
+  // sound
+  this.balloonSoundIndex++;
+
+  if(this.balloonSoundIndex >= 3) {
+    this.balloonSoundIndex = 0;
+  }
+
+  console.log(this.balloonSoundIndex);
+
+  var sound;
+
+  switch(this.balloonSoundIndex) {
+    case 0:
+      sound = AssetsSound.BALLOON_1;
+      break;
+
+    case 1:
+      sound = AssetsSound.BALLOON_2;
+      break;
+
+    case 2:
+      sound = AssetsSound.BALLOON_3;
+      break;
+  }
+
+  this.soundManager.play(sound);
 };
 
 /**
