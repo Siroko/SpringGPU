@@ -26,11 +26,19 @@ var MousePad = function( scene, camera, effect,physics ) {
     // load a resource
     loader.load(
     	// resource URL
-    	'assets/obj/hand-free.obj',
+    	'assets/obj/hand-free2.obj',
     	// Function when resource is loaded
     	function ( object ) {
 
-        object.children[0].material = new THREE.MeshNormalMaterial();
+        var textureLoader = new THREE.TextureLoader();
+
+        var tex = textureLoader.load("assets/textures/handocclusion.png");
+        tex.generateMipmaps = false;
+        tex.minFilter = THREE.LinearFilter;
+        tex.magFilter = THREE.LinearFilter;
+
+        object.children[0].material = new THREE.MeshBasicMaterial();
+        object.children[0].material.map = tex;
         object.children[0].material.side = THREE.DoubleSide;
         object.children[0].material.needsUpdate = true;
         object.children[0].geometry.scale( 0.02, 0.02, 0.02 );
