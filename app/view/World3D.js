@@ -108,7 +108,7 @@ var World3D = function( container ) {
       'GGG  GGGGG  SSSS SSSS   SS SSSS SSS  SSSSSSSSS' // S for silver, G for Gold
     );
 
-
+    this.phManager.setLettersLength(this.abc.length);
 
     this.springSystem = new Rebound.SpringSystem();
 
