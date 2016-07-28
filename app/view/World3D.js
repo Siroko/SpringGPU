@@ -117,7 +117,7 @@ var World3D = function( container ) {
 
     this.confettis = new Confettis(new THREE.Vector3(10, 10, 10), 1200, false);
     this.confettis.el.position.y += 5;
-    console.log(this.confettis)
+    this.confettis.start();
     this.scene.add(this.confettis.el);
 };
 

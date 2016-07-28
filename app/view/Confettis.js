@@ -19,16 +19,8 @@ var random = require('./utils').random;
  */
 function Confettis(size, count, debug) {
   this._size = size;
-  this._count = count;
+  this._count = count || 200;
   this._boudaries = this._getBoundaries();
-
-  if(count === void 0) {
-    count = 200;
-  }
-
-  if(debug === void 0) {
-    debug = false;
-  }
 
   this.el = new THREE.Object3D();
 
@@ -42,6 +34,8 @@ function Confettis(size, count, debug) {
   this._points = new THREE.Points(this._confettisGeometry, Confettis._confettisMaterial);
 
   this.el.add(this._points);
+
+  this._isActive = false;
 };
 
 /**
@@ -52,7 +46,7 @@ Confettis._confettisMaterial = new THREE.RawShaderMaterial({
   uniforms: {
     size: {
       type: 'f',
-      value: 30
+      value: 40
     },
     map: {
       type: 't',
@@ -154,11 +148,15 @@ Confettis.prototype._getBoundaries = function() {
  * @method update
  */
 Confettis.prototype.update = function() {
+  if(!this._isActive) {
+    return;
+  }
+
+  // apply velocity to position
   var positions = this._confettisGeometry.attributes.position.array;
   var velocities = this._velocities;
 
   for(var i = 0; i < positions.length; i += 3) {
-
     if(positions[i + 1] < this._boudaries.bottom) {
       positions[i + 1] = this._boudaries.top;
 
@@ -185,8 +183,27 @@ Confettis.prototype.update = function() {
   this._confettisGeometry.attributes.position.needsUpdate = true;
 };
 
-Confettis.prototype.dispose = function() {
+/**
+ * @method start
+ */
+Confettis.prototype.start = function() {
+  this._isActive = true;
+};
 
+/**
+ * @method stop
+ */
+Confettis.prototype.stop = function() {
+  this._isActive = false;
+};
+
+/**
+ * @method dispose
+ */
+Confettis.prototype.dispose = function() {
+  if(this.el.parent) {
+    this.el.parent.remove(this.el);
+  }
 };
 
 module.exports = Confettis;
