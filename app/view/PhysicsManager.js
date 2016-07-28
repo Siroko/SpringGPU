@@ -67,6 +67,8 @@ var PhysicsManager = function(dcamera,camera) {
   this.soundManager.addSounds(AssetsSound.Sounds);
   this.balloonSoundIndex = 0;
 
+  this.lettersLength = 0;
+
   window.addEventListener('click', this.onClick.bind( this )  );
   window.addEventListener("keydown",  this.onCursor, true);
 };
@@ -138,6 +140,8 @@ PhysicsManager.prototype.onCursor= function( e ){
           that.springElements[i].bodyB.isSpringing = false;
       }
       that.springElements = [];
+
+      that.dispatchEvent( { type : 'messageUnlocked' } );
     }
   }
 
@@ -611,6 +615,10 @@ PhysicsManager.prototype.addToSpring = function(bodyA, bodyB) {
 
 
   that.springElements.push(spring);
+  if(that.springElements.length >= that.lettersLength){
+      //console.log("message done");
+      that.dispatchEvent( { type : 'messageDone' } );
+  }
 
   // shring the spring resting lenght to 0
   new TWEEN.Tween({ length: spring.restLength })
@@ -694,7 +702,10 @@ PhysicsManager.prototype.animateQuaternion = function(obj, duration) {
       THREE.Quaternion.slerp(startQuaternion, endQuaternion, obj.t.quaternion, this.progress);
     })
     .start();
-
 };
+
+PhysicsManager.prototype.setLettersLength = function(n) {
+  this.lettersLength = n;
+}
 
 module.exports = PhysicsManager;
