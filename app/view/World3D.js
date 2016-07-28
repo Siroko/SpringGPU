@@ -22,6 +22,8 @@ var AssetsSound = require('./sound/AssetsSound');
 var Explosion = require('./Explosion');
 var Confettis = require('./Confettis');
 
+var random = require('./utils').random;
+
 var World3D = function( container ) {
 
     that=this;
@@ -93,6 +95,7 @@ var World3D = function( container ) {
 
     this.letters = [];
     this.lettersMesh = [];
+    this.lettersGrowIntervalIds = [];
     this.lettersMatcapsCache = {};
     this.lettersBaseMaterial = new THREE.RawShaderMaterial({
       uniforms: {
@@ -346,8 +349,25 @@ World3D.prototype.onMessageComplete = function() {
   // acid time
   for(var i = 0; i < this.worldManager.meshes.length; ++i) {
     var mesh = this.worldManager.meshes[i];
-    mesh.material.uniforms.speed.value = 20;
+    mesh.material.uniforms.speed.value = 25;
     mesh.material.uniforms.growFromTo.value.set(0.5, 2);
+  }
+
+  function letterGrow(letter) {
+    return window.setInterval(function() {
+      letter.inflateSpring.setEndValue(0.09);
+
+      window.setTimeout(function() {
+        letter.inflateSpring.setEndValue(0);
+      }, 300);
+    }, random(1000, 5000))
+  };
+
+  this.lettersGrowIntervalIds = [];
+
+  for(var i = 0; i < this.lettersMesh.length; ++i) {
+    var letterMesh = this.lettersMesh[i];
+    this.lettersGrowIntervalIds.push(letterGrow(letterMesh));
   }
 };
 
@@ -366,6 +386,10 @@ World3D.prototype.onMessageRelease = function() {
     mesh.material.uniforms.speed.value = 1;
     mesh.material.uniforms.growFromTo.value.set(1, 1);
   }
+
+  this.lettersGrowIntervalIds.forEach(function(id) {
+    window.clearInterval(id);
+  });
 };
 
 /**
