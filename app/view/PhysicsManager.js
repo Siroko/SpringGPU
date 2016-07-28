@@ -65,6 +65,7 @@ var PhysicsManager = function(dcamera,camera) {
 
   this.soundManager = new SoundManager();
   this.soundManager.addSounds(AssetsSound.Sounds);
+  this.soundManager.playWhenReady(AssetsSound.BACKGROUND_NORMAL);
   this.balloonSoundIndex = 0;
 
   window.addEventListener('click', this.onClick.bind( this )  );
@@ -481,7 +482,7 @@ PhysicsManager.prototype.onLetterHit = function(letterMesh) {
   // sound
   this.balloonSoundIndex++;
 
-  if(this.balloonSoundIndex >= 3) {
+  if(this.balloonSoundIndex >= 4) {
     this.balloonSoundIndex = 0;
   }
 
@@ -500,6 +501,10 @@ PhysicsManager.prototype.onLetterHit = function(letterMesh) {
 
     case 2:
       sound = AssetsSound.BALLOON_3;
+      break;
+
+    case 3:
+      sound = AssetsSound.BALLOON_4;
       break;
   }
 
