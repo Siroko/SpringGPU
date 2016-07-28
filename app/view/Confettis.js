@@ -54,7 +54,7 @@ Confettis._confettisMaterial = new THREE.RawShaderMaterial({
     },
     repeat: {
       type: 'v2',
-      value: new THREE.Vector2(0.25, 1)
+      value: new THREE.Vector2(1 / 6, 1)
     }
   },
   vertexShader: require('../glsl/vs-confettis.glsl'),
@@ -117,28 +117,7 @@ Confettis.prototype._getConfettisGeometry = function() {
     scales[i] = random(1, 2);
 
     // uv offset
-    var offsetX;
-
-    var seed = random(0, 4, true);
-
-    switch(seed) {
-      case 1:
-        offsetX = 0.25;
-        break;
-
-      case 2:
-        offsetX = 0.5;
-        break;
-
-      case 3:
-        offsetX = 0.75;
-        break;
-
-      default:
-        offsetX = 0;
-    }
-
-    offsets[k] = offsetX;
+    offsets[k] = random(0, 5, true) * (1 / 6);
     offsets[k + 1] = 0;
 
     // velocity
