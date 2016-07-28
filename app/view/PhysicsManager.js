@@ -136,12 +136,17 @@ PhysicsManager.prototype.onCursor= function( e ){
         that.showMessage();
     }
     if(e.keyCode==32 || e == -1){
+      if(that.springElements.length >= that.lettersLength){
+        //console.log("unlock");
+        that.dispatchEvent( { type : 'messageUnlocked' } );
+      }
+
       for(var i=0; i < that.springElements.length; i++){
           that.springElements[i].bodyB.isSpringing = false;
       }
       that.springElements = [];
 
-      that.dispatchEvent( { type : 'messageUnlocked' } );
+
     }
   }
 
