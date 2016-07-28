@@ -5,11 +5,12 @@ uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
 uniform mat3 normalMatrix;
 uniform vec3 cameraPosition;
+
 attribute vec3 position;
 attribute vec3 normal;
 attribute vec2 uv;
 
-attribute float rotation;
+// custom
 attribute float scale;
 attribute vec2 offset;
 attribute vec3 color;
@@ -17,12 +18,10 @@ attribute vec3 color;
 uniform float size;
 
 varying vec3 vColor;
-varying float vRotation;
 varying vec2 vOffset;
 
 void main(void) {
   vColor = color;
-  vRotation = rotation;
   vOffset = offset;
 
   vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);

@@ -32,6 +32,7 @@ function Confettis(size, count, debug) {
   this._confettisGeometry = this._getConfettisGeometry();
 
   this._points = new THREE.Points(this._confettisGeometry, Confettis._confettisMaterial);
+  this._points.frustumCulled = false;
 
   this.el.add(this._points);
 
@@ -93,7 +94,6 @@ Confettis.prototype._getConfettisGeometry = function() {
   var geometry = new THREE.BufferGeometry();
 
   var positions = new Float32Array(3 * this._count);
-  var rotations = new Float32Array(this._count);
   var colors = new Float32Array(3 * this._count);
   var scales = new Float32Array(this._count);
   var offsets = new Float32Array(2 * this._count);
@@ -104,9 +104,6 @@ Confettis.prototype._getConfettisGeometry = function() {
     positions[j] = random(this._boudaries.left, this._boudaries.right);
     positions[j + 1] = random(this._boudaries.top, this._boudaries.top + this._size.y / 10);
     positions[j + 2] = random(this._boudaries.front, this._boudaries.back);
-
-    // rotation
-    rotations[i] = random(0, 2 * Math.PI);
 
     // color
     colors[j] = Math.random();
@@ -127,7 +124,6 @@ Confettis.prototype._getConfettisGeometry = function() {
   }
 
   geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
-  geometry.addAttribute('rotation', new THREE.BufferAttribute(rotations, 1));
   geometry.addAttribute('color', new THREE.BufferAttribute(colors, 3));
   geometry.addAttribute('scale', new THREE.BufferAttribute(scales, 1));
   geometry.addAttribute('offset', new THREE.BufferAttribute(offsets, 2));
