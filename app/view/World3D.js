@@ -173,10 +173,9 @@ World3D.prototype.addLetter = function(letter) {
     this.setMatcap(mat, matcap);
 
     var mesh = new THREE.Mesh(geo, mat);
-    //mesh.scale.set(0.75, 0.75, 0.75);
     mesh.geometry.scale(0.75, 0.75, 0.75);
     mesh.geometry.computeBoundingBox();
-    //console.log(mesh);
+    mesh.visible = false;
 
     var boxsize= 20;
     var rdx = Math.floor(Math.random()*boxsize - boxsize/2 );
@@ -270,6 +269,8 @@ World3D.prototype.onStart = function() {
    * @param {THREE.Mesh} mesh
    */
   var makeLetterAppear = (function(mesh) {
+
+    mesh.visible = true;
 
     new TWEEN.Tween({ opacity: 0 })
       .to({ opacity: 1 }, 1000)
