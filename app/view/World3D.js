@@ -112,6 +112,13 @@ var World3D = function( container ) {
 
     this.springSystem = new Rebound.SpringSystem();
 
+
+    var Confettis = require('./Confettis');
+
+    this.confettis = new Confettis(new THREE.Vector3(10, 10, 10), 1200, false);
+    this.confettis.el.position.y += 5;
+    console.log(this.confettis)
+    this.scene.add(this.confettis.el);
 };
 
 /**
@@ -351,6 +358,8 @@ World3D.prototype.render = function( timestamp ) {
     window.requestAnimationFrame( this.render.bind( this ) );
 
     TWEEN.update();
+
+    this.confettis.update();
 
     this.planeCalc.lookAt( this.dummyCamera.position );
     this.gamePads.update( timestamp,[ this.planeCalc ] );
