@@ -40,6 +40,7 @@ Explosion._lineMaterial = new THREE.RawShaderMaterial({
   vertexShader: require('../glsl/vs-explosion.glsl'),
   fragmentShader: require('../glsl/fs-explosion.glsl'),
   transparent: true,
+  depthWrite: false,
   linewidth: 2
 });
 
