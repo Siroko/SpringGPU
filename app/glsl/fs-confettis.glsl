@@ -1,19 +1,16 @@
 precision highp float;
 
 uniform sampler2D map;
+uniform vec2 repeat;
 
 varying float vRotation;
 varying vec3 vColor;
+varying vec2 vOffset;
 
 void main(void) {
-  // see https://github.com/mrdoob/three.js/issues/1891
-  float mid = 0.5;
+  vec2 uv = vec2( gl_PointCoord.x, 1.0 - gl_PointCoord.y );
+  vec2 offsetedUv = uv * repeat + vOffset;
 
-  vec2 rotated = vec2(
-    cos(vRotation) * (gl_PointCoord.x - mid) + sin(vRotation) * (gl_PointCoord.y - mid) + mid,
-    cos(vRotation) * (gl_PointCoord.y - mid) - sin(vRotation) * (gl_PointCoord.x - mid) + mid
-  );
-
-  gl_FragColor = texture2D(map, rotated);
+  gl_FragColor = texture2D(map, offsetedUv);
   gl_FragColor.rgb *= vColor;
 }

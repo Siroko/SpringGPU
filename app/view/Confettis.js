@@ -50,7 +50,11 @@ Confettis._confettisMaterial = new THREE.RawShaderMaterial({
     },
     map: {
       type: 't',
-      value: new THREE.TextureLoader().load('assets/textures/confetti.png')
+      value: new THREE.TextureLoader().load('assets/textures/confettis.png')
+    },
+    repeat: {
+      type: 'v2',
+      value: new THREE.Vector2(0.25, 1)
     }
   },
   vertexShader: require('../glsl/vs-confettis.glsl'),
@@ -92,10 +96,11 @@ Confettis.prototype._getConfettisGeometry = function() {
   var rotations = new Float32Array(this._count);
   var colors = new Float32Array(3 * this._count);
   var scales = new Float32Array(this._count);
+  var offsets = new Float32Array(2 * this._count);
 
   this._velocities = new Float32Array(3 * this._count);
 
-  for(var i = 0, j = 0; i < this._count; ++i, j += 3) {
+  for(var i = 0, j = 0, k = 0; i < this._count; ++i, j += 3, k += 2) {
     positions[j] = random(this._boudaries.left, this._boudaries.right);
     positions[j + 1] = random(this._boudaries.top, this._boudaries.top + this._size.y / 10);
     positions[j + 2] = random(this._boudaries.front, this._boudaries.back);
@@ -104,12 +109,37 @@ Confettis.prototype._getConfettisGeometry = function() {
     rotations[i] = random(0, 2 * Math.PI);
 
     // color
-    colors[j] = random(0, 1);
-    colors[j + 1] = random(0, 1);
-    colors[j + 2] = random(0, 1);
+    colors[j] = Math.random();
+    colors[j + 1] = Math.random();
+    colors[j + 2] = Math.random();
 
     // scale
     scales[i] = random(1, 2);
+
+    // uv offset
+    var offsetX;
+
+    var seed = random(0, 4, true);
+
+    switch(seed) {
+      case 1:
+        offsetX = 0.25;
+        break;
+
+      case 2:
+        offsetX = 0.5;
+        break;
+
+      case 3:
+        offsetX = 0.75;
+        break;
+
+      default:
+        offsetX = 0;
+    }
+
+    offsets[k] = offsetX;
+    offsets[k + 1] = 0;
 
     // velocity
     this._velocities[j] = random(-0.01, 0.01);
@@ -121,6 +151,7 @@ Confettis.prototype._getConfettisGeometry = function() {
   geometry.addAttribute('rotation', new THREE.BufferAttribute(rotations, 1));
   geometry.addAttribute('color', new THREE.BufferAttribute(colors, 3));
   geometry.addAttribute('scale', new THREE.BufferAttribute(scales, 1));
+  geometry.addAttribute('offset', new THREE.BufferAttribute(offsets, 2));
 
   return geometry;
 };

@@ -11,16 +11,19 @@ attribute vec2 uv;
 
 attribute float rotation;
 attribute float scale;
+attribute vec2 offset;
 attribute vec3 color;
 
 uniform float size;
 
 varying vec3 vColor;
 varying float vRotation;
+varying vec2 vOffset;
 
 void main(void) {
   vColor = color;
   vRotation = rotation;
+  vOffset = offset;
 
   vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
 
