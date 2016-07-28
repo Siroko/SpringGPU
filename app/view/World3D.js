@@ -15,6 +15,13 @@ var PhysicsManager = require('./PhysicsManager');
 var WorldManager = require('./scene/WorldManager');
 var that;
 
+var SoundManager = require('./sound/SoundManager');
+var AssetsSound = require('./sound/AssetsSound');
+
+// effects
+var Explosion = require('./Explosion');
+var Confettis = require('./Confettis');
+
 var World3D = function( container ) {
 
     that=this;
@@ -110,15 +117,22 @@ var World3D = function( container ) {
 
     this.phManager.setLettersLength(this.abc.length);
 
+    // sounds
+    this.soundManager = new SoundManager();
+    this.soundManager.addSounds(AssetsSound.Sounds);
+    this.balloonSoundIndex = 0;
+    this.isSuccessSoundPlaying = false;
+
+    // springs
     this.springSystem = new Rebound.SpringSystem();
 
+    // effects
+    this.explosionsPool = [];
 
-    var Confettis = require('./Confettis');
-
+    // confettis
     this.confettis = new Confettis(new THREE.Vector3(10, 10, 10), 1200, false);
     this.confettis.el.position.y += 5;
-    this.confettis.start();
-    this.scene.add(this.confettis.el);
+    this.isConfettisActive = false; 
 };
 
 /**
@@ -238,9 +252,19 @@ World3D.prototype.addEvents = function() {
 
     this.worldManager.addEventListener( 'assetsLoaded', this.onAssetsLoaded.bind( this ) );
     this.phManager.addEventListener( 'starts', this.onStart.bind(this) );
+    this.phManager.addEventListener('letterHit', this.onLetterHit.bind(this));
+    this.phManager.addEventListener('messageDone', this.onMessageComplete.bind(this));
+    this.phManager.addEventListener('messageUnlocked', this.onMessageRelease.bind(this));
 };
 
+/**
+ * Cube has been hit.
+ *
+ * @method onStart
+ */
 World3D.prototype.onStart = function() {
+  this.soundManager.play(AssetsSound.BACKGROUND_NORMAL);
+
   var springSystem = this.springSystem;
 
   /**
@@ -294,6 +318,116 @@ World3D.prototype.onStart = function() {
 
   this.phManager.attractBodiesToPlayer();
 
+};
+
+/**
+ * All the letters are in place.
+ *
+ * @method onMessageComplete
+ */
+World3D.prototype.onMessageComplete = function() {
+  this.soundManager.fadeOut(AssetsSound.BACKGROUND_NORMAL);
+
+  if(this.isSuccessSoundPlaying) {
+    this.soundManager.fadeIn(AssetsSound.BACKGROUND_SUCCESS);
+  }
+  else {
+    this.soundManager.play(AssetsSound.BACKGROUND_SUCCESS);
+    this.isSuccessSoundPlaying = true;
+  }
+
+  if(!this.isConfettisActive) {
+    this.isConfettisActive = true; 
+    this.scene.add(this.confettis.el);
+  }
+
+  this.confettis.start();
+};
+
+/**
+ * The letters are no longer all in place.
+ *
+ * @method onMessageRelease
+ */
+World3D.prototype.onMessageRelease = function() {
+  this.soundManager.fadeIn(AssetsSound.BACKGROUND_NORMAL);
+  this.soundManager.fadeOut(AssetsSound.BACKGROUND_SUCCESS);
+
+};
+
+/**
+ * @interface ILetterHitEvent {
+ *  THREE.Mesh mesh;
+ * }
+ *
+ * @method onLetterHit
+ * @param {ILetterHitEvent} e
+ */
+World3D.prototype.onLetterHit = function(e) {
+  var letterMesh = e.mesh;
+
+  if(!letterMesh || !letterMesh.inflateSpring) {
+    return;
+  }
+
+  if(letterMesh.deflateTimeoutId) {
+    window.clearTimeout(letterMesh.deflateTimeoutId);
+  }
+
+  // explosion
+  var explosion = this.explosionsPool.length
+    ? this.explosionsPool.pop()
+    : new Explosion();
+
+  explosion.setParent(this.scene);
+  explosion.el.position.copy(letterMesh.position);
+
+  new TWEEN.Tween({ progress: 0 })
+    .to({ progress: 1 }, 400)
+    .onUpdate(function() {
+      explosion.setProgress(this.progress);
+    })
+    .onComplete((function() {
+      this.explosionsPool.push(explosion);
+      explosion.setParent(null);
+    }).bind(this))
+    .start();
+
+  // inflate
+  letterMesh.inflateSpring.setEndValue(0.09);
+
+  letterMesh.deflateTimeoutId = window.setTimeout(function() {
+    letterMesh.inflateSpring.setEndValue(0);
+  }, 300);
+
+  // sound
+  this.balloonSoundIndex++;
+
+  if(this.balloonSoundIndex >= 4) {
+    this.balloonSoundIndex = 0;
+  }
+
+  var sound;
+
+  switch(this.balloonSoundIndex) {
+    case 0:
+      sound = AssetsSound.BALLOON_1;
+      break;
+
+    case 1:
+      sound = AssetsSound.BALLOON_2;
+      break;
+
+    case 2:
+      sound = AssetsSound.BALLOON_3;
+      break;
+
+    case 3:
+      sound = AssetsSound.BALLOON_4;
+      break;
+  }
+
+  this.soundManager.play(sound);
 };
 
 World3D.prototype.onInitializeManager = function( n, o ) {

@@ -7,9 +7,6 @@ var THREE = require('three');
 var TWEEN = require('tween.js');
 var that;
 
-var SoundManager = require('./sound/SoundManager');
-var AssetsSound = require('./sound/AssetsSound');
-
 var PhysicsManager = function(dcamera,camera) {
 
   that = this;
@@ -62,11 +59,6 @@ var PhysicsManager = function(dcamera,camera) {
 
   this.startPh = false;
   this.startSpring;
-
-  this.soundManager = new SoundManager();
-  this.soundManager.addSounds(AssetsSound.Sounds);
-  this.soundManager.playWhenReady(AssetsSound.BACKGROUND_NORMAL);
-  this.balloonSoundIndex = 0;
 
   this.lettersLength = 0;
 
@@ -343,7 +335,10 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator,springable,opt
           if(e.body.springable && !e.body.isSpringing && that.startPh){
             if(e.body.springIndex != undefined){
               that.addToSpring(that.bodyText[e.body.springIndex],e.body);
-              that.onLetterHit(that.getThreeMeshFromCannonBody(e.body));
+              that.dispatchEvent({
+                type: 'letterHit',
+                mesh: that.getThreeMeshFromCannonBody(e.body)
+              });
             }
           }
         });
@@ -427,7 +422,10 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator,springable,opt
 
               if(e.body.springIndex != undefined){
                 that.addToSpring(that.bodyText[e.body.springIndex], e.body);
-                that.onLetterHit(that.getThreeMeshFromCannonBody(e.body));
+                that.dispatchEvent({
+                  type: 'letterHit',
+                  mesh: that.getThreeMeshFromCannonBody(e.body)
+                });
               }
             }
           });
@@ -440,85 +438,6 @@ PhysicsManager.prototype.add3DObject = function(obj,type,actuator,springable,opt
     default:
   }
 }
-
-var Explosion = require('./Explosion');
-
-var availableExplosions = [];
-
-/**
- * @method onLetterHit
- * @param {THREE.Mesh} letterMesh
- */
-PhysicsManager.prototype.onLetterHit = function(letterMesh) {
-  if(!letterMesh.inflateSpring) {
-    return;
-  }
-
-  if(letterMesh.deflateTimeoutId) {
-    window.clearTimeout(letterMesh.deflateTimeoutId);
-  }
-
-
-  // explosion
-  var explosion = availableExplosions.length
-    ? availableExplosions.pop()
-    : new Explosion();
-
-  var scene = letterMesh.parent;
-
-  explosion.setParent(scene);
-  explosion.el.position.copy(letterMesh.position);
-
-  new TWEEN.Tween({ progress: 0 })
-    .to({ progress: 1 }, 400)
-    //.easing(TWEEN.Easing.Exponential.Out)
-    .onUpdate(function() {
-      explosion.setProgress(this.progress);
-    })
-    .onComplete(function() {
-      availableExplosions.push(explosion);
-      explosion.setParent(null);
-    })
-    .start();
-
-  // inflate
-  letterMesh.inflateSpring.setEndValue(0.09);
-
-  letterMesh.deflateTimeoutId = window.setTimeout(function() {
-    letterMesh.inflateSpring.setEndValue(0);
-  }, 300);
-
-  // sound
-  this.balloonSoundIndex++;
-
-  if(this.balloonSoundIndex >= 4) {
-    this.balloonSoundIndex = 0;
-  }
-
-  //console.log(this.balloonSoundIndex);
-
-  var sound;
-
-  switch(this.balloonSoundIndex) {
-    case 0:
-      sound = AssetsSound.BALLOON_1;
-      break;
-
-    case 1:
-      sound = AssetsSound.BALLOON_2;
-      break;
-
-    case 2:
-      sound = AssetsSound.BALLOON_3;
-      break;
-
-    case 3:
-      sound = AssetsSound.BALLOON_4;
-      break;
-  }
-
-  this.soundManager.play(sound);
-};
 
 /**
  * @method getThreeMeshFromCannonBody

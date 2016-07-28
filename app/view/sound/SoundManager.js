@@ -68,15 +68,18 @@ SoundManager.prototype.addSounds = function(sounds) {
  *
  * @method play
  * @param {string} sound
+ * @returns {int}
  */
-SoundManager.prototype.play = function(sound) {
-  var sound = this._sounds[sound];
+SoundManager.prototype.play = function(name) {
+  var sound = this._sounds[name];
+
+  console.log('play: ', name)
 
   if(!sound || sound.state() === 'loading') {
     return;
   }
 
-  sound.play();
+  return sound.play();
 };
 
 /**
@@ -84,15 +87,41 @@ SoundManager.prototype.play = function(sound) {
  *
  * @method playWhenReady
  * @param {string} sound
+ * @param {(int) => void} callback
  */
-SoundManager.prototype.playWhenReady = function(sound) {
-  var sound = this._sounds[sound];
+SoundManager.prototype.playWhenReady = function(name, callback) {
+  var sound = this._sounds[name];
+
+  if(!sound) {
+    return;
+  }
+  sound.once('load', (function() {
+    var id = this.play(name);
+
+    if(callback) {
+      callback(id);
+    }
+  }).bind(this));
+};
+
+SoundManager.prototype.fadeOut = function(name, duration, id) {
+  var sound = this._sounds[name];
 
   if(!sound) {
     return;
   }
 
-  sound.once('load', sound.play.bind(sound));
+  sound.fade(sound.volume(), 0, duration || 1500, id);
+};
+
+SoundManager.prototype.fadeIn = function(name, duration, id) {
+  var sound = this._sounds[name];
+
+  if(!sound) {
+    return;
+  }
+
+  sound.fade(sound.volume(), 1, duration || 1500, id);
 };
 
 module.exports = SoundManager;
