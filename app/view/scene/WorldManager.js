@@ -131,7 +131,9 @@ WorldManager.prototype._createShapes = function() {
     var shapesMaterial = new THREE.RawShaderMaterial({
       uniforms: {
         time: { type: 'f', value: 0 },
-        timeOffset: { type: 'f', value: 0 }
+        timeOffset: { type: 'f', value: 0 },
+        speed: { type: 'f', value: 1 },
+        growFromTo: { type: 'v2', value: new THREE.Vector2(1, 1) }
       },
       vertexShader: require('../../glsl/vs-shape.glsl'),
       fragmentShader: require('../../glsl/fs-shape.glsl')

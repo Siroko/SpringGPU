@@ -342,6 +342,13 @@ World3D.prototype.onMessageComplete = function() {
   }
 
   this.confettis.start();
+
+  // acid time
+  for(var i = 0; i < this.worldManager.meshes.length; ++i) {
+    var mesh = this.worldManager.meshes[i];
+    mesh.material.uniforms.speed.value = 20;
+    mesh.material.uniforms.growFromTo.value.set(0.5, 2);
+  }
 };
 
 /**
@@ -353,6 +360,12 @@ World3D.prototype.onMessageRelease = function() {
   this.soundManager.fadeIn(AssetsSound.BACKGROUND_NORMAL);
   this.soundManager.fadeOut(AssetsSound.BACKGROUND_SUCCESS);
 
+  // let's chill out a bit
+  for(var i = 0; i < this.worldManager.meshes.length; ++i) {
+    var mesh = this.worldManager.meshes[i];
+    mesh.material.uniforms.speed.value = 1;
+    mesh.material.uniforms.growFromTo.value.set(1, 1);
+  }
 };
 
 /**
