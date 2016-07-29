@@ -1,5 +1,5 @@
 /**
- * Created by jorgalga on July 18th 2015.
+ * Created by jorgalga on July 18th 2016.
  */
 var THREE = require("three");
 var TWEEN = require("tween.js");
@@ -200,6 +200,8 @@ PhysicsManager.prototype.update = function(timestamp) {
  * Add Simple Cannon physics to a THREE object which is used as an starter Element of the interaction
  *
  * @method addStarterObject
+ * @param {THREE.Mesh} obj - Three.js Mesh
+ * @param {string} type - bounding geometry for physics calculations.
  */
 PhysicsManager.prototype.addStarterObject = function(obj, type) {
     var mass = 5;
@@ -273,7 +275,7 @@ PhysicsManager.prototype.deleteStarterObject = function() {
  *
  * @method add3DObject
  * @param {THREE.Mesh} obj - Three.js Mesh
- * @param {string} author - bounding geometry for physics calculations.
+ * @param {string} type - bounding geometry for physics calculations.
  * @param {boolean} actuator - The object is used for interacting so the mass is 0
  * @param {boolean} springable - The object has an Spring interaction
  * @param {Objects} options - options object with the properties of the CANNON material
