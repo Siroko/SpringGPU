@@ -117,7 +117,6 @@ PhysicsManager.prototype.showMessage = function() {
  */
 PhysicsManager.prototype.onCursor = function(e) {
     if (that.startPh) {
-
         if (e.keyCode == 81) { // 'Q' key
             that.showMessage();
         }
@@ -234,12 +233,14 @@ PhysicsManager.prototype.addStarterObject = function(obj, type) {
                 localAnchorB: new CANNON.Vec3(0, 0, 0),
                 restLength: 0,
                 stiffness: 50,
-                damping: 40,
+                damping: 40
             });
             this.threeCannon.push({
                 "t": obj,
                 "c": boxBody
             });
+            break;
+        default:
             break;
     }
 };
@@ -256,18 +257,14 @@ PhysicsManager.prototype.deleteStarterObject = function() {
 
     new TWEEN.Tween({
             opacity: mesh.material.opacity
-        })
-        .to({
+        }).to({
             opacity: 0
-        }, 1000)
-        .onUpdate(function() {
+        }, 1000).onUpdate(function() {
             mesh.material.opacity = this.opacity;
-        })
-        .onComplete(function() {
+        }).onComplete(function() {
             mesh.visible = false;
             cbody.sleep();
-        })
-        .start();
+        }).start();
     this.startSpring = undefined;
 };
 
@@ -417,6 +414,7 @@ PhysicsManager.prototype.add3DObject = function(obj, type, actuator, springable,
             });
             break;
         default:
+            break;
     }
 };
 
@@ -428,12 +426,12 @@ PhysicsManager.prototype.add3DObject = function(obj, type, actuator, springable,
  * @returns {THREE.Mesh}
  */
 PhysicsManager.prototype.getThreeMeshFromCannonBody = function(body) {
-    for (var i = 0; i < this.threeCannon.length; i++) {
+    for (i = 0; i < this.threeCannon.length; i++) {
         if (body.id === this.threeCannon[i].c.id) {
             return this.threeCannon[i].t;
         }
     }
-    return;
+    return {};
 };
 
 /**
@@ -482,6 +480,8 @@ PhysicsManager.prototype.setClosedArea = function(x, y, z) {
     groundBody.quaternion.setFromAxisAngle(rot, -(Math.PI / 2));
     groundBody.position.set(0, -widthZ / 2, widthY / 2);
     this.world.addBody(groundBody);
+
+    //Back Wall
     groundBody = new CANNON.Body({
         mass: 0 // mass == 0 makes the body static
     });
@@ -535,15 +535,11 @@ PhysicsManager.prototype.addToSpring = function(bodyA, bodyB) {
     // shring the spring resting lenght to 0
     new TWEEN.Tween({
             length: spring.restLength
-        })
-        .to({
+        }).to({
             length: 0
-        }, 2000)
-        .easing(TWEEN.Easing.Exponential.InOut)
-        .onUpdate(function() {
+        }, 2000).easing(TWEEN.Easing.Exponential.InOut).onUpdate(function() {
             spring.restLength = this.length;
-        })
-        .start();
+        }).start();
 };
 
 /**
@@ -572,8 +568,8 @@ PhysicsManager.prototype.setBodyText = function() {
     var ofsetW = sw / columns;
     var offsetH = sh / rows;
 
-    for (var i = 0; i <= rows; i++) {
-        for (var j = 0; j <= columns; j++) {
+    for (i = 0; i <= rows; i++) {
+        for (j = 0; j <= columns; j++) {
             var radius = 0.1; // m
             var body = new CANNON.Body({
                 mass: 0, // kg
@@ -597,14 +593,11 @@ PhysicsManager.prototype.animateQuaternion = function(obj, duration) {
     var endQuaternion = new THREE.Quaternion().set(0, 0, 0, 1).normalize();
     new TWEEN.Tween({
             progress: 0
-        })
-        .to({
+        }).to({
             progress: 1
-        }, duration)
-        .onUpdate(function() {
+        }, duration).onUpdate(function() {
             THREE.Quaternion.slerp(startQuaternion, endQuaternion, obj.t.quaternion, this.progress);
-        })
-        .start();
+        }).start();
 };
 
 /**
