@@ -1,0 +1,40 @@
+newmtl Trump_lowPoly:Material_000
+illum 4
+Kd 0.64 0.64 0.64
+Ka 1.00 1.00 1.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 96.08
+newmtl Trump_lowPoly:Material_002
+illum 4
+Kd 0.64 0.64 0.64
+Ka 1.00 1.00 1.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 96.08
+newmtl Trump_lowPoly:eyebrows
+illum 4
+Kd 0.64 0.64 0.64
+Ka 1.00 1.00 1.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 96.08
+newmtl Trump_lowPoly:side_hair
+illum 4
+Kd 0.64 0.64 0.64
+Ka 1.00 1.00 1.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 96.08
+newmtl Trump_lowPoly:tiop_hair
+illum 4
+Kd 0.64 0.64 0.64
+Ka 1.00 1.00 1.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 96.08

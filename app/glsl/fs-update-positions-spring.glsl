@@ -157,7 +157,7 @@ float snoise(vec4 v) {
           vec3 direction = uWorldPosition - uTouch[i];
           normalize( direction );
 
-          float d = clamp( 0.3 - distance( vertexWorldPosition, uTouch[ i ] ), 0.0, 1.0 );
+          float d = clamp( 0.1 - distance( vertexWorldPosition, uTouch[ i ] ), 0.0, 1.0 );
 
           displacement += direction * d;
           normalize( displacement );
@@ -169,7 +169,7 @@ float snoise(vec4 v) {
       pos += displacement;
 
       float div = .04;
-      float damping = 0.9;
+      float damping = 0.87;
 
       vec3 spring = vec3( ( prevPos.x + ( prevPosGeom.x - pos.x ) * div ) * damping,  ( prevPos.y + ( prevPosGeom.y - pos.y )  * div ) * damping,  ( prevPos.z + ( prevPosGeom.z - pos.z ) * div ) * damping );
       gl_FragColor = vec4( spring, 1.0 );

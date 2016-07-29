@@ -94,7 +94,7 @@ World3D.prototype.setup = function() {
 
     var objLoader = new OBJLoader();
     objLoader.setPath( 'assets/obj/' );
-    objLoader.load( 'mask_high.obj', (function ( object ) {
+    objLoader.load( 'Trump_lowPoly.obj', (function ( object ) {
 
         this.positionTouch1 = new THREE.Vector3(0, 100, 0);
         this.positionTouch2 = new THREE.Vector3(0, 100, 0);
@@ -120,13 +120,13 @@ World3D.prototype.setup = function() {
 
         var objLoader2 = new OBJLoader();
         objLoader2.setPath( 'assets/obj/' );
-        objLoader2.load( 'mask.obj', (function ( object ) {
+        objLoader2.load( 'Trump_lowPoly.obj', (function ( object ) {
             this.maskConvex = object.children[ 0 ];
             this.maskConvex.material.transparent = true;
             this.maskConvex.material.opacity= 0;
             //this.maskConvex.scale.set( 0.5, 0.5 , 0.5 );
             this.maskConvex.scale.set( 0.08, 0.08 , 0.08 );
-            this.scene.add( this.maskConvex );
+            //this.scene.add( this.maskConvex );
 
             this.render( 0 );
         } ).bind( this ), onProgress, onError );
@@ -152,8 +152,8 @@ World3D.prototype.onInitializeManager = function( n, o ) {
 
     if( !this.manager.isVRCompatible || typeof window.orientation !== 'undefined' ) {
         this.gamePads = new MousePad( this.scene, this.camera, this.effect );
-        this.dummyCamera.position.z = 1;
-        this.dummyCamera.position.y = 1.6;
+        this.dummyCamera.position.z = 0.5;
+        this.dummyCamera.position.y = .6;
     } else {
         this.gamePads = new GamePads( this.scene, this.camera, this.effect );
     }
@@ -180,7 +180,7 @@ World3D.prototype.render = function( timestamp ) {
 
     this.planeCalc.lookAt( this.dummyCamera.position );
 
-    this.gamePads.update( timestamp,[ this.maskConvex ] );
+    this.gamePads.update( timestamp,[ this.mask ] );
 
     this.worldPosition.copy( this.mask.position );
     this.displacedGeometry.updateSpringMaterial.uniforms.uTime.value = timestamp;
@@ -194,8 +194,8 @@ World3D.prototype.render = function( timestamp ) {
     this.mask.rotation.x = this.maskConvex.rotation.x = ( ImprovedNoise().noise( t, -t ), 12 ) * 0.5;
     this.mask.rotation.z = this.maskConvex.rotation.z = ( ImprovedNoise().noise( 13, t, t ) ) * 0.5;
 
-    this.mask.position.y = this.maskConvex.position.y = (ImprovedNoise().noise( 13, t, t ) ) * 0.5 + 2;
-    this.mask.position.z = this.maskConvex.position.z = ImprovedNoise().noise( 1, -t, t );
+    this.mask.position.y = this.maskConvex.position.y = (ImprovedNoise().noise( 13, t, t ) ) * 0.25 + 2;
+    this.mask.position.z = this.maskConvex.position.z = ImprovedNoise().noise( 1, -t, t ) * 0.5;
     this.planeCalc.position.copy( this.maskConvex.position );
     this.worldPosition.copy( this.mask.position );
 
