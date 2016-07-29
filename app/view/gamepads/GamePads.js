@@ -64,13 +64,6 @@ var GamePads = function( scene, camera, effect , physics){
 
     	}
     );
-    /*
-    this.h1.matrixAutoUpdate = false;
-    this.h2.matrixAutoUpdate = false;
-    this.handlers = [ this.h1, this.h2 ];
-    this.scene.add( this.h1 );
-    this.scene.add( this.h2 );
-    */
 
     this.cursorlocked = [];
     this.cursorlocked[0] = false;
@@ -142,22 +135,6 @@ GamePads.prototype.update = function( t ){
                 console.log("Trigger unlocked");
               }
             }
-
-
-            //if ("vibrate" in gamepad) {
-            //    for (var j = 0; j < gamepad.buttons.length; ++j) {
-            //        if (gamepad.buttons[j].pressed) {
-            //            //gamepad.vibrate(1000);
-            //            // Vibrate the gamepad relative to the amount the button is pressed.
-            //            var vibrationDelay = (500 * (1.0 - gamepad.buttons[j].value)) + 100;
-            //            if (t - lastVibration > vibrationDelay) {
-            //                gamepad.vibrate(100);
-            //                lastVibration = t;
-            //            }
-            //            break;
-            //        }
-            //    }
-            //}
         }
     }
 };

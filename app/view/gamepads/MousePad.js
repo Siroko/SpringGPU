@@ -47,15 +47,12 @@ var MousePad = function( scene, camera, effect,physics ) {
 
         that.h1 = object.children[0];
 
-        console.log(that.h1);
 
         that.scene.add(that.h1);
         that.phManager.add3DObject(that.h1, "cube", true,false);
         that.addEvents();
     	}
     );
-    //this.scene.add(this.h1);
-    //this.addEvents();
 
 };
 
