@@ -18,9 +18,8 @@ var that;
 var SoundManager = require('./sound/SoundManager');
 var AssetsSound = require('./sound/AssetsSound');
 
-// effects
-var Explosion = require('./Explosion');
-var Confettis = require('./Confettis');
+var Explosion = require('./explosion/Explosion');
+var Confettis = require('./confettis/Confettis');
 
 var random = require('./utils').random;
 
