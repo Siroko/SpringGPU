@@ -93,8 +93,8 @@ var World3D = function( container ) {
         inflation: { type: 'f', value: 0 },
         opacity: { type: 'f', value: 0 }
       },
-      vertexShader: require('../glsl/vs-letter.glsl'),
-      fragmentShader: require('../glsl/fs-letter.glsl'),
+      vertexShader: require('./letter/vs-letter.glsl'),
+      fragmentShader: require('./letter/fs-letter.glsl'),
       transparent: true
     });
 
