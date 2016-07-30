@@ -1,3 +1,5 @@
+var THREE = require('three');
+
 /**
  * @function random
  * @param {float} min
@@ -10,5 +12,7 @@ function random(min, max, round) {
 };
 
 module.exports = {
-  random: random
+  random: random,
+  textureLoader: new THREE.TextureLoader(),
+  jsonLoader: new THREE.JSONLoader()
 };
