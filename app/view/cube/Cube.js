@@ -12,7 +12,7 @@ function Cube(size) {
   var geometry = new THREE.BoxBufferGeometry(size, size, size);
 
   var material = new THREE.MeshBasicMaterial({
-    map: textureLoader.load('assets/textures/breel.jpeg')
+    map: textureLoader.load('assets/textures/breel.png')
   });
 
   this.el = new THREE.Mesh(geometry, material);
