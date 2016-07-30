@@ -57,7 +57,7 @@ Confettis._material = new THREE.RawShaderMaterial({
     },
     map: {
       type: 't',
-      value: textureLoader.load('./confettis.png')
+      value: textureLoader.load('assets/textures/confettis.png')
     },
     repeat: {
       type: 'v2',
