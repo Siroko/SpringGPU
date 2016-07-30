@@ -7,9 +7,11 @@ varying vec3 vColor;
 varying vec2 vOffset;
 
 void main(void) {
-  vec2 uv = vec2( gl_PointCoord.x, 1.0 - gl_PointCoord.y );
+  vec2 uv = vec2(gl_PointCoord.x, 1.0 - gl_PointCoord.y);
   vec2 offsetedUv = uv * repeat + vOffset;
 
-  gl_FragColor = texture2D(map, offsetedUv);
-  gl_FragColor.rgb *= vColor;
+  vec4 textureColor = texture2D(map, offsetedUv);
+  textureColor.rgb *= vColor;
+
+  gl_FragColor = textureColor;
 }
