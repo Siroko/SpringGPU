@@ -18,6 +18,7 @@ var that;
 var SoundManager = require('./sound/SoundManager');
 var AssetsSound = require('./sound/AssetsSound');
 
+var Cube = require('./cube/Cube');
 var Explosion = require('./explosion/Explosion');
 var Confettis = require('./confettis/Confettis');
 
@@ -67,23 +68,12 @@ var World3D = function( container ) {
 
     this.textureLoader = new THREE.TextureLoader();
 
-    var tex = this.textureLoader.load("assets/textures/breel.jpeg");
-    tex.generateMipmaps = false;
-    tex.minFilter = THREE.LinearFilter;
-    tex.magFilter = THREE.LinearFilter;
 
-    var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-    var material = new THREE.MeshBasicMaterial(  );
-    material.map =  tex;
-    material.map = tex;
-    material.needsUpdate = true;
+    var introCube = new Cube(1);
+    introCube.el.position.y = 0.5;
+    this.scene.add(introCube.el);
 
-    var cube = new THREE.Mesh( geometry, material );
-    cube.position.y = 0.5;
-    cube.position.z = 0.0;
-
-    that.phManager.addStarterObject(cube,"cube");
-    that.scene.add( cube );
+    that.phManager.addStarterObject(introCube.el,"cube");
 
 
 
