@@ -13,7 +13,6 @@ var MousePad = require('./gamepads/MousePad');
 
 var PhysicsManager = require('./PhysicsManager');
 var WorldManager = require('./scene/WorldManager');
-var that;
 
 var SoundManager = require('./sound/SoundManager');
 var AssetsSound = require('./sound/AssetsSound');
@@ -30,8 +29,6 @@ var random = require('./utils').random;
 var World3D = function( container ) {
 
     this.boxSize = 20;
-
-    that=this;
 
     this.container      = container;
 

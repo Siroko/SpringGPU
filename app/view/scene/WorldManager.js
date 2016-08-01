@@ -31,45 +31,7 @@ WorldManager.prototype._init = function() {
 };
 
 WorldManager.prototype._loadAssets = function() {
-
-    var onProgress = function ( xhr ) {
-        if ( xhr.lengthComputable ) {
-            var percentComplete = xhr.loaded / xhr.total * 100;
-            console.log( Math.round(percentComplete, 2 ) + '% downloaded' );
-        }
-    };
-
-    var onError = function ( xhr ) {
-    };
-
-    var objLoader = new OBJLoader();
-    var textureLoader = new THREE.TextureLoader();
-
-    objLoader.setPath( 'assets/obj/' );
-    objLoader.load( 'enviro.obj', (function ( object ) {
-
-        var texturePattern = textureLoader.load('assets/textures/patt2.png' );
-        texturePattern.wrapS = THREE.RepeatWrapping;
-        texturePattern.wrapT = THREE.RepeatWrapping;
-        texturePattern.repeat.x = 1000;
-        texturePattern.repeat.y = 1000;
-
-        this.room = object.children[ 0 ];
-        this.room.material = new THREE.RawShaderMaterial( {
-            uniforms: {
-                map             : { type : 't', value : textureLoader.load('assets/textures/baked_ao.png' ) },
-                uPatternMap     : { type : 't', value : texturePattern }
-            },
-
-            vertexShader                : vs_environment,
-            fragmentShader              : fs_environment
-        } );
-
-        this._createGeometries();
-
-
-    } ).bind( this ), onProgress, onError );
-
+      this._createGeometries();
 };
 
 WorldManager.prototype._createGeometries = function() {
