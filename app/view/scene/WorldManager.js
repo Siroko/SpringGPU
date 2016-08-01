@@ -17,8 +17,6 @@ var WorldManager = function(){
 
     this.room = null;
     this.floor = null;
-    this.meshes = [];
-    this.materials = [];
 
     this._init();
 
@@ -97,77 +95,9 @@ WorldManager.prototype._createFloor = function() {
     this.floor.add(centerFloorMesh);
 };
 
-
-WorldManager.prototype._createShapes = function() {
-
-    var quantity = 100;
-    var sizeBase = 0.2;
-    var radius = [];
-    var scales = [];
-    var positions = [];
-
-    var boxsize= 20;
-
-    for ( var i = 0; i < quantity; i++ ) {
-
-        var s = ( Math.random() * 2 ) + 0.1;
-
-
-        var rdx = Math.floor(Math.random() * boxsize) - boxsize/2;
-        var rdy = Math.floor(Math.random() * boxsize/2);
-        var rdz = Math.floor(Math.random() * boxsize) - boxsize/2;
-
-        //var p = new THREE.Vector3( ( Math.random() * 2 - 1) * 4.5, Math.random() * 4.5 + 4, ( Math.random() * 2 - 1 ) * 9 );
-
-        var p = new THREE.Vector3( rdx,rdy, rdz );
-
-
-
-        positions.push( p );
-        radius.push( sizeBase * s );
-        scales.push( s );
-    }
-
-    var shapesMaterial = new THREE.RawShaderMaterial({
-      uniforms: {
-        time: { type: 'f', value: 0 },
-        timeOffset: { type: 'f', value: 0 },
-        speed: { type: 'f', value: 1 },
-        growFromTo: { type: 'v2', value: new THREE.Vector2(1, 1) }
-      },
-      vertexShader: require('../../glsl/vs-shape.glsl'),
-      fragmentShader: require('../../glsl/fs-shape.glsl')
-    });
-
-
-    var geom = new THREE.IcosahedronGeometry( sizeBase, 2 );
-
-    var mesh;
-    for ( var i = 0; i < positions.length; i++ ) {
-
-        var r = Math.round( Math.random() * 3 );
-
-        var newMat = shapesMaterial.clone();
-        newMat.uniforms.time.value = 0;
-        newMat.uniforms.timeOffset.value = Math.random();
-        this.materials.push(newMat);
-
-        mesh = new THREE.Mesh( geom, newMat);
-        mesh.visible = false;
-        mesh.position.copy( positions[ i ] );
-
-        var s = scales[ i ];
-        mesh.scale.set( s*0.5, s*0.5, s*0.5 );
-        this.meshes.push( mesh );
-
-
-    }
-};
-
 WorldManager.prototype._createGeometries = function() {
 
     this._createFloor();
-    this._createShapes();
 
     this.dispatchEvent( { type : 'assetsLoaded' } );
 
@@ -175,9 +105,6 @@ WorldManager.prototype._createGeometries = function() {
 
 
 WorldManager.prototype.update = function( t ) {
-  for(var i = 0; i < this.materials.length; ++i) {
-    this.materials[i].uniforms.time.value += 0.01;
-  }
 };
 
 module.exports = WorldManager;

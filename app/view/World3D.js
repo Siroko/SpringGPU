@@ -22,6 +22,7 @@ var Cube = require('./cube/Cube');
 var Explosion = require('./explosion/Explosion');
 var Confettis = require('./confettis/Confettis');
 var Letter = require('./letter/Letter');
+var Shape = require('./shape/Shape');
 
 var random = require('./utils').random;
 
@@ -82,8 +83,7 @@ var World3D = function( container ) {
 
     //Letters integration
     this.letters = [];
-
-    this.meshes = [];
+    this.shapes = [];
 
 
 
@@ -185,32 +185,8 @@ World3D.prototype.addEvents = function() {
 World3D.prototype.onStart = function() {
   this.soundManager.play(AssetsSound.BACKGROUND_NORMAL);
 
-  var springSystem = this.springSystem;
-
-  /**
-   * @function makeShapeAppear
-   * @param {THREE.Mesh} mesh
-   */
-  var makeShapeAppear = (function(mesh) {
-
-    var targetScale = mesh.scale.x;
-    mesh.scale.set(0, 0, 0);
-    mesh.visible = true;
-
-    new TWEEN.Tween({ scale: 0 })
-      .to({ scale: targetScale }, 1000)
-      .easing(TWEEN.Easing.Elastic.Out)
-      .delay(Math.random() * 2000)
-      .onUpdate(function() {
-        mesh.scale.set(this.scale, this.scale, this.scale);
-      })
-      .start();
-
-  }).bind(this);
-
-  for(var i = 0; i < this.worldManager.meshes.length; ++i) {
-    var mesh = this.worldManager.meshes[i];
-    makeShapeAppear(mesh)
+  for(var i = 0; i < this.shapes.length; ++i) {
+    this.shapes[i].fadeIn();
   }
 
   for(var i = 0; i < this.letters.length; ++i) {
@@ -244,11 +220,8 @@ World3D.prototype.onMessageComplete = function() {
 
   this.confettis.start();
 
-  // acid time
-  for(var i = 0; i < this.worldManager.meshes.length; ++i) {
-    var mesh = this.worldManager.meshes[i];
-    mesh.material.uniforms.speed.value = 25;
-    mesh.material.uniforms.growFromTo.value.set(0.5, 2);
+  for(var i = 0; i < this.shapes.length; ++i) {
+    this.shapes[i].startTripping();
   }
 
   for(var i = 0; i < this.letters.length; ++i) {
@@ -265,11 +238,8 @@ World3D.prototype.onMessageRelease = function() {
   this.soundManager.fadeIn(AssetsSound.BACKGROUND_NORMAL);
   this.soundManager.fadeOut(AssetsSound.BACKGROUND_SUCCESS);
 
-  // let's chill out a bit
-  for(var i = 0; i < this.worldManager.meshes.length; ++i) {
-    var mesh = this.worldManager.meshes[i];
-    mesh.material.uniforms.speed.value = 1;
-    mesh.material.uniforms.growFromTo.value.set(1, 1);
+  for(var i = 0; i < this.shapes.length; ++i) {
+    this.shapes[i].stopTripping();
   }
 
   for(var i = 0; i < this.letters.length; ++i) {
@@ -369,19 +339,26 @@ World3D.prototype.onAssetsLoaded = function( e ) {
 
     this.scene.add(this.worldManager.floor);
 
+    var boxSize = 20;
 
-    this.phManager.setClosedArea(20,20,20);
+    this.phManager.setClosedArea(boxSize, boxSize, boxSize);
 
+    // shapes
+    for(var i = 0; i < 100; ++i) {
+      var shape = new Shape();
 
+      var x = random(-boxSize / 2, boxSize / 2);
+      var y = random(-boxSize / 2, boxSize / 2);
+      var z = random(-boxSize / 2, boxSize / 2);
 
-    for (var i = 0; i < this.worldManager.meshes.length; i++) {
-        var mesh = this.worldManager.meshes[i];
-        this.scene.add( mesh );
+      shape.el.position.set(x, y, z);
 
-        this.phManager.add3DObject(mesh,"sphere",false,false);
-
+      this.shapes.push(shape);
+      this.scene.add(shape.el);
+      this.phManager.add3DObject(shape.el, 'sphere', false, false);
     }
 
+    // letters
     var lettersInfos = this.getLettersInfos(
       'THE  SPITE  GOOD LUCK   ON YOUR NEW  ADVENTURE',
       'GGG  GGGGG  SSSS SSSS   SS SSSS SSS  SSSSSSSSS',
@@ -402,7 +379,6 @@ World3D.prototype.onAssetsLoaded = function( e ) {
       // that way we can access back the Letter onLetterHit
       letter.el.letter = letter;
 
-      var boxSize = 20;
 
       var x = random(-boxSize / 2, boxSize / 2);
       var y = random(-boxSize / 2, boxSize / 2);
@@ -444,20 +420,17 @@ World3D.prototype.render = function( timestamp ) {
 
     TWEEN.update();
 
+    for(var i = 0; i < this.shapes.length; ++i) {
+      this.shapes[i].update(0.01);
+    }
+
     this.confettis.update();
 
     this.planeCalc.lookAt( this.dummyCamera.position );
     this.gamePads.update( timestamp,[ this.planeCalc ] );
 
-    //this.pointer.position.copy( this.gamePads.intersectPoint );
-
-    // update world manager
-    this.worldManager.update();
-
     // Update the physics
-
-      this.phManager.update(timestamp);
-
+    this.phManager.update(timestamp);
 
     // Update VR headset position and apply to camera.
     this.controls.update();
