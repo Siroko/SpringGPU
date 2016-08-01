@@ -85,16 +85,7 @@ var World3D = function( container ) {
 
     this.meshes = [];
 
-    this.abc = this.getAbc(
-      'THE  SPITE  GOOD LUCK   ON YOUR NEW  ADVENTURE',
-      'GGG  GGGGG  SSSS SSSS   SS SSSS SSS  SSSSSSSSS',
-      {
-        S: 'silver',
-        G: 'gold'
-      }
-    );
 
-    this.phManager.setLettersLength(this.abc.length);
 
     // sounds
     this.soundManager = new SoundManager();
@@ -123,16 +114,16 @@ var World3D = function( container ) {
  */
 
 /**
- * @function getAbc
+ * @function getLettersInfos
  * @param {string} text
  * @param {colors} colors
  * @param {{[key:string]:string}} colorsTable
  * @returns {Array<ILetter>}
  */
-World3D.prototype.getAbc = function(text, colors, colorsTable) {
+World3D.prototype.getLettersInfos = function(text, colors, colorsTable) {
     var letters = text.split('');
 
-    var abc = [];
+    var lettersInfos = [];
 
     for(var i = 0; i < letters.length; ++i) {
       var letter = letters[i];
@@ -141,14 +132,16 @@ World3D.prototype.getAbc = function(text, colors, colorsTable) {
         continue;
       }
 
-      abc.push({
+      var letterInfos = {
         letter: letter,
         index: i,
         color: colorsTable[colors[i]]
-      });
+      }
+
+      lettersInfos.push(letterInfos);
     }
 
-    return abc;
+    return lettersInfos;
 };
 
 World3D.prototype.setup = function() {
@@ -389,8 +382,21 @@ World3D.prototype.onAssetsLoaded = function( e ) {
 
     }
 
-    for(var i=0; i < this.abc.length; i++ ){
-      var letter = new Letter(this.abc[i].letter, this.abc[i].color);
+    var lettersInfos = this.getLettersInfos(
+      'THE  SPITE  GOOD LUCK   ON YOUR NEW  ADVENTURE',
+      'GGG  GGGGG  SSSS SSSS   SS SSSS SSS  SSSSSSSSS',
+      {
+        S: 'silver',
+        G: 'gold'
+      }
+    );
+
+    this.phManager.setLettersLength(lettersInfos.length);
+
+    for(var i = 0; i < lettersInfos.length; i++ ){
+      var letterInfos = lettersInfos[i];
+
+      var letter = new Letter(letterInfos.letter, letterInfos.color);
 
       // attach letter to el
       // that way we can access back the Letter onLetterHit
@@ -404,7 +410,7 @@ World3D.prototype.onAssetsLoaded = function( e ) {
 
       letter.el.position.set(x, y, z);
 
-      letter.el.springIndex = this.abc[i].index;
+      letter.el.springIndex = letterInfos.index;
 
       this.letters.push(letter);
       this.scene.add(letter.el);
