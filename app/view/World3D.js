@@ -261,8 +261,8 @@ World3D.prototype.onLetterHit = function(e) {
   var mesh = e.mesh;
   var letter = mesh.letter;
 
-  var explosion = this.explosionsPool.length
-    ? this.explosionsPool.pop()
+  var explosion = Explosion.pool.length
+    ? Explosion.pool.pop()
     : new Explosion();
 
   explosion.setParent(this.scene);
@@ -273,10 +273,10 @@ World3D.prototype.onLetterHit = function(e) {
     .onUpdate(function() {
       explosion.setProgress(this.progress);
     })
-    .onComplete((function() {
-      this.explosionsPool.push(explosion);
+    .onComplete(function() {
+      Explosion.pool.push(explosion);
       explosion.setParent(null);
-    }).bind(this))
+    })
     .start();
 
   // inflate

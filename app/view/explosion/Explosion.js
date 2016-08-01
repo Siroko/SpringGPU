@@ -21,22 +21,8 @@ function Explosion(radius, divisions) {
 };
 
 /**
- * @property _material
- * @static
- */
-Explosion._material = new THREE.RawShaderMaterial({
-  uniforms: {
-    progress: { type: 'f', value: 0 }
-  },
-  vertexShader: vertexShader,
-  fragmentShader: fragmentShader,
-  transparent: true,
-  depthWrite: false,
-  linewidth: 2
-});
-
-/**
  * @method createLines
+ * @private
  */
 Explosion.prototype._createLines = function() {
   var sphereGeometry = new THREE.SphereGeometry(
@@ -87,6 +73,7 @@ Explosion.prototype._createLines = function() {
 
 /**
  * @method setParent
+ * @public
  * @param {THREE.Object3D} parent
  */
 Explosion.prototype.setParent = function(parent) {
@@ -101,6 +88,7 @@ Explosion.prototype.setParent = function(parent) {
 
 /**
  * @method setProgress
+ * @public
  * @param {float} value from 0 to 1
  */
 Explosion.prototype.setProgress = function(value) {
@@ -109,11 +97,35 @@ Explosion.prototype.setProgress = function(value) {
 
 /**
  * @method dispose
+ * @public
  */
 Explosion.prototype.dispose = function() {
   if(this.el.parent) {
     this.el.parent.remove(this.el);
   }
 };
+
+/**
+ * @property material
+ * @private
+ * @static
+ */
+Explosion._material = new THREE.RawShaderMaterial({
+  uniforms: {
+    progress: { type: 'f', value: 0 }
+  },
+  vertexShader: vertexShader,
+  fragmentShader: fragmentShader,
+  transparent: true,
+  depthWrite: false,
+  linewidth: 2
+});
+
+/**
+ * @property pool
+ * @public
+ * @static
+ */
+Explosion.pool = [];
 
 module.exports = Explosion;
