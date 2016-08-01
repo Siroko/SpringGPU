@@ -21,6 +21,7 @@ var AssetsSound = require('./sound/AssetsSound');
 var Cube = require('./cube/Cube');
 var Explosion = require('./explosion/Explosion');
 var Confettis = require('./confettis/Confettis');
+var Letter = require('./letter/Letter');
 
 var random = require('./utils').random;
 
@@ -80,31 +81,18 @@ var World3D = function( container ) {
 
 
     //Letters integration
-    this.loader = new THREE.JSONLoader();
-
     this.letters = [];
-    this.lettersMesh = [];
     this.lettersGrowIntervalIds = [];
-    this.lettersMatcapsCache = {};
-    this.lettersBaseMaterial = new THREE.RawShaderMaterial({
-      uniforms: {
-        normalMap: { type: 't', value: null },
-        textureMap: { type: 't', value: null },
-        inflation: { type: 'f', value: 0 },
-        opacity: { type: 'f', value: 0 }
-      },
-      vertexShader: require('./letter/vs-letter.glsl'),
-      fragmentShader: require('./letter/fs-letter.glsl'),
-      transparent: true
-    });
 
     this.meshes = [];
 
-    this.jsonLoader = new THREE.JSONLoader();
-
     this.abc = this.getAbc(
       'THE  SPITE  GOOD LUCK   ON YOUR NEW  ADVENTURE',
-      'GGG  GGGGG  SSSS SSSS   SS SSSS SSS  SSSSSSSSS' // S for silver, G for Gold
+      'GGG  GGGGG  SSSS SSSS   SS SSSS SSS  SSSSSSSSS',
+      {
+        S: 'silver',
+        G: 'gold'
+      }
     );
 
     this.phManager.setLettersLength(this.abc.length);
@@ -138,10 +126,11 @@ var World3D = function( container ) {
 /**
  * @function getAbc
  * @param {string} text
- * @param {colors} colors G for Gold, S for silver
+ * @param {colors} colors
+ * @param {{[key:string]:string}} colorsTable
  * @returns {Array<ILetter>}
  */
-World3D.prototype.getAbc = function(text, colors) {
+World3D.prototype.getAbc = function(text, colors, colorsTable) {
     var letters = text.split('');
 
     var abc = [];
@@ -156,64 +145,11 @@ World3D.prototype.getAbc = function(text, colors) {
       abc.push({
         letter: letter,
         index: i,
-        color: colors[i]
+        color: colorsTable[colors[i]]
       });
     }
 
     return abc;
-};
-
-/**
- * @function addLetter
- * @param {ILetter} letter
- */
-World3D.prototype.addLetter = function(letter) {
-  var url = '/assets/letters/models/' + letter.letter + '.json';
-
-  this.jsonLoader.load(url, (function(geo, mats) {
-    geo.computeFaceNormals();
-    geo.computeVertexNormals();
-
-    var mat = this.lettersBaseMaterial.clone();
-    var matcap = letter.color === 'G' ? 'gold' : 'silver';
-    this.setMatcap(mat, matcap);
-
-    var mesh = new THREE.Mesh(geo, mat);
-    mesh.geometry.scale(0.75, 0.75, 0.75);
-    mesh.geometry.computeBoundingBox();
-    mesh.visible = false;
-
-    var boxsize= 20;
-    var rdx = Math.floor(Math.random()*boxsize - boxsize/2 );
-    var rdy = Math.floor(Math.random()*boxsize/2  );
-    var rdz = Math.floor(Math.random()*boxsize - boxsize/2);
-    mesh.position.set(rdx, rdy, rdz);
-    mesh.springIndex = letter.index;
-
-    mesh.material.transparent = true;
-    mesh.material.opacity = 0;
-
-    mesh.geometry.computeBoundingBox();
-    this.scene.add(mesh);
-
-    this.phManager.add3DObject(mesh, 'cube', false, true);
-    //this.phManager.add3DObject(mesh, 'convex', false, true);
-
-
-    var inflateSpring = that.springSystem.createSpring(40, 3);
-    inflateSpring.setEndValue(1).setAtRest();
-
-    inflateSpring.addListener({
-      onSpringUpdate: function(spring) {
-        mat.uniforms.inflation.value = spring.getCurrentValue();
-      }
-    });
-
-    mesh.inflateSpring = inflateSpring;
-
-    this.lettersMesh.push(mesh);
-
-  }).bind(this));
 };
 
 World3D.prototype.setup = function() {
@@ -280,32 +216,13 @@ World3D.prototype.onStart = function() {
 
   }).bind(this);
 
-  /**
-   * @function makeLetterAppear
-   * @param {THREE.Mesh} mesh
-   */
-  var makeLetterAppear = (function(mesh) {
-
-    mesh.visible = true;
-
-    new TWEEN.Tween({ opacity: 0 })
-      .to({ opacity: 1 }, 1000)
-      .delay((Math.random() * 2000) + 1000)
-      .onUpdate(function() {
-        mesh.material.uniforms.opacity.value = this.opacity;
-      })
-      .start();
-
-  }).bind(this);
-
   for(var i = 0; i < this.worldManager.meshes.length; ++i) {
     var mesh = this.worldManager.meshes[i];
     makeShapeAppear(mesh)
   }
 
-  for(var i = 0; i < this.lettersMesh.length; ++i) {
-    var letterMesh = this.lettersMesh[i];
-    makeLetterAppear(letterMesh);
+  for(var i = 0; i < this.letters.length; ++i) {
+    this.letters[i].fadeIn();
   }
 
   this.phManager.attractBodiesToPlayer();
@@ -344,19 +261,16 @@ World3D.prototype.onMessageComplete = function() {
 
   function letterGrow(letter) {
     return window.setInterval(function() {
-      letter.inflateSpring.setEndValue(0.09);
-
-      window.setTimeout(function() {
-        letter.inflateSpring.setEndValue(0);
-      }, 300);
+      console.log('inflate')
+      letter.inflate();
     }, random(1000, 5000))
   };
 
   this.lettersGrowIntervalIds = [];
 
-  for(var i = 0; i < this.lettersMesh.length; ++i) {
-    var letterMesh = this.lettersMesh[i];
-    this.lettersGrowIntervalIds.push(letterGrow(letterMesh));
+  for(var i = 0; i < this.letters.length; ++i) {
+    var letter = this.letters[i];
+    this.lettersGrowIntervalIds.push(letterGrow(letter));
   }
 };
 
@@ -390,23 +304,15 @@ World3D.prototype.onMessageRelease = function() {
  * @param {ILetterHitEvent} e
  */
 World3D.prototype.onLetterHit = function(e) {
-  var letterMesh = e.mesh;
+  var mesh = e.mesh;
+  var letter = mesh.letter;
 
-  if(!letterMesh || !letterMesh.inflateSpring) {
-    return;
-  }
-
-  if(letterMesh.deflateTimeoutId) {
-    window.clearTimeout(letterMesh.deflateTimeoutId);
-  }
-
-  // explosion
   var explosion = this.explosionsPool.length
     ? this.explosionsPool.pop()
     : new Explosion();
 
   explosion.setParent(this.scene);
-  explosion.el.position.copy(letterMesh.position);
+  explosion.el.position.copy(mesh.position);
 
   new TWEEN.Tween({ progress: 0 })
     .to({ progress: 1 }, 400)
@@ -420,11 +326,7 @@ World3D.prototype.onLetterHit = function(e) {
     .start();
 
   // inflate
-  letterMesh.inflateSpring.setEndValue(0.09);
-
-  letterMesh.deflateTimeoutId = window.setTimeout(function() {
-    letterMesh.inflateSpring.setEndValue(0);
-  }, 300);
+  letter.inflate();
 
   // sound
   this.balloonSoundIndex++;
@@ -499,9 +401,36 @@ World3D.prototype.onAssetsLoaded = function( e ) {
     }
 
     for(var i=0; i < this.abc.length; i++ ){
+      var letter = new Letter(this.abc[i].letter, this.abc[i].color);
 
-      this.addLetter(this.abc[i]);
+      // attach letter to el
+      // that way we can access back the Letter onLetterHit
+      letter.el.letter = letter;
 
+      var boxSize = 20;
+
+      var x = random(-boxSize / 2, boxSize / 2);
+      var y = random(-boxSize / 2, boxSize / 2);
+      var z = random(-boxSize / 2, boxSize / 2);
+
+      letter.el.position.set(x, y, z);
+
+      letter.el.springIndex = this.abc[i].index;
+
+      this.letters.push(letter);
+      this.scene.add(letter.el);
+
+      var addToPhysicSimulation = (function(letter) {
+        this.phManager.add3DObject(letter.el, 'cube', false, true);
+        letter.removeEventListener(addToPhysicSimulation);
+      }).bind(this, letter);
+
+      if(letter.isReady) {
+        addToPhysicSimulation();
+      }
+      else {
+        letter.addEventListener('ready', addToPhysicSimulation);
+      }
     }
 
 };
@@ -550,27 +479,6 @@ World3D.prototype.onResize = function( w, h ) {
     this.effect.setSize( w, h );
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
-};
-
-/**
- * @function setMatcap
- * @param {THREE.Material} mat
- * @param {string} matcap
- */
-World3D.prototype.setMatcap =  function(mat, matcap) {
-  var setUniforms = (function() {
-    mat.uniforms.normalMap.value = mat.uniforms.textureMap.value = this.lettersMatcapsCache[matcap];
-    mat.needsUpdate = true;
-  }).bind(this);
-
-  if(this.lettersMatcapsCache[matcap]) {
-    setUniforms();
-  }
-  else {
-    var url = '/assets/textures/' + matcap + '.jpg';
-    this.lettersMatcapsCache[matcap] = this.textureLoader.load(url);
-    setUniforms();
-  }
 };
 
 module.exports = World3D;

@@ -21,14 +21,24 @@ function Letter(letter, color) {
   this._material = Letter._material.clone();
   this.el.material = this._material;
 
+  this._isMatCapReady = false;
+  this._isGeometryReady = false;
+  this.isReady = this.isMatCapReady && this.isGeometryReady;
+
   Letter._loadMatCap(color || 'silver', (function(texture) {
     this._material.uniforms.normalMap.value = texture;
     this._material.uniforms.textureMap.value = texture;
     this._material.needsUpdate = true;
+
+    this._isMatCapReady = true;
+    this._checkIfReady();
   }).bind(this));
 
   Letter._loadModel(letter, (function(geometry) {
     this.el.geometry = geometry;
+
+    this._isGeometryReady = true;
+    this._checkIfReady();
   }).bind(this));
 
   this._inflateSpring = Letter._springSystem.createSpring(40, 3);
@@ -37,6 +47,24 @@ function Letter(letter, color) {
   this._inflateTimeoutId = null;
 
   this._addListeners();
+};
+
+Letter.prototype = Object.create(THREE.EventDispatcher.prototype);
+
+/**
+ * @method checkIfReady
+ * @private
+ */
+Letter.prototype._checkIfReady = function() {
+  if(this.isReady) {
+    return;
+  }
+
+  this.isReady = this._isMatCapReady && this._isGeometryReady;
+
+  if(this.isReady) {
+    this.dispatchEvent({ type: 'ready' });
+  }
 };
 
 /**
