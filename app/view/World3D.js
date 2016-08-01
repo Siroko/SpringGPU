@@ -29,6 +29,8 @@ var random = require('./utils').random;
 
 var World3D = function( container ) {
 
+    this.boxSize = 20;
+
     that=this;
 
     this.container      = container;
@@ -43,6 +45,7 @@ var World3D = function( container ) {
 
     //// Cannon.js physics manager
     this.phManager      = new PhysicsManager(this.dummyCamera,this.camera);
+    this.phManager.setClosedArea(this.boxSize, this.boxSize, this.boxSize);
 
     //// Apply VR headset positional data to camera.
     this.controls       = new VRControls( this.camera );
@@ -69,42 +72,23 @@ var World3D = function( container ) {
     //this.scene.add( this.planeCalc );
     this.scene.add( this.dummyCamera );
 
-    var floor = new Floor();
-    this.scene.add(floor.el);
-
-    var introCube = new Cube(1);
-    introCube.el.position.y = 0.5;
-    this.scene.add(introCube.el);
-
-    that.phManager.addStarterObject(introCube.el,"cube");
-
-
-
-
-
-    //Letters integration
+    this.floor = null;
+    this.introCube = null;
+    this.confettis = null;
     this.letters = [];
     this.shapes = [];
 
+    this.createFloor();
+    this.createIntroCube();
+    this.createConfettis();
+    this.createLetters();
+    this.createShapes();
 
-
-
-    // sounds
     this.soundManager = new SoundManager();
     this.soundManager.addSounds(AssetsSound.Sounds);
     this.balloonSoundIndex = 0;
     this.isSuccessSoundPlaying = false;
 
-    // springs
-    this.springSystem = new Rebound.SpringSystem();
-
-    // effects
-    this.explosionsPool = [];
-
-    // confettis
-    this.confettis = new Confettis(new THREE.Vector3(10, 10, 10), 1200, false);
-    this.confettis.el.position.y += 5;
-    this.isConfettisActive = false; 
 };
 
 /**
@@ -196,7 +180,6 @@ World3D.prototype.onStart = function() {
   }
 
   this.phManager.attractBodiesToPlayer();
-
 };
 
 /**
@@ -215,8 +198,7 @@ World3D.prototype.onMessageComplete = function() {
     this.isSuccessSoundPlaying = true;
   }
 
-  if(!this.isConfettisActive) {
-    this.isConfettisActive = true; 
+  if(!this.confettis.el.parent) {
     this.scene.add(this.confettis.el);
   }
 
@@ -337,76 +319,113 @@ World3D.prototype.onInitializeManager = function( n, o ) {
     this.setup();
 };
 
-World3D.prototype.onAssetsLoaded = function( e ) {
-
-    this.scene.add(this.worldManager.floor);
-
-    var boxSize = 20;
-
-    this.phManager.setClosedArea(boxSize, boxSize, boxSize);
-
-    // shapes
-    for(var i = 0; i < 100; ++i) {
-      var shape = new Shape();
-
-      var x = random(-boxSize / 2, boxSize / 2);
-      var y = random(-boxSize / 2, boxSize / 2);
-      var z = random(-boxSize / 2, boxSize / 2);
-
-      shape.el.position.set(x, y, z);
-
-      this.shapes.push(shape);
-      this.scene.add(shape.el);
-      this.phManager.add3DObject(shape.el, 'sphere', false, false);
-    }
-
-    // letters
-    var lettersInfos = this.getLettersInfos(
-      'THE  SPITE  GOOD LUCK   ON YOUR NEW  ADVENTURE',
-      'GGG  GGGGG  SSSS SSSS   SS SSSS SSS  SSSSSSSSS',
-      {
-        S: 'silver',
-        G: 'gold'
-      }
-    );
-
-    this.phManager.setLettersLength(lettersInfos.length);
-
-    for(var i = 0; i < lettersInfos.length; i++ ){
-      var letterInfos = lettersInfos[i];
-
-      var letter = new Letter(letterInfos.letter, letterInfos.color);
-
-      // attach letter to el
-      // that way we can access back the Letter onLetterHit
-      letter.el.letter = letter;
-
-
-      var x = random(-boxSize / 2, boxSize / 2);
-      var y = random(-boxSize / 2, boxSize / 2);
-      var z = random(-boxSize / 2, boxSize / 2);
-
-      letter.el.position.set(x, y, z);
-
-      letter.el.springIndex = letterInfos.index;
-
-      this.letters.push(letter);
-      this.scene.add(letter.el);
-
-      var addToPhysicSimulation = (function(letter) {
-        this.phManager.add3DObject(letter.el, 'cube', false, true);
-        letter.removeEventListener(addToPhysicSimulation);
-      }).bind(this, letter);
-
-      if(letter.isReady) {
-        addToPhysicSimulation();
-      }
-      else {
-        letter.addEventListener('ready', addToPhysicSimulation);
-      }
-    }
-
+/**
+ * @method getRandomCoordinatesInBox
+ * @public
+ * @returns {{x:float, y:float, z:float}}
+ */
+World3D.prototype.getRandomCoordinatesInBox = function() {
+  var x = random(-this.boxSize / 2, this.boxSize / 2);
+  var y = random(-this.boxSize / 2, this.boxSize / 2);
+  var z = random(-this.boxSize / 2, this.boxSize / 2);
+  
+  return {
+    x: x,
+    y: y,
+    z: z
+  }
 };
+
+/**
+ * @method createFloor
+ */
+World3D.prototype.createFloor = function() {
+  this.floor = new Floor();
+  this.scene.add(this.floor.el);
+};
+
+/**
+ * @method createIntroCube
+ */
+World3D.prototype.createIntroCube = function() {
+  this.introCube = new Cube(1);
+  this.introCube.el.position.y = 0.5;
+  this.scene.add(this.introCube.el);
+  this.phManager.addStarterObject(this.introCube.el,"cube");
+};
+
+/**
+ * @method createConfettis
+ */
+World3D.prototype.createConfettis = function() {
+  this.confettis = new Confettis(new THREE.Vector3(10, 10, 10), 1200, false);
+  this.confettis.el.position.y += 5;
+};
+
+/**
+ * @method createShapes
+ */
+World3D.prototype.createShapes = function() {
+  for(var i = 0; i < 100; ++i) {
+    var shape = new Shape();
+
+    var coordinates = this.getRandomCoordinatesInBox();
+    shape.el.position.set(coordinates.x, coordinates.y, coordinates.z);
+
+    this.shapes.push(shape);
+    this.scene.add(shape.el);
+    this.phManager.add3DObject(shape.el, 'sphere', false, false);
+  }
+};
+
+/**
+ * @method createLetters
+ */
+World3D.prototype.createLetters = function() {
+  var lettersInfos = this.getLettersInfos(
+    'THE  SPITE  GOOD LUCK   ON YOUR NEW  ADVENTURE',
+    'GGG  GGGGG  SSSS SSSS   SS SSSS SSS  SSSSSSSSS',
+    {
+      S: 'silver',
+      G: 'gold'
+    }
+  );
+
+  this.phManager.setLettersLength(lettersInfos.length);
+
+  for(var i = 0; i < lettersInfos.length; i++ ){
+    var letterInfos = lettersInfos[i];
+
+    var letter = new Letter(letterInfos.letter, letterInfos.color);
+
+    // attach letter to el
+    // that way we can access back the Letter onLetterHit
+    letter.el.letter = letter;
+
+    var coordinates = this.getRandomCoordinatesInBox();
+    letter.el.position.set(coordinates.x, coordinates.y, coordinates.z);
+
+    letter.el.springIndex = letterInfos.index;
+
+    this.letters.push(letter);
+    this.scene.add(letter.el);
+
+    var addToPhysicSimulation = (function(letter) {
+      this.phManager.add3DObject(letter.el, 'cube', false, true);
+      letter.removeEventListener(addToPhysicSimulation);
+    }).bind(this, letter);
+
+    if(letter.isReady) {
+      addToPhysicSimulation();
+    }
+    else {
+      letter.addEventListener('ready', addToPhysicSimulation);
+    }
+  }
+};
+
+
+World3D.prototype.onAssetsLoaded = function( e ) {};
 
 World3D.prototype.onRenderLeft = function() {
     //console.log('rendering Left', this);
