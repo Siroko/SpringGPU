@@ -16,7 +16,6 @@ var WorldManager = function(){
     THREE.EventDispatcher.call( this );
 
     this.room = null;
-    this.floor = null;
 
     this._init();
 
@@ -73,31 +72,7 @@ WorldManager.prototype._loadAssets = function() {
 
 };
 
-WorldManager.prototype._createFloor = function() {
-    this.floor = new THREE.Object3D();
-    this.floor.rotation.x = -Math.PI / 2;
-
-    // create floor
-    var infiniteFloorGeo = new THREE.PlaneBufferGeometry(100, 100);
-    var infiniteFloorMat = new THREE.MeshBasicMaterial({ color: '#1a1f27' });
-    var infiniteFloorMesh = new THREE.Mesh(infiniteFloorGeo, infiniteFloorMat);
-    this.floor.add(infiniteFloorMesh);
-
-    var centerFloorGeo = new THREE.PlaneBufferGeometry(6, 6);
-    var centerFloorMat = new THREE.MeshBasicMaterial({
-      side: THREE.DoubleSide,
-      map: new THREE.TextureLoader().load('assets/textures/floor.png'),
-      transparent: true
-    });
-
-    var centerFloorMesh = new THREE.Mesh(centerFloorGeo, centerFloorMat);
-    centerFloorMesh.position.z = 0.01;
-    this.floor.add(centerFloorMesh);
-};
-
 WorldManager.prototype._createGeometries = function() {
-
-    this._createFloor();
 
     this.dispatchEvent( { type : 'assetsLoaded' } );
 

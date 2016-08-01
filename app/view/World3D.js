@@ -18,6 +18,7 @@ var that;
 var SoundManager = require('./sound/SoundManager');
 var AssetsSound = require('./sound/AssetsSound');
 
+var Floor = require('./floor/Floor');
 var Cube = require('./cube/Cube');
 var Explosion = require('./explosion/Explosion');
 var Confettis = require('./confettis/Confettis');
@@ -68,8 +69,8 @@ var World3D = function( container ) {
     //this.scene.add( this.planeCalc );
     this.scene.add( this.dummyCamera );
 
-    this.textureLoader = new THREE.TextureLoader();
-
+    var floor = new Floor();
+    this.scene.add(floor.el);
 
     var introCube = new Cube(1);
     introCube.el.position.y = 0.5;
@@ -84,6 +85,7 @@ var World3D = function( container ) {
     //Letters integration
     this.letters = [];
     this.shapes = [];
+
 
 
 
