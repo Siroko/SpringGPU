@@ -45,6 +45,7 @@ function Letter(letter, color) {
   this._inflateSpring.setEndValue(1).setAtRest();
 
   this._inflateTimeoutId = null;
+  this._inflateLoopIntervalId = null;
 
   this._addListeners();
 };
@@ -128,6 +129,31 @@ Letter.prototype.inflate = function() {
   this._inflateTimeoutId = window.setTimeout((function() {
     this._inflateSpring.setEndValue(0);
   }).bind(this), 300);
+};
+
+/**
+ * @method startInflateLoop
+ * @public
+ * @param {float} [interval=2000]
+ */
+Letter.prototype.startInflateLoop = function(interval) {
+  this._inflateLoopIntervalId = window.setInterval((function() {
+    this.inflate();
+  }).bind(this), interval);
+};
+
+/**
+ * @method stopInflateLoop
+ * @public
+ */
+Letter.prototype.stopInflateLoop = function() {
+  if(this._inflateLoopIntervalId === null) {
+    return;
+  }
+
+  window.clearInterval(this._inflateLoopIntervalId);
+
+  this._inflateLoopIntervalId = null;
 };
 
 /**

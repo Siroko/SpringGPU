@@ -82,7 +82,6 @@ var World3D = function( container ) {
 
     //Letters integration
     this.letters = [];
-    this.lettersGrowIntervalIds = [];
 
     this.meshes = [];
 
@@ -259,18 +258,8 @@ World3D.prototype.onMessageComplete = function() {
     mesh.material.uniforms.growFromTo.value.set(0.5, 2);
   }
 
-  function letterGrow(letter) {
-    return window.setInterval(function() {
-      console.log('inflate')
-      letter.inflate();
-    }, random(1000, 5000))
-  };
-
-  this.lettersGrowIntervalIds = [];
-
   for(var i = 0; i < this.letters.length; ++i) {
-    var letter = this.letters[i];
-    this.lettersGrowIntervalIds.push(letterGrow(letter));
+    this.letters[i].startInflateLoop(random(1000, 5000));
   }
 };
 
@@ -290,9 +279,9 @@ World3D.prototype.onMessageRelease = function() {
     mesh.material.uniforms.growFromTo.value.set(1, 1);
   }
 
-  this.lettersGrowIntervalIds.forEach(function(id) {
-    window.clearInterval(id);
-  });
+  for(var i = 0; i < this.letters.length; ++i) {
+    this.letters[i].stopInflateLoop();
+  }
 };
 
 /**
