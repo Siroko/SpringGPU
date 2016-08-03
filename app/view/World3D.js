@@ -1,9 +1,5 @@
-/**
- * Created by siroko on 7/8/15.
- */
 var THREE = require('three');
 var TWEEN = require('tween.js');
-var Rebound = require('rebound');
 
 var VRControls = require('./../utils/VRControls');
 var VREffect = require('./../utils/VREffect');
@@ -26,143 +22,123 @@ var Shape = require('./shape/Shape');
 
 var random = require('./utils').random;
 
-var World3D = function( container ) {
-
-    this.boxSize = 20;
-
-    this.container      = container;
-
-    this.camera         = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 10000 );
-    this.camera.layers.enable( 1 );
-    this.dummyCamera = new THREE.Object3D();
-    this.dummyCamera.add( this.camera );
-
-    this.scene          = new THREE.Scene();
-    this.renderer       = new THREE.WebGLRenderer( { antialias: true } );
-
-    //// Cannon.js physics manager
-    this.phManager      = new PhysicsManager(this.dummyCamera,this.camera);
-    this.phManager.setClosedArea(this.boxSize, this.boxSize, this.boxSize);
-
-    //// Apply VR headset positional data to camera.
-    this.controls       = new VRControls( this.camera );
-    this.controls.standing = true;
-
-    // Apply VR stereo rendering to renderer.
-    this.effect = new VREffect( this.renderer, null, null, this.onRenderLeft.bind( this ), this.onRenderRight.bind( this ) );
-
-    // Create a VR manager helper to enter and exit VR mode.
-    var params = {
-        hideButton: false, // Default: false.
-        isUndistorted: false // Default: false.
-    };
-    this.manager = new WebVRManager( this.renderer, this.effect, params );
-    this.worldManager = new WorldManager();
-    this.addEvents();
-
-    // Create plane to raycast
-    this.planeCalc = new THREE.Mesh( new THREE.PlaneBufferGeometry( 100, 100, 2, 2 ) , new THREE.MeshNormalMaterial({
-        transparent: true,
-        opacity: 0
-    }) );
-
-    //this.scene.add( this.planeCalc );
-    this.scene.add( this.dummyCamera );
-
-    this.floor = null;
-    this.introCube = null;
-    this.confettis = null;
-    this.letters = [];
-    this.shapes = [];
-
-    this.createFloor();
-    this.createIntroCube();
-    this.createConfettis();
-    this.createLetters();
-    this.createShapes();
-
-    this.soundManager = new SoundManager();
-    this.soundManager.addSounds(AssetsSound.Sounds);
-    this.balloonSoundIndex = 0;
-    this.isSuccessSoundPlaying = false;
-
-};
-
 /**
- * @interface ILetter {
+ * @interface ILetterInfos {
  *  char letter;
  *  int index;
  *  string color;
  * }
- */
-
-/**
- * @function getLettersInfos
- * @param {string} text
- * @param {colors} colors
- * @param {{[key:string]:string}} colorsTable
- * @returns {Array<ILetter>}
- */
-World3D.prototype.getLettersInfos = function(text, colors, colorsTable) {
-    var letters = text.split('');
-
-    var lettersInfos = [];
-
-    for(var i = 0; i < letters.length; ++i) {
-      var letter = letters[i];
-
-      if(letter === ' ') {
-        continue;
-      }
-
-      var letterInfos = {
-        letter: letter,
-        index: i,
-        color: colorsTable[colors[i]]
-      }
-
-      lettersInfos.push(letterInfos);
-    }
-
-    return lettersInfos;
-};
-
-World3D.prototype.setup = function() {
-
-    this.renderer.setClearColor( '#1a1f27', 1 );
-    this.container.appendChild( this.renderer.domElement );
-
-    this.positionTouch1 = new THREE.Vector3(0, 100, 0);
-    this.positionTouch2 = new THREE.Vector3(0, 100, 0);
-
-    this.render( 0 );
-
-};
-
-World3D.prototype.onModeChange = function( n, o ) {
-    this.phManager.setMode(n);
-    switch(n){
-        case 3 :
-            console.log('Passing to VR mode');
-
-            break;
-    }
-};
-
-World3D.prototype.addEvents = function() {
-    this.manager.on('initialized', this.onInitializeManager.bind( this ) );
-    this.manager.on('modechange', this.onModeChange.bind( this ) );
-
-    this.worldManager.addEventListener( 'assetsLoaded', this.onAssetsLoaded.bind( this ) );
-    this.phManager.addEventListener( 'starts', this.onStart.bind(this) );
-    this.phManager.addEventListener('letterHit', this.onLetterHit.bind(this));
-    this.phManager.addEventListener('messageDone', this.onMessageComplete.bind(this));
-    this.phManager.addEventListener('messageUnlocked', this.onMessageRelease.bind(this));
-};
-
-/**
- * Cube has been hit.
  *
+ * @class World3D
+ * @param {HTMLElement} container
+ */
+var World3D = function(container) {
+  this.boxSize = 20;
+
+  this.container = container;
+
+  this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 10000);
+  this.camera.layers.enable(1);
+  this.dummyCamera = new THREE.Object3D();
+  this.dummyCamera.add(this.camera);
+
+  this.scene = new THREE.Scene();
+  this.renderer = new THREE.WebGLRenderer({ antialias: true });
+
+  //// Cannon.js physics manager
+  this.physicsManager = new PhysicsManager(this.dummyCamera,this.camera);
+  this.physicsManager.setClosedArea(this.boxSize, this.boxSize, this.boxSize);
+
+  //// Apply VR headset positional data to camera.
+  this.controls = new VRControls(this.camera);
+  this.controls.standing = true;
+
+  // Apply VR stereo rendering to renderer.
+  this.effect = new VREffect(this.renderer, null, null, this.onRenderLeft.bind(this), this.onRenderRight.bind(this));
+
+  // Create a VR manager helper to enter and exit VR mode.
+  this.manager = new WebVRManager(this.renderer, this.effect, {
+    hideButton: false, // Default: false.
+    isUndistorted: false // Default: false.
+  });
+
+  this.worldManager = new WorldManager();
+  this.addEvents();
+
+  // Create plane to raycast
+  this.planeCalc = new THREE.Mesh(
+    new THREE.PlaneBufferGeometry(100, 100, 2, 2),
+    new THREE.MeshNormalMaterial({
+      transparent: true,
+      opacity: 0
+    })
+  );
+
+  this.scene.add(this.dummyCamera);
+
+  // elements
+  this.floor = null;
+  this.introCube = null;
+  this.confettis = null;
+  this.letters = [];
+  this.shapes = [];
+
+  this.createFloor();
+  this.createIntroCube();
+  this.createConfettis();
+  this.createLetters();
+  this.createShapes();
+
+  this.soundManager = new SoundManager();
+  this.soundManager.addSoundsFromConfig(AssetsSound.Sounds);
+  this.balloonSoundIndex = 0;
+  this.isSuccessSoundPlaying = false;
+
+  this.renderBound = this.render.bind(this);
+};
+
+/**
+ * @method setup
+ */
+World3D.prototype.setup = function() {
+  this.renderer.setClearColor('#1a1f27', 1);
+  this.container.appendChild(this.renderer.domElement);
+
+  this.positionTouch1 = new THREE.Vector3(0, 100, 0);
+  this.positionTouch2 = new THREE.Vector3(0, 100, 0);
+
+  this.render(0);
+};
+
+/**
+ * @method onModeChange
+ * @param {int} mode
+ */
+World3D.prototype.onModeChange = function(mode, o) {
+  this.physicsManager.setMode(mode);
+
+  switch(mode){
+    case 3 :
+      console.log('Passing to VR mode');
+    break;
+  }
+};
+
+/**
+ * @method addEvents
+ */
+World3D.prototype.addEvents = function() {
+  this.manager.on('initialized', this.onInitializeManager.bind(this));
+  this.manager.on('modechange', this.onModeChange.bind(this));
+
+  this.worldManager.addEventListener('assetsLoaded', this.onAssetsLoaded.bind(this));
+  this.physicsManager.addEventListener('starts', this.onStart.bind(this));
+  this.physicsManager.addEventListener('letterHit', this.onLetterHit.bind(this));
+  this.physicsManager.addEventListener('messageDone', this.onMessageComplete.bind(this));
+  this.physicsManager.addEventListener('messageUnlocked', this.onMessageRelease.bind(this));
+};
+
+/**
  * @method onStart
  */
 World3D.prototype.onStart = function() {
@@ -176,12 +152,10 @@ World3D.prototype.onStart = function() {
     this.letters[i].fadeIn();
   }
 
-  this.phManager.attractBodiesToPlayer();
+  this.physicsManager.attractBodiesToPlayer();
 };
 
 /**
- * All the letters are in place.
- *
  * @method onMessageComplete
  */
 World3D.prototype.onMessageComplete = function() {
@@ -211,8 +185,6 @@ World3D.prototype.onMessageComplete = function() {
 };
 
 /**
- * The letters are no longer all in place.
- *
  * @method onMessageRelease
  */
 World3D.prototype.onMessageRelease = function() {
@@ -258,7 +230,6 @@ World3D.prototype.onLetterHit = function(e) {
     })
     .start();
 
-  // inflate
   letter.inflate();
 
   // sound
@@ -291,41 +262,34 @@ World3D.prototype.onLetterHit = function(e) {
   this.soundManager.play(sound);
 };
 
-World3D.prototype.onInitializeManager = function( n, o ) {
+/**
+ * @method onInitializeManager
+ */
+World3D.prototype.onInitializeManager = function(n, o) {
+  if(!this.manager.isVRCompatible || typeof window.orientation !== 'undefined') {
+    this.gamePads = new MousePad(this.scene, this.camera, this.effect, this.physicsManager);
+    this.dummyCamera.position.z = 5;
+    this.dummyCamera.position.y = 0.5;
+  } else {
+    this.gamePads = new GamePads(this.scene, this.camera, this.effect, this.physicsManager);
+  }
 
-    if( !this.manager.isVRCompatible || typeof window.orientation !== 'undefined' ) {
+  if(this.gamePads.h2 !== undefined) {
+    this.physicsManager.add3DObject(this.gamePads.h2, 'cube', true, false);
+  }
 
-        this.gamePads = new MousePad( this.scene, this.camera, this.effect, this.phManager );
-        this.dummyCamera.position.z = 5;
-        this.dummyCamera.position.y = 0.5;
-
-    } else {
-
-        this.gamePads = new GamePads( this.scene, this.camera, this.effect,  this.phManager );
-
-    }
-
-    //this.pointer = new THREE.Mesh( new THREE.SphereBufferGeometry( 0.1, 10, 10), new THREE.MeshNormalMaterial() );
-    //this.scene.add( this.pointer );
-
-
-    if(this.gamePads.h2 !== undefined){
-      this.phManager.add3DObject(this.gamePads.h2, "cube", true,false);
-    }
-
-    this.setup();
+  this.setup();
 };
 
 /**
  * @method getRandomCoordinatesInBox
- * @public
  * @returns {{x:float, y:float, z:float}}
  */
 World3D.prototype.getRandomCoordinatesInBox = function() {
   var x = random(-this.boxSize / 2, this.boxSize / 2);
   var y = random(-this.boxSize / 2, this.boxSize / 2);
   var z = random(-this.boxSize / 2, this.boxSize / 2);
-  
+
   return {
     x: x,
     y: y,
@@ -348,7 +312,7 @@ World3D.prototype.createIntroCube = function() {
   this.introCube = new Cube(1);
   this.introCube.el.position.y = 0.5;
   this.scene.add(this.introCube.el);
-  this.phManager.addStarterObject(this.introCube.el,"cube");
+  this.physicsManager.addStarterObject(this.introCube.el,"cube");
 };
 
 /**
@@ -371,8 +335,39 @@ World3D.prototype.createShapes = function() {
 
     this.shapes.push(shape);
     this.scene.add(shape.el);
-    this.phManager.add3DObject(shape.el, 'sphere', false, false);
+    this.physicsManager.add3DObject(shape.el, 'sphere', false, false);
   }
+};
+
+/**
+ * @method getLettersInfos
+ * @param {string} text
+ * @param {colors} colors
+ * @param {{[key:string]:string}} colorsTable
+ * @returns {Array<IletterInfos>}
+ */
+World3D.prototype.getLettersInfos = function(text, colors, colorsTable) {
+  var letters = text.split('');
+
+  var lettersInfos = [];
+
+  for(var i = 0; i < letters.length; ++i) {
+    var letter = letters[i];
+
+    if(letter === ' ') {
+      continue;
+    }
+
+    var letterInfos = {
+      letter: letter,
+      index: i,
+      color: colorsTable[colors[i]]
+    }
+
+    lettersInfos.push(letterInfos);
+  }
+
+  return lettersInfos;
 };
 
 /**
@@ -388,7 +383,7 @@ World3D.prototype.createLetters = function() {
     }
   );
 
-  this.phManager.setLettersLength(lettersInfos.length);
+  this.physicsManager.setLettersLength(lettersInfos.length);
 
   for(var i = 0; i < lettersInfos.length; i++ ){
     var letterInfos = lettersInfos[i];
@@ -408,7 +403,7 @@ World3D.prototype.createLetters = function() {
     this.scene.add(letter.el);
 
     var addToPhysicSimulation = (function(letter) {
-      this.phManager.add3DObject(letter.el, 'cube', false, true);
+      this.physicsManager.add3DObject(letter.el, 'cube', false, true);
       letter.removeEventListener(addToPhysicSimulation);
     }).bind(this, letter);
 
@@ -421,50 +416,59 @@ World3D.prototype.createLetters = function() {
   }
 };
 
+/**
+ * @method onAssetsLoade
+ */
+World3D.prototype.onAssetsLoaded = function(e) {};
 
-World3D.prototype.onAssetsLoaded = function( e ) {};
+/**
+ * @method onRenderLeft
+ */
+World3D.prototype.onRenderLeft = function() {};
 
-World3D.prototype.onRenderLeft = function() {
-    //console.log('rendering Left', this);
+/**
+ * @method onRenderRight
+ */
+World3D.prototype.onRenderRight = function() {};
+
+/**
+ * @method render
+ */
+World3D.prototype.render = function(timestamp) {
+  window.requestAnimationFrame(this.renderBound);
+
+  TWEEN.update();
+
+  for(var i = 0; i < this.shapes.length; ++i) {
+    this.shapes[i].update();
+  }
+
+  this.confettis.update();
+
+  this.planeCalc.lookAt(this.dummyCamera.position);
+  this.gamePads.update(timestamp, [this.planeCalc]);
+
+  // Update the physics
+  this.physicsManager.update(timestamp);
+
+  // Update VR headset position and apply to camera.
+  this.controls.update();
+
+  // Render the scene through the manager.
+  //this.renderer.setRenderTarget( null ); // add this line if you are working with GPGPU sims
+  this.manager.render(this.scene, this.camera, timestamp);
 };
 
-World3D.prototype.onRenderRight = function() {
-    //console.log('rendering Right', this);
-};
-
-World3D.prototype.render = function( timestamp ) {
-
-    window.requestAnimationFrame( this.render.bind( this ) );
-
-    TWEEN.update();
-
-    for(var i = 0; i < this.shapes.length; ++i) {
-      this.shapes[i].update(0.01);
-    }
-
-    this.confettis.update();
-
-    this.planeCalc.lookAt( this.dummyCamera.position );
-    this.gamePads.update( timestamp,[ this.planeCalc ] );
-
-    // Update the physics
-    this.phManager.update(timestamp);
-
-    // Update VR headset position and apply to camera.
-    this.controls.update();
-
-    // Render the scene through the manager.
-    //this.renderer.setRenderTarget( null ); // add this line if you are working with GPGPU sims
-    this.manager.render( this.scene, this.camera, timestamp);
-
-};
-
-World3D.prototype.onResize = function( w, h ) {
-
-    this.renderer.setPixelRatio( window.devicePixelRatio );
-    this.effect.setSize( w, h );
-    this.camera.aspect = w / h;
-    this.camera.updateProjectionMatrix();
+/**
+ * @method onResize
+ * @param {float} w
+ * @param {float} h
+ */
+World3D.prototype.onResize = function(w, h) {
+  this.renderer.setPixelRatio(window.devicePixelRatio);
+  this.effect.setSize(w, h);
+  this.camera.aspect = w / h;
+  this.camera.updateProjectionMatrix();
 };
 
 module.exports = World3D;

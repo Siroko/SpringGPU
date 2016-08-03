@@ -10,7 +10,6 @@ var fragmentShader = require('./fs-letter.glsl');
 
 /**
  * @class Letter
- * @constructor
  * @param {char} letter
  * @param {string} [color='silver'] gold or silver
  */
@@ -54,7 +53,6 @@ Letter.prototype = Object.create(THREE.EventDispatcher.prototype);
 
 /**
  * @method checkIfReady
- * @private
  */
 Letter.prototype._checkIfReady = function() {
   if(this.isReady) {
@@ -70,7 +68,6 @@ Letter.prototype._checkIfReady = function() {
 
 /**
  * @method addListeners
- * @private
  */
 Letter.prototype._addListeners = function() {
   this._inflateSpring.addListener({
@@ -80,7 +77,6 @@ Letter.prototype._addListeners = function() {
 
 /**
  * @method removeListeners
- * @private
  */
 Letter.prototype._removeListeners = function() {
   this._inflateSpring.removeAllListeners();
@@ -88,7 +84,6 @@ Letter.prototype._removeListeners = function() {
 
 /**
  * @method onInflateSpringUpdate
- * @private
  * @param {Rebound.Spring} spring
  */
 Letter.prototype._onInflateSpringUpdate = function(spring) {
@@ -97,7 +92,6 @@ Letter.prototype._onInflateSpringUpdate = function(spring) {
 
 /**
  * @method fadeIn
- * @public
  */
 Letter.prototype.fadeIn = function() {
   var material = this._material;
@@ -116,7 +110,6 @@ Letter.prototype.fadeIn = function() {
 
 /**
  * @method inflate
- * @public
  */
 Letter.prototype.inflate = function() {
   if(this._inflateTimeoutId) {
@@ -144,7 +137,6 @@ Letter.prototype.startInflateLoop = function(interval) {
 
 /**
  * @method stopInflateLoop
- * @public
  */
 Letter.prototype.stopInflateLoop = function() {
   if(this._inflateLoopIntervalId === null) {
@@ -158,7 +150,6 @@ Letter.prototype.stopInflateLoop = function() {
 
 /**
  * @method dispose
- * @public
  */
 Letter.prototype.dispose = function() {
   this._removeListeners();
@@ -170,15 +161,11 @@ Letter.prototype.dispose = function() {
 
 /**
  * @property models
- * @private
- * @static
  */
 Letter._models = {};
 
 /**
  * @method loadModel
- * @private
- * @static
  * @param {char} name
  * @param {(THREE.Geometry) => void} callback
  */
@@ -220,15 +207,11 @@ Letter._loadModel = function(name, callback) {
 
 /**
  * @property matCaps
- * @private
- * @static
  */
 Letter._matCaps = {};
 
 /**
  * @method loadMatCap
- * @private
- * @static
  * @param {string} name
  * @param {(THREE.Texture) => void} callback
  */
@@ -244,8 +227,6 @@ Letter._loadMatCap = function(name, callback) {
 
 /**
  * @property material
- * @private
- * @static
  */
 Letter._material = new THREE.RawShaderMaterial({
   uniforms: {
@@ -261,8 +242,6 @@ Letter._material = new THREE.RawShaderMaterial({
 
 /**
  * @property springSystem
- * @private
- * @static
  */
 Letter._springSystem = new Rebound.SpringSystem();
 

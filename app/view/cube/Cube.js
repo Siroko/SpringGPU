@@ -3,7 +3,6 @@ var textureLoader = require('../utils').textureLoader;
 
 /**
  * @class Cube
- * @constructor
  * @param {float} [size=1]
  */
 function Cube(size) {

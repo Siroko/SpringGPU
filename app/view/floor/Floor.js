@@ -3,7 +3,6 @@ var textureLoader = require('../utils').textureLoader;
 
 /**
  * @class Floor
- * @constructor
  */
 function Floor() {
   this.el = new THREE.Object3D();
@@ -31,7 +30,6 @@ function Floor() {
 
 /**
  * @method dispose
- * @public
  */
 Floor.prototype.dispose = function() {
   if(this.el.parent) {

@@ -16,7 +16,6 @@ var fragmentShader = require('./fs-confettis.glsl');
  * }
  *
  * @class Confettis
- * @constructor
  * @param {THREE.Vector3} size
  * @param {int} [count=200]
  */
@@ -41,13 +40,11 @@ function Confettis(size, count) {
 
 /**
  * @property typesCount
- * @static
  */
 Confettis._typesCount = 6;
 
 /**
  * @property confettisMaterial
- * @static
  */
 Confettis._material = new THREE.RawShaderMaterial({
   uniforms: {

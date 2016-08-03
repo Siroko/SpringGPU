@@ -4,7 +4,6 @@ var random = require('../utils').random;
 
 /**
  * @class Shape
- * @constructor
  */
 function Shape() {
   this._material = Shape._material.clone();
@@ -21,7 +20,6 @@ function Shape() {
 
 /**
  * @method fadeIn
- * @public
  */
 Shape.prototype.fadeIn = function() {
   var targetScale = this.el.scale.x;
@@ -43,15 +41,13 @@ Shape.prototype.fadeIn = function() {
 
 /**
  * @method update
- * @param {float} delta
  */
-Shape.prototype.update = function(delta) {
-  this._material.uniforms.time.value += delta;
+Shape.prototype.update = function() {
+  this._material.uniforms.time.value += 0.01;
 };
 
 /**
  * @method startTripping
- * @public
  */
 Shape.prototype.startTripping = function() {
   this._material.uniforms.speed.value = 25;
@@ -60,7 +56,6 @@ Shape.prototype.startTripping = function() {
 
 /**
  * @method stopTripping
- * @public
  */
 Shape.prototype.stopTripping = function() {
   this._material.uniforms.speed.value = 1;
@@ -69,7 +64,6 @@ Shape.prototype.stopTripping = function() {
 
 /**
  * @method dispose
- * @public
  */
 Shape.prototype.dispose = function() {
   if(this.el.parent) {
@@ -79,15 +73,11 @@ Shape.prototype.dispose = function() {
 
 /**
  * @property geometry
- * @private
- * @static
  */
 Shape._geometry = new THREE.IcosahedronGeometry(0.2, 2);
 
 /**
  * @property material
- * @private
- * @static
  */
 Shape._material = new THREE.RawShaderMaterial({
   uniforms: {

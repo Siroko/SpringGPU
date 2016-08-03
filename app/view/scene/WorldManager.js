@@ -1,47 +1,40 @@
+var THREE = require('three');
+
 /**
- * Created by siroko on 7/19/16.
+ * @class WorldManager
  */
-
-var THREE = require( 'three' );
-var OBJLoader = require('./../../utils/OBJLoader');
-
-var vs_bufferGeometry   = require('./../../glsl/vs-buffer-geometry.glsl');
-var fs_bufferGeometry   = require('./../../glsl/fs-buffer-geometry.glsl');
-
-var vs_environment      = require('./../../glsl/vs-environment.glsl');
-var fs_environment      = require('./../../glsl/fs-environment.glsl');
-
 var WorldManager = function(){
+  THREE.EventDispatcher.call(this);
 
-    THREE.EventDispatcher.call( this );
-
-    this.room = null;
-
-    this._init();
-
+  this._init();
 };
 
-// Inherits from eventdispatcher in order to be able to dispatch events from this class
-WorldManager.prototype = Object.create( THREE.EventDispatcher.prototype );
+WorldManager.prototype = Object.create(THREE.EventDispatcher.prototype);
 
+/**
+ * @method init
+ */
 WorldManager.prototype._init = function() {
-
-    this._loadAssets();
-
+  this._loadAssets();
 };
 
+/**
+ * @method laodAssets
+ */
 WorldManager.prototype._loadAssets = function() {
-      this._createGeometries();
+  this._createGeometries();
 };
 
+/**
+ * @method createGeometries
+ */
 WorldManager.prototype._createGeometries = function() {
-
-    this.dispatchEvent( { type : 'assetsLoaded' } );
-
+  this.dispatchEvent({ type : 'assetsLoaded' });
 };
 
-
-WorldManager.prototype.update = function( t ) {
-};
+/**
+ * @method update
+ */
+WorldManager.prototype.update = function(t) {};
 
 module.exports = WorldManager;

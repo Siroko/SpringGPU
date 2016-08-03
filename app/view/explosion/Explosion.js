@@ -5,7 +5,6 @@ var fragmentShader = require('./fs-explosion.glsl');
 
 /**
  * @class Explosion
- * @constructor
  * @param {float} radius
  * @param {int} divisions
  */
@@ -22,7 +21,6 @@ function Explosion(radius, divisions) {
 
 /**
  * @method createLines
- * @private
  */
 Explosion.prototype._createLines = function() {
   var sphereGeometry = new THREE.SphereGeometry(
@@ -73,7 +71,6 @@ Explosion.prototype._createLines = function() {
 
 /**
  * @method setParent
- * @public
  * @param {THREE.Object3D} parent
  */
 Explosion.prototype.setParent = function(parent) {
@@ -88,7 +85,6 @@ Explosion.prototype.setParent = function(parent) {
 
 /**
  * @method setProgress
- * @public
  * @param {float} value from 0 to 1
  */
 Explosion.prototype.setProgress = function(value) {
@@ -97,7 +93,6 @@ Explosion.prototype.setProgress = function(value) {
 
 /**
  * @method dispose
- * @public
  */
 Explosion.prototype.dispose = function() {
   if(this.el.parent) {
@@ -107,8 +102,6 @@ Explosion.prototype.dispose = function() {
 
 /**
  * @property material
- * @private
- * @static
  */
 Explosion._material = new THREE.RawShaderMaterial({
   uniforms: {
@@ -123,8 +116,6 @@ Explosion._material = new THREE.RawShaderMaterial({
 
 /**
  * @property pool
- * @public
- * @static
  */
 Explosion.pool = [];
 

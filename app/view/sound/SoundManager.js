@@ -2,15 +2,12 @@ var Howler = require('howler');
 
 /**
  * @interface ISound {
- *  string|Array<string> src
- *  boolean loop
- *  float volume
+ *  string|Array<string> src;
+ *  boolean loop;
+ *  float volume;
  * }
- */
-
-/**
+ *
  * @class SoundManager
- * @constructor
  */
 function SoundManager() {
   this._sounds = {};
@@ -46,12 +43,10 @@ SoundManager.prototype.addSound = function(name, srcs, loop, volume) {
 };
 
 /**
- * Add sounds from a config object
- *
- * @method addSounds
+ * @method addSoundsFromConfig
  * @param {Array<ISound>} sounds
  */
-SoundManager.prototype.addSounds = function(sounds) {
+SoundManager.prototype.addSoundsFromConfig = function(sounds) {
   for(var name in sounds) {
     if(!sounds.hasOwnProperty(name)) {
       continue;
@@ -64,16 +59,12 @@ SoundManager.prototype.addSounds = function(sounds) {
 };
 
 /**
- * Play a sound, ignores if the sound is not ready
- *
  * @method play
  * @param {string} sound
  * @returns {int}
  */
 SoundManager.prototype.play = function(name) {
   var sound = this._sounds[name];
-
-  console.log('play: ', name)
 
   if(!sound || sound.state() === 'loading') {
     return;
@@ -83,8 +74,6 @@ SoundManager.prototype.play = function(name) {
 };
 
 /**
- * Play a sound, if the sound isn't ready, wait for it to be and play it
- *
  * @method playWhenReady
  * @param {string} sound
  * @param {(int) => void} callback
@@ -95,6 +84,7 @@ SoundManager.prototype.playWhenReady = function(name, callback) {
   if(!sound) {
     return;
   }
+
   sound.once('load', (function() {
     var id = this.play(name);
 
@@ -104,6 +94,12 @@ SoundManager.prototype.playWhenReady = function(name, callback) {
   }).bind(this));
 };
 
+/**
+ * @method fadeOut
+ * @param {string} name
+ * @param {float} duration
+ * @param {int} id
+ */
 SoundManager.prototype.fadeOut = function(name, duration, id) {
   var sound = this._sounds[name];
 
@@ -114,6 +110,12 @@ SoundManager.prototype.fadeOut = function(name, duration, id) {
   sound.fade(sound.volume(), 0, duration || 1500, id);
 };
 
+/**
+ * @method fadeIn
+ * @param {string} name
+ * @param {float} duration
+ * @param {int} id
+ */
 SoundManager.prototype.fadeIn = function(name, duration, id) {
   var sound = this._sounds[name];
 
