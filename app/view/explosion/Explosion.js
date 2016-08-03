@@ -1,57 +1,32 @@
 var THREE = require('three');
 
+var vertexShader = require('./vs-explosion.glsl');
+var fragmentShader = require('./fs-explosion.glsl');
+
 /**
- * @interface IExplosionOptions: {
- *  float radius;
- *  int divisions;
- * }
- *
  * @class Explosion
- * @constructor
- * @param {IExplosionOptions} options
+ * @param {float} radius
+ * @param {int} divisions
  */
-function Explosion(options) {
-  this._options = options || {};
+function Explosion(radius, divisions) {
+  this._radius = radius = 1;
+  this._divisions = divisions || 12;
 
-  if(this._options.radius === void 0) {
-    this._options.radius = 1;
-  }
-
-  if(this._options.divisions === void 0) {
-    this._options.divisions = 12;
-  }
-
-  this._parent = null;
   this.el = new THREE.Object3D();
 
-  this._lineMaterial = Explosion._lineMaterial.clone();
+  this._material = Explosion._material.clone();
 
-  this._init();
+  this._createLines();
 };
 
 /**
- * @property _lineMaterial
- * @static
+ * @method createLines
  */
-Explosion._lineMaterial = new THREE.RawShaderMaterial({
-  uniforms: {
-    progress: { type: 'f', value: 0 }
-  },
-  vertexShader: require('../glsl/vs-explosion.glsl'),
-  fragmentShader: require('../glsl/fs-explosion.glsl'),
-  transparent: true,
-  depthWrite: false,
-  linewidth: 2
-});
-
-/**
- * @method init
- */
-Explosion.prototype._init = function() {
+Explosion.prototype._createLines = function() {
   var sphereGeometry = new THREE.SphereGeometry(
-    this._options.radius,
-    this._options.divisions,
-    this._options.divisions
+    this._radius,
+    this._divisions,
+    this._divisions
   );
 
   for(var i = 0; i < sphereGeometry.vertices.length; ++i) {
@@ -69,7 +44,6 @@ Explosion.prototype._init = function() {
     var startY = endY * startOffset;
     var startZ = endZ * startOffset;
 
-    // attributes
     var positions = new Float32Array([
       startX, startY, startZ,
       endX, endY, endZ
@@ -90,7 +64,7 @@ Explosion.prototype._init = function() {
     geometry.addAttribute('influence', new THREE.BufferAttribute(influences, 1));
     geometry.addAttribute('tint', new THREE.BufferAttribute(tints, 3));
 
-    var line = new THREE.Line(geometry, this._lineMaterial);
+    var line = new THREE.Line(geometry, this._material);
     this.el.add(line);
   }
 };
@@ -100,31 +74,49 @@ Explosion.prototype._init = function() {
  * @param {THREE.Object3D} parent
  */
 Explosion.prototype.setParent = function(parent) {
-  if(this._parent) {
-    this._parent.remove(this.el);
+  if(this.el.parent) {
+    this.el.parent.remove(this.el);
   }
 
   if(parent) {
-    this._parent = parent;
-    this._parent.add(this.el);
+    parent.add(this.el);
   }
 };
 
 /**
  * @method setProgress
- * @param {float} valu from 0 to 1
+ * @param {float} value from 0 to 1
  */
 Explosion.prototype.setProgress = function(value) {
-  this._lineMaterial.uniforms.progress.value = value;
+  this._material.uniforms.progress.value = value;
 };
 
 /**
  * @method dispose
  */
 Explosion.prototype.dispose = function() {
-  if(this._parent) {
-    this._parent.remove(this.el);
+  if(this.el.parent) {
+    this.el.parent.remove(this.el);
   }
 };
+
+/**
+ * @property material
+ */
+Explosion._material = new THREE.RawShaderMaterial({
+  uniforms: {
+    progress: { type: 'f', value: 0 }
+  },
+  vertexShader: vertexShader,
+  fragmentShader: fragmentShader,
+  transparent: true,
+  depthWrite: false,
+  linewidth: 2
+});
+
+/**
+ * @property pool
+ */
+Explosion.pool = [];
 
 module.exports = Explosion;
