@@ -572,27 +572,29 @@ PhysicsManager.prototype.setBodyText = function(text) {
   var y = 5;
   var z = -9;
   
-  var words = text.split(' ')
-
   var indices = [];
 
-  var offsetY = (words.length * letterHeight) / 2
+  var lines = text.split('\\N');
 
-  for(var i = 0; i < words.length; ++i) {
-    var word = words[i];
+  var offsetY = (lines.length * letterHeight) / 2;
 
-    var offsetX = (word.length * letterWidth) / 2
+  for(var i = 0; i < lines.length; ++i) {
+    var line = lines[i];
 
-    for(var j = 0; j < word.length; ++j) {
-      var letter = word[j];
+    var offsetX = (line.length * letterWidth) / 2;
 
-      this.bodyText.push(new CANNON.Body({
-        mass: 0,
-        position: new CANNON.Vec3(x - offsetX, z, y + offsetY),
-        shape: boundingSphere
-      }));
+    for(var j = 0; j < line.length; ++j) {
+      var letter = line[j];
 
-      indices.push(this.bodyText.length - 1);
+      if(letter !== ' ') {
+        this.bodyText.push(new CANNON.Body({
+          mass: 0,
+          position: new CANNON.Vec3(x - offsetX, z, y + offsetY),
+          shape: boundingSphere
+        }));
+
+        indices.push(this.bodyText.length - 1);
+      }
 
       x += letterWidth;
     }
@@ -600,7 +602,6 @@ PhysicsManager.prototype.setBodyText = function(text) {
     x = 0;
     y -= letterHeight;
   }
-
 
   return indices;
 };

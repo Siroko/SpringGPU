@@ -347,7 +347,7 @@ World3D.prototype.createShapes = function() {
  * @returns {Array<IletterInfos>}
  */
 World3D.prototype.getLettersInfos = function(text, colors, colorsTable) {
-  var letters = text.split('');
+  var letters = text.replace(/\\N/g, ' ').split('');
 
   var lettersInfos = [];
 
