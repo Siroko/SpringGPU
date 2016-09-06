@@ -576,15 +576,19 @@ PhysicsManager.prototype.setBodyText = function(text) {
 
   var indices = [];
 
+  var offsetY = (words.length * letterHeight) / 2
+
   for(var i = 0; i < words.length; ++i) {
     var word = words[i];
+
+    var offsetX = (word.length * letterWidth) / 2
 
     for(var j = 0; j < word.length; ++j) {
       var letter = word[j];
 
       this.bodyText.push(new CANNON.Body({
         mass: 0,
-        position: new CANNON.Vec3(x, z, y),
+        position: new CANNON.Vec3(x - offsetX, z, y + offsetY),
         shape: boundingSphere
       }));
 
