@@ -36,7 +36,7 @@ function getTextAndColorsFromHash() {
   return {
     text: text || 'HELLO WORLD',
     colors: colors || text ?
-      Array.prototype.map.call(text, function() { return 'S'; }).join('')
+      Array.prototype.map.call(text, function() { return Math.random() < 0.5 ? 'S' : 'G'; }).join('')
       : 'SSSSS GGGGG'
   }
 };

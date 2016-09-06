@@ -39,7 +39,6 @@ var PhysicsManager = function(dcamera, camera) {
     this.f = 10; //force
 
     this.bodyText = [];
-    this.setBodyText();
     this.springElements = [];
 
     this.startPh = false;
@@ -555,32 +554,51 @@ PhysicsManager.prototype.setMode = function(mode) {
 };
 
 /**
- * Pushing into the bodyText Array CANNON bodies placed in a grid of positions
+ * Pushing into the bodyText Array CANNON bodies placed in a grid of positions.
+ * Returns spring indices. Indices need to be assigned to the THREE.Object3D passed to add3DObject.
  *
  * @method setBodyText
+ * @param {string} text
+ * @returns {Array<int>}
  */
-PhysicsManager.prototype.setBodyText = function() {
-    var sw = 10; // Width  of the message grid
-    var sh = 8; // Height  of the message grid
-    var px = -4.5; // Startig position in X
-    var pz = 9; // Starting position in Z
-    // Grid 4 * 11
-    var rows = 4;
-    var columns = 11;
-    var ofsetW = sw / columns;
-    var offsetH = sh / rows;
+PhysicsManager.prototype.setBodyText = function(text) {
+  var boundingSphere = new CANNON.Sphere(0.1);
 
-    for (i = 0; i <= rows; i++) {
-        for (j = 0; j <= columns; j++) {
-            var radius = 0.1; // m
-            var body = new CANNON.Body({
-                mass: 0, // kg
-                position: new CANNON.Vec3(px + ofsetW * j, -9, pz - offsetH * i),
-                shape: new CANNON.Sphere(radius)
-            });
-            this.bodyText.push(body);
-        }
+  var letterWidth = 1.3;
+  var letterHeight = 2;
+  
+  // with CANNON, y and z axis are swapped
+  var x = 0;
+  var y = 5;
+  var z = -9;
+  
+  var words = text.split(' ')
+
+  var indices = [];
+
+  for(var i = 0; i < words.length; ++i) {
+    var word = words[i];
+
+    for(var j = 0; j < word.length; ++j) {
+      var letter = word[j];
+
+      this.bodyText.push(new CANNON.Body({
+        mass: 0,
+        position: new CANNON.Vec3(x, z, y),
+        shape: boundingSphere
+      }));
+
+      indices.push(this.bodyText.length - 1);
+
+      x += letterWidth;
     }
+
+    x = 0;
+    y -= letterHeight;
+  }
+
+
+  return indices;
 };
 
 /**

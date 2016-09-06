@@ -21,11 +21,11 @@ var Letter = require('./letter/Letter');
 var Shape = require('./shape/Shape');
 
 var random = require('./utils').random;
+var getTextAndColorsFromHash = require('./utils').getTextAndColorsFromHash;
 
 /**
  * @interface ILetterInfos {
  *  char letter;
- *  int index;
  *  string color;
  * }
  *
@@ -360,7 +360,6 @@ World3D.prototype.getLettersInfos = function(text, colors, colorsTable) {
 
     var letterInfos = {
       letter: letter,
-      index: i,
       color: colorsTable[colors[i]]
     }
 
@@ -374,9 +373,11 @@ World3D.prototype.getLettersInfos = function(text, colors, colorsTable) {
  * @method createLetters
  */
 World3D.prototype.createLetters = function() {
+  var textInfos = getTextAndColorsFromHash();
+
   var lettersInfos = this.getLettersInfos(
-    'THE  SPITE  GOOD LUCK   ON YOUR NEW  ADVENTURE',
-    'GGG  GGGGG  SSSS SSSS   SS SSSS SSS  SSSSSSSSS',
+    textInfos.text,
+    textInfos.colors,
     {
       S: 'silver',
       G: 'gold'
@@ -384,6 +385,7 @@ World3D.prototype.createLetters = function() {
   );
 
   this.physicsManager.setLettersLength(lettersInfos.length);
+  var indices = this.physicsManager.setBodyText(textInfos.text);
 
   for(var i = 0; i < lettersInfos.length; i++ ){
     var letterInfos = lettersInfos[i];
@@ -397,7 +399,7 @@ World3D.prototype.createLetters = function() {
     var coordinates = this.getRandomCoordinatesInBox();
     letter.el.position.set(coordinates.x, coordinates.y, coordinates.z);
 
-    letter.el.springIndex = letterInfos.index;
+    letter.el.springIndex = indices[i];
 
     this.letters.push(letter);
     this.scene.add(letter.el);
