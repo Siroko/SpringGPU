@@ -141,7 +141,7 @@ World3D.prototype.addEvents = function() {
 /**
  * @method onStart
  */
-World3D.prototype.onStart = function() {
+World3D.prototype.onStart = function(e) {
   this.soundManager.play(AssetsSound.BACKGROUND_NORMAL);
 
   for(var i = 0; i < this.shapes.length; ++i) {
@@ -153,6 +153,8 @@ World3D.prototype.onStart = function() {
   }
 
   this.physicsManager.attractBodiesToPlayer();
+
+  this.gamePads.vibrate(e.gamepadIndex);
 };
 
 /**

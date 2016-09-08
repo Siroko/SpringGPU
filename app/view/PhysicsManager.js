@@ -316,7 +316,8 @@ PhysicsManager.prototype.add3DObject = function(obj, type, actuator, springable,
                 boxBody.addEventListener("collide", function(e) {
                     if (!that.startPh && e.body.isStarter && that.lastTime > 1000) {
                         that.dispatchEvent({
-                            type: 'starts'
+                            type: 'starts',
+                            gamepadIndex: obj.gamepadIndex
                         });
                         that.startPh = true;
                         that.deleteStarterObject();
