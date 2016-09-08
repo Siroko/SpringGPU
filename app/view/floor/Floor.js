@@ -1,9 +1,6 @@
 var THREE = require('three');
 var textureLoader = require('../utils').textureLoader;
 
-/**
- * @class Floor
- */
 function Floor() {
   this.el = new THREE.Object3D();
   this.el.rotation.x = -Math.PI / 2;
@@ -28,9 +25,6 @@ function Floor() {
   this.el.add(center);
 };
 
-/**
- * @method dispose
- */
 Floor.prototype.dispose = function() {
   if(this.el.parent) {
     this.el.parent.remove(this.el);

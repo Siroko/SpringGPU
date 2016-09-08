@@ -1,101 +1,113 @@
-/**
- * Created by siroko on 6/27/16.
- */
-
 var THREE = require('three');
-var OBJLoader = require('./../../utils/OBJLoader');
-var that;
-var MousePad = function( scene, camera, effect,physics ) {
-    that = this;
+var textureLoader = require('../utils').textureLoader;
+var jsonLoader = require('../utils').jsonLoader;
 
-    this.raycaster = new THREE.Raycaster();
-    this.screenVector = new THREE.Vector2( 0, 0 );
+/**
+ * @param {THREE.Scene} scene
+ * @param {THREE.Camera} camera
+ * @param {VREffect} effect
+ * @param {PhysicsManager} physics
+ */
+var MousePad = function(scene, camera, effect, physics) {
+  this.raycaster = new THREE.Raycaster();
+  this.screenVector = new THREE.Vector2(0, 0);
 
-    this.scene = scene;
-    this.camera = camera;
+  this.scene = scene;
+  this.camera = camera;
 
-    this.phManager = physics;
-    this.intersectPoint = new THREE.Vector3();
-    this.intersectPoint2 = new THREE.Vector3();
+  this.phManager = physics;
 
-    this.h1 = new THREE.Mesh( new THREE.BoxBufferGeometry( 0.1, 0.1, 0.1, 1, 1, 1), new THREE.MeshNormalMaterial() );
+  this.intersectPoint = new THREE.Vector3();
+  this.intersectPoint2 = new THREE.Vector3();
 
+  var tempHand = new THREE.Mesh(
+    new THREE.BoxBufferGeometry(0.1, 0.1, 0.1, 1, 1, 1),
+    new THREE.MeshNormalMaterial()
+  );
 
-    // instantiate a loader
-    var loader = new OBJLoader();
-    // load a resource
-    loader.load(
-    	// resource URL
-    	'assets/obj/hand-free2.obj',
-    	// Function when resource is loaded
-    	function ( object ) {
+  this.h1 = tempHand;
 
-        var textureLoader = new THREE.TextureLoader();
-
-        var tex = textureLoader.load("assets/textures/handocclusion.png");
-        tex.generateMipmaps = false;
-        tex.minFilter = THREE.LinearFilter;
-        tex.magFilter = THREE.LinearFilter;
-
-        object.children[0].material = new THREE.MeshBasicMaterial();
-        object.children[0].material.map = tex;
-        object.children[0].material.side = THREE.DoubleSide;
-        object.children[0].material.needsUpdate = true;
-        object.children[0].geometry.scale( 0.02, 0.02, 0.02 );
-        object.children[0].rotation.y += Math.PI;
-        object.children[0].geometry.computeBoundingBox();
-
-        that.h1 = object.children[0];
-
-
-        that.scene.add(that.h1);
-        that.phManager.add3DObject(that.h1, "cube", true,false);
-        that.addEvents();
-    	}
-    );
-
+  this._loadModel((function() {
+    this._bindMethods();
+    this._addListeners();
+  }).bind(this));
 };
 
+/**
+ * @param {() => void} callback
+ */
+MousePad.prototype._loadModel = function(callback) {
+  jsonLoader.load('assets/hand/hand.json', (function (geometry) {
+    geometry.scale(0.02, 0.02, 0.02);
+    geometry.computeBoundingBox();
 
-MousePad.prototype.addEvents = function(){
-    this.mouseMoveHandler = this.onMouseMove.bind( this )
-    window.addEventListener('mousemove', this.mouseMoveHandler );
-    window.addEventListener('touchend', this.onTouchEnd.bind( this ) );
+    var texture = textureLoader.load('assets/textures/hand_occlusion.jpg');
+    texture.generateMipmaps = false;
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
 
-};
+    var material = new THREE.MeshBasicMaterial({
+      map: texture,
+      side: THREE.DoubleSide
+    });
 
-MousePad.prototype.onMouseMove = function( e ){
+    var hand = new THREE.Mesh(geometry, material);
+    hand.rotation.y += Math.PI;
 
-     this.screenVector.x = (e.clientX / window.innerWidth) * 2 - 1;
-     this.screenVector.y = (1 - (e.clientY / window.innerHeight)) * 2 - 1;
+    this.h1 = hand;
 
-};
-
-MousePad.prototype.onTouchEnd = function( e ){
-
-    window.removeEventListener('mousemove', this.mouseMoveHandler );
-
-    this.screenVector.x = 0;
-    this.screenVector.y = 0;
-};
-
-
-
-MousePad.prototype.update = function( t, objs ) {
-
-    this.raycaster.setFromCamera(this.screenVector, this.camera);
-
-    var intersects = this.raycaster.intersectObjects( objs );
-    if (intersects.length > 0) {
-
-        this.intersectPoint.copy(intersects[0].point);
-        this.intersectPoint2.copy(intersects[0].point);
-        this.h1.position.copy(intersects[0].point);
-
-
+    this.scene.add(this.h1);
+    this.phManager.add3DObject(this.h1, 'cube', true, false);
+    
+    if(callback) {
+      callback();
     }
+  }).bind(this));
+};
 
+MousePad.prototype._bindMethods = function() {
+  this._handleMouseMoveBound = this._handleMouseMove.bind(this);
+  this._handleTouchEndBound = this._handleTouchEnd.bind(this);
+};
 
+MousePad.prototype._addListeners = function() {
+  window.addEventListener('mousemove', this._handleMouseMoveBound);
+  window.addEventListener('touchend', this._handleTouchEndBound);
+};
+
+MousePad.prototype._removeListeners = function() {
+  window.addEventListener('mousemove', this._handleMouseMoveBound);
+  window.addEventListener('touchend', this._handleTouchEndBound);
+};
+
+MousePad.prototype._handleMouseMove = function( e ){
+  this.screenVector.x = (e.clientX / window.innerWidth) * 2 - 1;
+  this.screenVector.y = (1 - (e.clientY / window.innerHeight)) * 2 - 1;
+};
+
+MousePad.prototype._handleTouchEnd = function( e ){
+  this.screenVector.x = 0;
+  this.screenVector.y = 0;
+};
+
+/**
+ * @param {float} time
+ * @param {Array<THREE.Object3D>} objs
+ */
+MousePad.prototype.update = function(time, objs) {
+  this.raycaster.setFromCamera(this.screenVector, this.camera);
+
+  var intersects = this.raycaster.intersectObjects(objs);
+
+  if(intersects.length > 0) {
+    this.intersectPoint.copy(intersects[0].point);
+    this.intersectPoint2.copy(intersects[0].point);
+    this.h1.position.copy(intersects[0].point);
+  }
+};
+
+MousePad.prototype.dispose = function() {
+  this._removeListeners();
 };
 
 module.exports = MousePad;

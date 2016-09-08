@@ -14,8 +14,9 @@ var fragmentShader = require('./fs-confettis.glsl');
  *  float front;
  *  float back;
  * }
- *
- * @class Confettis
+ */
+
+/**
  * @param {THREE.Vector3} size
  * @param {int} [count=200]
  */
@@ -38,28 +39,13 @@ function Confettis(size, count) {
   this.el.add(this._points);
 };
 
-/**
- * @property typesCount
- */
 Confettis._typesCount = 6;
 
-/**
- * @property confettisMaterial
- */
 Confettis._material = new THREE.RawShaderMaterial({
   uniforms: {
-    size: {
-      type: 'f',
-      value: 40
-    },
-    map: {
-      type: 't',
-      value: textureLoader.load('assets/textures/confettis.png')
-    },
-    repeat: {
-      type: 'v2',
-      value: new THREE.Vector2(1 / Confettis._typesCount, 1)
-    }
+    size: { type: 'f', value: 40 },
+    map: { type: 't', value: textureLoader.load('assets/textures/confettis.png') },
+    repeat: { type: 'v2', value: new THREE.Vector2(1 / Confettis._typesCount, 1) }
   },
   vertexShader: vertexShader,
   fragmentShader: fragmentShader,
@@ -67,9 +53,6 @@ Confettis._material = new THREE.RawShaderMaterial({
   depthWrite: false
 });
 
-/**
- * @method createGeometry
- */
 Confettis.prototype._createGeometry = function() {
   this._geometry = new THREE.BufferGeometry();
 
@@ -105,9 +88,6 @@ Confettis.prototype._createGeometry = function() {
   this._geometry.addAttribute('offset', new THREE.BufferAttribute(offsets, 2));
 };
 
-/**
- * @method computeBoundaries
- */
 Confettis.prototype._computeBoundaries = function() {
   var halfX = this._size.x / 2;
   var halfY = this._size.y / 2;
@@ -123,9 +103,6 @@ Confettis.prototype._computeBoundaries = function() {
   }
 };
 
-/**
- * @method update
- */
 Confettis.prototype.update = function() {
   if(!this._isActive) {
     return;
@@ -161,23 +138,14 @@ Confettis.prototype.update = function() {
   this._geometry.attributes.position.needsUpdate = true;
 };
 
-/**
- * @method start
- */
 Confettis.prototype.start = function() {
   this._isActive = true;
 };
 
-/**
- * @method stop
- */
 Confettis.prototype.stop = function() {
   this._isActive = false;
 };
 
-/**
- * @method dispose
- */
 Confettis.prototype.dispose = function() {
   if(this.el.parent) {
     this.el.parent.remove(this.el);

@@ -12,7 +12,6 @@ float random(const in vec3 scale, const in float seed) {
 }
 
 void main() {
-
   float time = vTime * vSpeed;
 
   float sin1 = (sin(time * vTimeOffset) + 1.0) / 2.0;
@@ -27,5 +26,4 @@ void main() {
 
   float noise = 0.05 * random(vec3(1.0), length(gl_FragCoord));
   gl_FragColor.rgb += vec3(noise);
-
 }

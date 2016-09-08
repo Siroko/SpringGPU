@@ -4,7 +4,6 @@ var vertexShader = require('./vs-explosion.glsl');
 var fragmentShader = require('./fs-explosion.glsl');
 
 /**
- * @class Explosion
  * @param {float} radius
  * @param {int} divisions
  */
@@ -19,9 +18,19 @@ function Explosion(radius, divisions) {
   this._createLines();
 };
 
-/**
- * @method createLines
- */
+Explosion._material = new THREE.RawShaderMaterial({
+  uniforms: {
+    progress: { type: 'f', value: 0 }
+  },
+  vertexShader: vertexShader,
+  fragmentShader: fragmentShader,
+  transparent: true,
+  depthWrite: false,
+  linewidth: 2
+});
+
+Explosion.pool = [];
+
 Explosion.prototype._createLines = function() {
   var sphereGeometry = new THREE.SphereGeometry(
     this._radius,
@@ -70,7 +79,6 @@ Explosion.prototype._createLines = function() {
 };
 
 /**
- * @method setParent
  * @param {THREE.Object3D} parent
  */
 Explosion.prototype.setParent = function(parent) {
@@ -84,39 +92,16 @@ Explosion.prototype.setParent = function(parent) {
 };
 
 /**
- * @method setProgress
  * @param {float} value from 0 to 1
  */
 Explosion.prototype.setProgress = function(value) {
   this._material.uniforms.progress.value = value;
 };
 
-/**
- * @method dispose
- */
 Explosion.prototype.dispose = function() {
   if(this.el.parent) {
     this.el.parent.remove(this.el);
   }
 };
-
-/**
- * @property material
- */
-Explosion._material = new THREE.RawShaderMaterial({
-  uniforms: {
-    progress: { type: 'f', value: 0 }
-  },
-  vertexShader: vertexShader,
-  fragmentShader: fragmentShader,
-  transparent: true,
-  depthWrite: false,
-  linewidth: 2
-});
-
-/**
- * @property pool
- */
-Explosion.pool = [];
 
 module.exports = Explosion;

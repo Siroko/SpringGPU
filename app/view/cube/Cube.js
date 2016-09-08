@@ -2,7 +2,6 @@ var THREE = require('three');
 var textureLoader = require('../utils').textureLoader;
 
 /**
- * @class Cube
  * @param {float} [size=1]
  */
 function Cube(size) {
@@ -17,9 +16,6 @@ function Cube(size) {
   this.el = new THREE.Mesh(geometry, material);
 };
 
-/**
- * @method dispose
- */
 Cube.prototype.dispose = function() {
   if(this.el.parent) {
     this.el.remove(this.el);

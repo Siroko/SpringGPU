@@ -6,15 +6,13 @@ var Howler = require('howler');
  *  boolean loop;
  *  float volume;
  * }
- *
- * @class SoundManager
  */
+
 function SoundManager() {
   this._sounds = {};
 };
 
 /**
- * @method addSound
  * @param {string} name
  * @param {string|Array<string>} srcs
  * @param {boolean} [loop=false]
@@ -43,7 +41,6 @@ SoundManager.prototype.addSound = function(name, srcs, loop, volume) {
 };
 
 /**
- * @method addSoundsFromConfig
  * @param {Array<ISound>} sounds
  */
 SoundManager.prototype.addSoundsFromConfig = function(sounds) {
@@ -59,7 +56,6 @@ SoundManager.prototype.addSoundsFromConfig = function(sounds) {
 };
 
 /**
- * @method play
  * @param {string} sound
  * @returns {int}
  */
@@ -74,7 +70,6 @@ SoundManager.prototype.play = function(name) {
 };
 
 /**
- * @method playWhenReady
  * @param {string} sound
  * @param {(int) => void} callback
  */
@@ -95,7 +90,6 @@ SoundManager.prototype.playWhenReady = function(name, callback) {
 };
 
 /**
- * @method fadeOut
  * @param {string} name
  * @param {float} duration
  * @param {int} id
@@ -111,7 +105,6 @@ SoundManager.prototype.fadeOut = function(name, duration, id) {
 };
 
 /**
- * @method fadeIn
  * @param {string} name
  * @param {float} duration
  * @param {int} id

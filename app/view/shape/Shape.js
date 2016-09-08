@@ -2,9 +2,6 @@ var THREE = require('three');
 var TWEEN = require('tween.js');
 var random = require('../utils').random;
 
-/**
- * @class Shape
- */
 function Shape() {
   this._material = Shape._material.clone();
   this._material.uniforms.time.value = 0;
@@ -18,9 +15,19 @@ function Shape() {
   this.el.scale.set(scale, scale, scale);
 };
 
-/**
- * @method fadeIn
- */
+Shape._geometry = new THREE.IcosahedronGeometry(0.2, 2);
+
+Shape._material = new THREE.RawShaderMaterial({
+  uniforms: {
+    time: { type: 'f', value: 0 },
+    timeOffset: { type: 'f', value: 0 },
+    speed: { type: 'f', value: 1 },
+    growFromTo: { type: 'v2', value: new THREE.Vector2(1, 1) }
+  },
+  vertexShader: require('./vs-shape.glsl'),
+  fragmentShader: require('./fs-shape.glsl')
+});
+
 Shape.prototype.fadeIn = function() {
   var targetScale = this.el.scale.x;
 
@@ -39,55 +46,24 @@ Shape.prototype.fadeIn = function() {
     .start();
 };
 
-/**
- * @method update
- */
 Shape.prototype.update = function() {
   this._material.uniforms.time.value += 0.01;
 };
 
-/**
- * @method startTripping
- */
 Shape.prototype.startTripping = function() {
   this._material.uniforms.speed.value = 25;
   this._material.uniforms.growFromTo.value.set(0.5, 2);
 };
 
-/**
- * @method stopTripping
- */
 Shape.prototype.stopTripping = function() {
   this._material.uniforms.speed.value = 1;
   this._material.uniforms.growFromTo.value.set(1, 1);
 };
 
-/**
- * @method dispose
- */
 Shape.prototype.dispose = function() {
   if(this.el.parent) {
     this.el.parent(this.el);
   }
 };
-
-/**
- * @property geometry
- */
-Shape._geometry = new THREE.IcosahedronGeometry(0.2, 2);
-
-/**
- * @property material
- */
-Shape._material = new THREE.RawShaderMaterial({
-  uniforms: {
-    time: { type: 'f', value: 0 },
-    timeOffset: { type: 'f', value: 0 },
-    speed: { type: 'f', value: 1 },
-    growFromTo: { type: 'v2', value: new THREE.Vector2(1, 1) }
-  },
-  vertexShader: require('./vs-shape.glsl'),
-  fragmentShader: require('./fs-shape.glsl')
-});
 
 module.exports = Shape;

@@ -22,8 +22,7 @@ varying vec4 vOPosition;
 varying vec3 vU;
 varying vec3 vSmoothNormal;
 
-void main(){
-
+void main() {
   vec3 pos = position;
 
   vPos = vec4(pos, 1.0);
@@ -33,5 +32,4 @@ void main(){
 
   vSmoothNormal = normal;
   gl_Position = projectionMatrix * modelViewMatrix * vec4(pos + normal * inflation, 1.0);
-
 }

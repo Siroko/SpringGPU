@@ -33,8 +33,7 @@ float map(const in float value, const in float inMin, const in float inMax, cons
   return (value - inMin) / (inMax - inMin) * (outMax - outMin) + outMin;
 }
 
-void main(){
-
+void main() {
   vPos = vec4(position, 1.0);
   vUv = uv;
   vTime = time;
@@ -44,5 +43,4 @@ void main(){
   vec4 finalPosition = vec4(position * map(sin(time * timeOffset * speed), -1.0, 1.0, growFromTo.x, growFromTo.y), 1.0);
 
   gl_Position = projectionMatrix * modelViewMatrix * finalPosition;
-
 }

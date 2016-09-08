@@ -1,7 +1,6 @@
 var THREE = require('three');
 
 /**
- * @function random
  * @param {float} min
  * @param {float} max
  * @param {boolean} round
@@ -12,7 +11,6 @@ function random(min, max, round) {
 };
 
 /**
- * @function getTextAndColorsFromHash
  * @returns {{[name:string]:string}}
  */
 function getTextAndColorsFromHash() {
@@ -36,14 +34,22 @@ function getTextAndColorsFromHash() {
   return {
     text: text || 'HELLO WORLD',
     colors: colors || text ?
-      Array.prototype.map.call(text, function() { return Math.random() < 0.5 ? 'S' : 'G'; }).join('')
+      Array.prototype.map.call(text, function() {
+        return Math.random() < 0.5 ? 'S' : 'G';
+      }).join('')
       : 'SSSSS GGGGG'
   }
+};
+
+var KeyCodes = {
+  Q: 81,
+  SPACE: 32
 };
 
 module.exports = {
   random: random,
   textureLoader: new THREE.TextureLoader(),
   jsonLoader: new THREE.JSONLoader(),
-  getTextAndColorsFromHash: getTextAndColorsFromHash
+  getTextAndColorsFromHash: getTextAndColorsFromHash,
+  KeyCodes: KeyCodes
 };

@@ -5,11 +5,7 @@ var random = require('../utils').random;
 var textureLoader = require('../utils').textureLoader;
 var jsonLoader = require('../utils').jsonLoader;
 
-var vertexShader = require('./vs-letter.glsl');
-var fragmentShader = require('./fs-letter.glsl');
-
 /**
- * @class Letter
  * @param {char} letter
  * @param {string} [color='silver'] gold or silver
  */
@@ -49,11 +45,26 @@ function Letter(letter, color) {
   this._addListeners();
 };
 
+Letter._material = new THREE.RawShaderMaterial({
+  uniforms: {
+    normalMap: { type: 't', value: null },
+    textureMap: { type: 't', value: null },
+    inflation: { type: 'f', value: 0 },
+    opacity: { type: 'f', value: 0 }
+  },
+  vertexShader: require('./vs-letter.glsl'),
+  fragmentShader: require('./fs-letter.glsl'),
+  transparent: true
+});
+
+Letter._springSystem = new Rebound.SpringSystem();
+
+Letter._matCaps = {};
+
+Letter._models = {};
+
 Letter.prototype = Object.create(THREE.EventDispatcher.prototype);
 
-/**
- * @method checkIfReady
- */
 Letter.prototype._checkIfReady = function() {
   if(this.isReady) {
     return;
@@ -66,24 +77,17 @@ Letter.prototype._checkIfReady = function() {
   }
 };
 
-/**
- * @method addListeners
- */
 Letter.prototype._addListeners = function() {
   this._inflateSpring.addListener({
     onSpringUpdate: this._onInflateSpringUpdate.bind(this)
   })
 };
 
-/**
- * @method removeListeners
- */
 Letter.prototype._removeListeners = function() {
   this._inflateSpring.removeAllListeners();
 };
 
 /**
- * @method onInflateSpringUpdate
  * @param {Rebound.Spring} spring
  */
 Letter.prototype._onInflateSpringUpdate = function(spring) {
@@ -91,81 +95,6 @@ Letter.prototype._onInflateSpringUpdate = function(spring) {
 };
 
 /**
- * @method fadeIn
- */
-Letter.prototype.fadeIn = function() {
-  var material = this._material;
-
-  new TWEEN.Tween({ opacity: 0 })
-    .to({ opacity: 1 })
-    .delay(random(1000, 3000))
-    .onStart((function() {
-      this.el.visible = true;
-    }).bind(this))
-    .onUpdate(function() {
-      material.uniforms.opacity.value = this.opacity; 
-    })
-    .start();
-};
-
-/**
- * @method inflate
- */
-Letter.prototype.inflate = function() {
-  if(this._inflateTimeoutId) {
-    window.clearTimeout(this._inflateTimeoutId);
-    this._inflateTimeoutId = null;
-  }
-
-  this._inflateSpring.setEndValue(0.09);
-
-  this._inflateTimeoutId = window.setTimeout((function() {
-    this._inflateSpring.setEndValue(0);
-  }).bind(this), 300);
-};
-
-/**
- * @method startInflateLoop
- * @public
- * @param {float} [interval=2000]
- */
-Letter.prototype.startInflateLoop = function(interval) {
-  this._inflateLoopIntervalId = window.setInterval((function() {
-    this.inflate();
-  }).bind(this), interval);
-};
-
-/**
- * @method stopInflateLoop
- */
-Letter.prototype.stopInflateLoop = function() {
-  if(this._inflateLoopIntervalId === null) {
-    return;
-  }
-
-  window.clearInterval(this._inflateLoopIntervalId);
-
-  this._inflateLoopIntervalId = null;
-};
-
-/**
- * @method dispose
- */
-Letter.prototype.dispose = function() {
-  this._removeListeners();
-
-  if(this.el.parent) {
-    this.el.parent.remove(this.el);
-  }
-};
-
-/**
- * @property models
- */
-Letter._models = {};
-
-/**
- * @method loadModel
  * @param {char} name
  * @param {(THREE.Geometry) => void} callback
  */
@@ -181,7 +110,7 @@ Letter._loadModel = function(name, callback) {
 
     Letter._models[name] = cache;
 
-    var url = 'assets/letters/models/' + name + '.json';
+    var url = 'assets/letters/' + name + '.json';
 
     jsonLoader.load(url, function(geometry, materials) {
       geometry.computeFaceNormals();
@@ -206,12 +135,6 @@ Letter._loadModel = function(name, callback) {
 };
 
 /**
- * @property matCaps
- */
-Letter._matCaps = {};
-
-/**
- * @method loadMatCap
  * @param {string} name
  * @param {(THREE.Texture) => void} callback
  */
@@ -225,24 +148,59 @@ Letter._loadMatCap = function(name, callback) {
   callback(Letter._matCaps[name]);
 };
 
-/**
- * @property material
- */
-Letter._material = new THREE.RawShaderMaterial({
-  uniforms: {
-    normalMap: { type: 't', value: null },
-    textureMap: { type: 't', value: null },
-    inflation: { type: 'f', value: 0 },
-    opacity: { type: 'f', value: 0 }
-  },
-  vertexShader: vertexShader,
-  fragmentShader: fragmentShader,
-  transparent: true
-});
+Letter.prototype.fadeIn = function() {
+  var material = this._material;
+
+  new TWEEN.Tween({ opacity: 0 })
+    .to({ opacity: 1 })
+    .delay(random(1000, 3000))
+    .onStart((function() {
+      this.el.visible = true;
+    }).bind(this))
+    .onUpdate(function() {
+      material.uniforms.opacity.value = this.opacity; 
+    })
+    .start();
+};
+
+Letter.prototype.inflate = function() {
+  if(this._inflateTimeoutId) {
+    window.clearTimeout(this._inflateTimeoutId);
+    this._inflateTimeoutId = null;
+  }
+
+  this._inflateSpring.setEndValue(0.09);
+
+  this._inflateTimeoutId = window.setTimeout((function() {
+    this._inflateSpring.setEndValue(0);
+  }).bind(this), 300);
+};
 
 /**
- * @property springSystem
+ * @param {float} [interval=2000]
  */
-Letter._springSystem = new Rebound.SpringSystem();
+Letter.prototype.startInflateLoop = function(interval) {
+  this._inflateLoopIntervalId = window.setInterval((function() {
+    this.inflate();
+  }).bind(this), interval);
+};
+
+Letter.prototype.stopInflateLoop = function() {
+  if(this._inflateLoopIntervalId === null) {
+    return;
+  }
+
+  window.clearInterval(this._inflateLoopIntervalId);
+
+  this._inflateLoopIntervalId = null;
+};
+
+Letter.prototype.dispose = function() {
+  this._removeListeners();
+
+  if(this.el.parent) {
+    this.el.parent.remove(this.el);
+  }
+};
 
 module.exports = Letter;

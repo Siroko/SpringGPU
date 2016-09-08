@@ -1,20 +1,15 @@
 # WebVR Spring GPU demo
 
-## Install dependencies
-- Checkout the project from [**Github**] (https://github.com/Siroko/SpringGPU.git)
-- Switch to WebVRBase  Branch: `git checkout feature/webVRBase`
-- Install front dependencies:
+WebVR farewell card.
 
-	```sh
-	$ cd <path_to_project>
-	$ npm install
-	```
-- Open another terminal window and start the front app:
+See the [demo](http://www.google.com)
 
-	```sh
-	$ cd <path_to_project>
-	$ npm start
-	```
+## Usage
+
+```sh
+$ npm install
+$ npm start
+```
 
 # Custom text
 
@@ -46,9 +41,8 @@ To break a line, add `\n` in the text.
 
 - `A`, `B`, `C`, `D`, `E`, `F`, `G`, `H`, `I`, `J`, `K`, `L`, `M`, `N`, `O`, `P`, `Q`, `R`, `S`, `T`, `U`, `V`, `W`, `X`, `Y`, `Z`
 - `0`, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`
-- `[`, `{`, `(`, `/`, `>`, `≥`, `_`, `-`, `=`, `*`, `'`, `"`, `+`, `;`, `:`, `?`, `!`, `#`, `&`
 
 ## Notes
 
 - If `colors` is missing, they will be random.
-- This isn't case sensitive, so `BONJOUR`, `bonjour` or `BoNjOuR`, same same.
+- This isn't case sensitive, so `HELLO`, `hello` or `HeLlO` are the same.
