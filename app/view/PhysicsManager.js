@@ -326,7 +326,8 @@ PhysicsManager.prototype.add3DObject = function(obj, type, actuator, springable,
                             that.addToSpring(that.bodyText[e.body.springIndex], e.body);
                             that.dispatchEvent({
                                 type: 'letterHit',
-                                mesh: that.getThreeMeshFromCannonBody(e.body)
+                                mesh: that.getThreeMeshFromCannonBody(e.body),
+                                gamepadIndex: obj.gamepadIndex
                             });
                         }
                     }
