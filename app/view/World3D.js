@@ -153,7 +153,7 @@ World3D.prototype.onStart = function(e) {
 
   this.physicsManager.attractBodiesToPlayer();
 
-  if(gamepadIndex !== void 0 && this.gamepads.vibrate) {
+  if(gamepadIndex !== void 0 && this.gamePads.vibrate) {
     this.gamePads.vibrate(gamepadIndex);
   }
 };
@@ -234,7 +234,7 @@ World3D.prototype.onLetterHit = function(e) {
 
   this.soundManager.play(AssetsSound['BALLOON_' + (this.balloonSoundIndex + 1)]);
 
-  if(gamepadIndex !== void 0 && this.gamepads.vibrate) {
+  if(gamepadIndex !== void 0 && this.gamePads.vibrate) {
     this.gamePads.vibrate(gamepadIndex);  
   }
 };
