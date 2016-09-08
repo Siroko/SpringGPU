@@ -209,6 +209,7 @@ World3D.prototype.onMessageRelease = function() {
  * @param {ILetterHitEvent} e
  */
 World3D.prototype.onLetterHit = function(e) {
+  var gamepadIndex = e.gamepadIndex; // left: 0, right: 1
   var mesh = e.mesh;
   var letter = mesh.letter;
 
@@ -260,6 +261,7 @@ World3D.prototype.onLetterHit = function(e) {
   }
 
   this.soundManager.play(sound);
+  this.gamePads.vibrate(gamepadIndex);
 };
 
 /**
