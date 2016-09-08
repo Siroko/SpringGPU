@@ -19,6 +19,7 @@ var GamePads = function( scene, camera, effect , physics){
 
     this.h1 = new THREE.Mesh( new THREE.BoxBufferGeometry( 0.1, 0.1, 0.1, 1, 1, 1), new THREE.MeshNormalMaterial() );
     this.h2 = new THREE.Mesh( new THREE.BoxBufferGeometry( 0.1, 0.1, 0.1, 1, 1, 1), new THREE.MeshNormalMaterial() );
+    this.handlers = [ this.h1, this.h2 ];
 
 
 
@@ -59,6 +60,8 @@ var GamePads = function( scene, camera, effect , physics){
 
         that.scene.add(that.h1);
         that.scene.add(that.h2);
+        that.h1.gamepadIndex = 0;
+        that.h2.gamepadIndex = 1;
         that.phManager.add3DObject(that.h1, "cube", true,false);
         that.phManager.add3DObject(that.h2, "cube", true,false);
 
