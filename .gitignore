@@ -1,2 +1,4 @@
 node_modules
 .idea
+public/js/bundle.js
+public/js/bundle.js.map
